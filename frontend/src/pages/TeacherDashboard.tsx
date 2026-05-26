@@ -1,0 +1,155 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import UserMenu from '../components/UserMenu';
+import BackButton from '../components/BackButton';
+
+interface Quiz {
+  id: string;
+  title: string;
+  subject: string;
+  grade: string;
+  teacher_id: string;
+  created_at: string;
+  question_count: number;
+}
+
+const TeacherDashboard: React.FC = () => {
+  const navigate = useNavigate();
+  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [startingId, setStartingId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadQuizzes = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const teacherData = localStorage.getItem('classquiz_teacher');
+      if (!teacherData) { navigate('/teacher/login'); return; }
+      const teacher = JSON.parse(teacherData);
+      const res = await fetch('/api/quizzes/');
+      if (!res.ok) throw new Error('Ошибка загрузки');
+      const all: Quiz[] = await res.json();
+      setQuizzes(all.filter(q => q.teacher_id === teacher.id));
+    } catch {
+      setError('Не удалось загрузить список тестов.');
+    } finally { setIsLoading(false); }
+  }, [navigate]);
+
+  useEffect(() => { loadQuizzes(); }, [loadQuizzes]);
+
+  if (isLoading && quizzes.length === 0) {
+    return (
+      <div className="page-container flex items-center justify-center">
+        <div className="text-center animate-fadeIn">
+          <div className="spinner mx-auto mb-4"></div>
+          <p className="text-text-secondary">Загрузка тестов...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="page-container flex items-center justify-center">
+        <div className="page-card animate-scaleIn">
+          <div className="error-box mb-4">
+            <h3 className="font-bold text-text-primary mb-1">Ошибка</h3>
+            <p className="text-text-secondary text-sm">{error}</p>
+          </div>
+          <button onClick={() => navigate('/teacher/login')} className="btn-primary w-full">Вернуться к входу</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="page-container relative">
+      <div className="fixed top-14 left-3 z-40">
+        <BackButton to="/teacher/login" />
+      </div>
+      <div className="absolute top-4 right-4 z-10">
+        <UserMenu role="teacher" />
+      </div>
+      <div className="max-w-4xl mx-auto card animate-slideUp">
+        <div className="gradient-header">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <h1 className="text-2xl font-bold">Панель управления учителя</h1>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <button onClick={() => navigate('/teacher/dashboard/create')} className="btn-sm bg-white/20 text-white hover:bg-white/30 rounded-lg transition-colors">
+                + Создать тест
+              </button>
+              <button onClick={() => navigate('/teacher/dashboard/import')} className="btn-sm bg-white/20 text-white hover:bg-white/30 rounded-lg transition-colors">
+                📥 Импортировать
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {quizzes.length === 0 ? (
+          <div className="p-8 text-center animate-fadeIn">
+            <p className="text-text-secondary">У вас пока нет созданных тестов.</p>
+            <p className="mt-2 text-sm text-text-secondary/60">Нажмите кнопку выше, чтобы создать первый тест или импортировать его из файла.</p>
+          </div>
+        ) : (
+          <div className="p-6">
+            <h2 className="text-xl font-bold text-text-primary mb-4">Мои тесты</h2>
+            <div className="grid gap-4">
+              {quizzes.map((quiz, index) => (
+                <div key={quiz.id} className="card-hover border border-gray-100 animate-slideUp" style={{ animationDelay: `${index * 0.1}s` }}>
+                  <div className="p-5">
+                    <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-3">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg font-semibold text-text-primary truncate">{quiz.title}</h3>
+                        <p className="text-sm text-text-secondary"><span className="font-medium">{quiz.subject}</span> • {quiz.grade} класс</p>
+                      </div>
+                      <span className="px-3 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary shrink-0">{quiz.question_count} вопросов</span>
+                    </div>
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                      <span className="text-sm text-text-secondary/60">
+                        Создан: {new Date(quiz.created_at).toLocaleDateString('ru-RU', { year: 'numeric', month: 'short', day: 'numeric' })}
+                      </span>
+                      <div className="flex gap-2 w-full sm:w-auto">
+                        <button
+                          onClick={async () => {
+                            setStartingId(quiz.id);
+                            try {
+                              const res = await fetch(`/api/sessions/?quiz_id=${quiz.id}`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ status: 'active' }),
+                              });
+                              if (!res.ok) { setError('Не удалось создать сессию'); return; }
+                              const session = await res.json();
+                              navigate(`/teacher/dashboard/session/${session.code}`);
+                            } catch {
+                              setError('Не удалось создать сессию');
+                            } finally { setStartingId(null); }
+                          }}
+                          disabled={startingId !== null}
+                          className="btn-sm btn-success flex-1 sm:flex-none disabled:opacity-50"
+                        >
+                          {startingId === quiz.id ? 'Запуск...' : '▶ Запустить'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="p-6 border-t border-gray-100">
+          <button onClick={() => navigate('/teacher/login')} className="btn-primary w-full">
+            ← На страницу входа
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default TeacherDashboard;
