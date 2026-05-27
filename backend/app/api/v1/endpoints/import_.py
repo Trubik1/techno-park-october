@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from typing import List
 import uuid
 import pandas as pd
 import io
-from app import schemas, crud
+from app import schemas, crud, models
 from app.db.database import get_db
 
 router = APIRouter()
@@ -44,7 +45,7 @@ def preview_quiz_import(
     Выполняет двухэтапную валидацию: клиентскую (в браузере) и серверную.
     """
     # Проверяем тип файла
-    if not file.filename.endswith(('.csv', '.xlsx', '.xls')):
+    if not file.filename or not file.filename.endswith(('.csv', '.xlsx', '.xls')):
         raise HTTPException(
             status_code=400,
             detail="Only CSV and Excel files are supported"
@@ -54,7 +55,7 @@ def preview_quiz_import(
         # Читаем файл в зависимости от типа
         content = file.file.read()
         if file.filename.endswith('.csv'):
-            df = pd.read_csv(io.StringIO(content.decode('utf-8')))
+            df = pd.read_csv(io.StringIO(content.decode('utf-8-sig')))
         else:  # Excel files
             df = pd.read_excel(io.BytesIO(content))
         
@@ -138,24 +139,46 @@ def confirm_quiz_import(
 ):
     """
     Подтверждение и сохранение импортированного теста.
-    Создает тест и все связанные вопросы.
+    Создает тест и все связанные вопросы в одной транзакции.
     """
-    # Создаем тест
-    db_quiz = crud.create_quiz(db=db, quiz=quiz_data, teacher_id=teacher_id)
-    
-    # Создаем вопросы для теста
-    created_questions = []
-    for question_data in questions:
-        db_question = crud.create_question(
-            db=db, 
-            question=question_data, 
-            quiz_id=db_quiz.id
+    teacher = crud.get_teacher(db, teacher_id=teacher_id)
+    if not teacher:
+        raise HTTPException(status_code=404, detail="Teacher not found")
+
+    existing = db.query(models.Quiz).filter(
+        models.Quiz.teacher_id == teacher_id,
+        func.lower(models.Quiz.title) == quiz_data.title.lower().strip()
+    ).first()
+    if existing:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Тест с названием «{quiz_data.title}» уже существует. Пожалуйста, используйте другое название."
         )
-        created_questions.append(db_question)
-    
-    # Обновляем объект теста, чтобы включить вопросы (опционально)
+
+    db_quiz = models.Quiz(
+        title=quiz_data.title,
+        subject=quiz_data.subject,
+        grade=quiz_data.grade,
+        teacher_id=teacher_id,
+        is_public=quiz_data.is_public
+    )
+    db.add(db_quiz)
+    db.flush()
+
+    for q in questions:
+        db.add(m.Question(
+            text=q.text,
+            opt_a=q.opt_a,
+            opt_b=q.opt_b,
+            opt_c=q.opt_c,
+            opt_d=q.opt_d,
+            correct=q.correct,
+            explanation=q.explanation,
+            quiz_id=db_quiz.id
+        ))
+    db.commit()
     db.refresh(db_quiz)
     d = {c.name: getattr(db_quiz, c.name) for c in db_quiz.__table__.columns}
-    d['question_count'] = len(db_quiz.questions) if hasattr(db_quiz, 'questions') else 0
+    d['question_count'] = len(db_quiz.questions)
     d['teacher_name'] = db_quiz.teacher.name if db_quiz.teacher else ""
     return schemas.QuizResponse(**d)
