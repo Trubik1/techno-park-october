@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, CheckConstraint, Uuid
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, CheckConstraint, Uuid, UniqueConstraint
 from sqlalchemy.orm import relationship
 import uuid
 from datetime import datetime, timezone
@@ -70,6 +70,7 @@ class Session(Base):
 
     quiz = relationship("Quiz", back_populates="sessions")
     results = relationship("Result", back_populates="session")
+    participants = relationship("SessionParticipant", back_populates="session")
 
 class Result(Base):
     __tablename__ = "results"
@@ -84,3 +85,18 @@ class Result(Base):
 
     session = relationship("Session", back_populates="results")
     student = relationship("Student", back_populates="results")
+
+
+class SessionParticipant(Base):
+    __tablename__ = "session_participants"
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    session_id = Column(Uuid(as_uuid=True), ForeignKey("sessions.id"), nullable=False)
+    student_id = Column(Uuid(as_uuid=True), ForeignKey("students.id"), nullable=False)
+    joined_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    __table_args__ = (
+        UniqueConstraint("session_id", "student_id", name="uq_session_student"),
+    )
+
+    session = relationship("Session", back_populates="participants")

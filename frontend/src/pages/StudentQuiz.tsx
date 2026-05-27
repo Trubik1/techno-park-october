@@ -98,6 +98,13 @@ const StudentQuiz: React.FC = () => {
         }));
         setQuizData({ id: qData.id, title: qData.title, questions });
         setShuffleOrder(shuffleArray(['a', 'b', 'c', 'd']));
+        if (student) {
+          fetch(`/api/sessions/${code}/join`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ student_id: student.id }),
+          }).catch(() => {});
+        }
       } catch {
         setError('Не удалось загрузить тест. Проверьте код сессии и попробуйте снова.');
       } finally { setIsLoading(false); }

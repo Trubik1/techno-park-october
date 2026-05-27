@@ -210,3 +210,40 @@ def create_result(db: Session, result: schemas.ResultCreate, session_id: uuid.UU
     db.commit()
     db.refresh(db_result)
     return db_result
+
+
+# Session participant CRUD
+def join_session(db: Session, session_id: uuid.UUID, student_id: uuid.UUID):
+    existing = db.query(models.SessionParticipant).filter(
+        models.SessionParticipant.session_id == session_id,
+        models.SessionParticipant.student_id == student_id
+    ).first()
+    if existing:
+        return existing
+    participant = models.SessionParticipant(
+        id=uuid.uuid4(),
+        session_id=session_id,
+        student_id=student_id
+    )
+    db.add(participant)
+    db.commit()
+    db.refresh(participant)
+    return participant
+
+def get_participants_by_session(db: Session, session_id: uuid.UUID):
+    return db.query(
+        models.SessionParticipant,
+        models.Student.display_name,
+        models.Student.class_name,
+        models.Result.completed_at,
+        models.Result.score,
+        models.Result.total_questions
+    ).join(
+        models.Student, models.SessionParticipant.student_id == models.Student.id
+    ).outerjoin(
+        models.Result,
+        (models.Result.session_id == models.SessionParticipant.session_id) &
+        (models.Result.student_id == models.SessionParticipant.student_id)
+    ).filter(
+        models.SessionParticipant.session_id == session_id
+    ).all()

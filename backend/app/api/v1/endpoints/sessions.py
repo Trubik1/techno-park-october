@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 import uuid
+from datetime import datetime, timezone
 from app import schemas, crud
 from app.db.database import get_db
 
@@ -48,3 +49,48 @@ def close_session_endpoint(session_id: uuid.UUID, db: Session = Depends(get_db))
     if db_session is None:
         raise HTTPException(status_code=404, detail="Session not found")
     return db_session
+
+
+@router.post("/{code}/join", response_model=schemas.ParticipantResponse)
+def join_session(code: str, body: schemas.SessionJoinRequest, db: Session = Depends(get_db)):
+    """
+    Ученик присоединяется к сессии по коду.
+    """
+    db_session = crud.get_session_by_code(db, code=code)
+    if db_session is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    if db_session.status != 'active':
+        raise HTTPException(status_code=400, detail="Session is not active")
+    student = crud.get_student(db, student_id=body.student_id)
+    if student is None:
+        raise HTTPException(status_code=404, detail="Student not found")
+    crud.join_session(db, session_id=db_session.id, student_id=body.student_id)
+    return schemas.ParticipantResponse(
+        student_id=student.id,
+        display_name=student.display_name,
+        class_name=student.class_name,
+        joined_at=datetime.now(timezone.utc),
+        completed_at=None,
+        score=None,
+        total_questions=0
+    )
+
+
+@router.get("/{session_id}/participants", response_model=List[schemas.ParticipantResponse])
+def get_participants(session_id: uuid.UUID, db: Session = Depends(get_db)):
+    """
+    Получить всех участников сессии (присоединившихся + сдавших).
+    """
+    rows = crud.get_participants_by_session(db, session_id=session_id)
+    result = []
+    for p, display_name, class_name, completed_at, score, total_questions in rows:
+        result.append(schemas.ParticipantResponse(
+            student_id=p.student_id,
+            display_name=display_name,
+            class_name=class_name,
+            joined_at=p.joined_at,
+            completed_at=completed_at,
+            score=score,
+            total_questions=total_questions or 0
+        ))
+    return result

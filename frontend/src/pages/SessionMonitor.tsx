@@ -14,22 +14,21 @@ interface SessionData {
   title?: string; subject?: string; grade?: string;
 }
 
-interface StudentResult {
-  id: string; student_id: string; display_name: string; class_name: string;
-  score: number; total_questions: number; completed_at: string;
-  answers: { question_id: string; answer: string }[];
+interface Participant {
+  student_id: string; display_name: string; class_name: string;
+  joined_at: string; completed_at: string | null;
+  score: number | null; total_questions: number;
 }
 
 const SessionMonitor: React.FC = () => {
   const { code } = useParams<{ code: string }>();
   const navigate = useNavigate();
   const [sessionData, setSessionData] = useState<SessionData | null>(null);
-  const [results, setResults] = useState<StudentResult[]>([]);
+  const [participants, setParticipants] = useState<Participant[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshCountdown, setRefreshCountdown] = useState(5);
   const [autoRefresh, setAutoRefresh] = useState(true);
-  const [answerModal, setAnswerModal] = useState<StudentResult | null>(null);
   const [qrModal, setQrModal] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState('');
   const refreshIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -49,13 +48,13 @@ const SessionMonitor: React.FC = () => {
       if (!quizResponse.ok) throw new Error('Не удалось загрузить информацию о тесте');
       const quizInfo = await quizResponse.json();
       setSessionData({ ...sessionInfo, ...quizInfo, id: sessionInfo.id, quiz_id: sessionInfo.quiz_id, code: sessionInfo.code, status: sessionInfo.status, started_at: sessionInfo.started_at, closed_at: sessionInfo.closed_at });
-      const resultsResponse = await fetch(`/api/results/session/${sessionInfo.id}`);
-      if (!resultsResponse.ok) throw new Error('Не удалось загрузить результаты');
-      const resultsData = await resultsResponse.json();
-      setResults(resultsData.map((r: any) => ({
-        id: r.id, student_id: r.student_id, display_name: r.student_display_name || 'Неизвестно',
-        class_name: r.student_class_name || 'Не указан', score: r.score, total_questions: r.total_questions || 0,
-        completed_at: r.completed_at, answers: r.answers || []
+      const participantsResponse = await fetch(`/api/sessions/${sessionInfo.id}/participants`);
+      if (!participantsResponse.ok) throw new Error('Не удалось загрузить участников');
+      const participantsData = await participantsResponse.json();
+      setParticipants(participantsData.map((p: any) => ({
+        student_id: p.student_id, display_name: p.display_name, class_name: p.class_name,
+        joined_at: p.joined_at, completed_at: p.completed_at,
+        score: p.score, total_questions: p.total_questions || 0
       })));
     } catch (err) {
       setError('Не удалось загрузить данные сессии. Проверьте подключение и попробуйте снова.');
@@ -109,7 +108,7 @@ const SessionMonitor: React.FC = () => {
     }
   }, [sessionData]);
 
-  if (isLoading && !sessionData && !results.length) {
+  if (isLoading && !sessionData) {
     return (
       <div className="page-container flex items-center justify-center">
         <div className="text-center animate-fadeIn">
@@ -146,9 +145,10 @@ const SessionMonitor: React.FC = () => {
   }
 
   const isActive = sessionData.status === 'active';
-  const totalStudents = results.length;
-  const averageScore = totalStudents > 0 ? Math.round((results.reduce((sum, r) => sum + r.score, 0) / totalStudents) * 10) / 10 : 0;
-  const completionRate = totalStudents > 0 ? Math.round((results.filter(r => r.completed_at).length / totalStudents) * 100) : 0;
+  const totalStudents = participants.length;
+  const completedStudents = participants.filter(p => p.completed_at);
+  const averageScore = completedStudents.length > 0 ? Math.round((completedStudents.reduce((sum, p) => sum + (p.score || 0), 0) / completedStudents.length) * 10) / 10 : 0;
+  const completionRate = totalStudents > 0 ? Math.round((completedStudents.length / totalStudents) * 100) : 0;
 
   return (
     <div className="page-container">
@@ -199,7 +199,7 @@ const SessionMonitor: React.FC = () => {
         </div>
 
         <div className="p-6">
-          {results.length === 0 ? (
+          {participants.length === 0 ? (
             <div className="text-center py-8 animate-fadeIn">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-background mb-4">
                 <svg className="w-8 h-8 text-text-secondary/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -214,33 +214,36 @@ const SessionMonitor: React.FC = () => {
             </div>
           ) : (
             <>
-              <h2 className="text-xl font-bold text-text-primary mb-4">Результаты участников <span className="text-sm font-normal text-text-secondary">({results.length})</span></h2>
+              <h2 className="text-xl font-bold text-text-primary mb-4">Участники <span className="text-sm font-normal text-text-secondary">({participants.length})</span></h2>
               <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-600">
                 <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
                   <thead className="bg-gray-50 dark:bg-gray-800">
                     <tr>
-                      {['Ученик', 'Класс', 'Балл', 'Статус', 'Время', 'Действия'].map(h => (
+                      {['Ученик', 'Класс', 'Балл', 'Статус', 'Время'].map(h => (
                         <th key={h} className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                    {results.map((result, i) => (
-                      <tr key={result.id} className="bg-white dark:bg-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors animate-fadeIn" style={{ animationDelay: `${i * 0.05}s` }}>
-                        <td className="px-4 py-3 text-sm font-medium text-text-primary">{result.display_name}</td>
-                        <td className="px-4 py-3 text-sm text-text-secondary">{result.class_name}</td>
-                        <td className={`px-4 py-3 text-sm font-bold ${result.score === 0 ? 'text-error' : result.score >= result.total_questions * 0.8 ? 'text-success' : result.score >= result.total_questions * 0.6 ? 'text-warning' : 'text-text-primary'}`}>
-                          {result.score}/{result.total_questions}
+                    {participants.map((p, i) => (
+                      <tr key={p.student_id} className="bg-white dark:bg-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors animate-fadeIn" style={{ animationDelay: `${i * 0.05}s` }}>
+                        <td className="px-4 py-3 text-sm font-medium text-text-primary">{p.display_name}</td>
+                        <td className="px-4 py-3 text-sm text-text-secondary">{p.class_name}</td>
+                        <td className="px-4 py-3 text-sm font-bold">
+                          {p.completed_at ? (
+                            <span className={`${p.score === 0 ? 'text-error' : p.score! >= p.total_questions * 0.8 ? 'text-success' : p.score! >= p.total_questions * 0.6 ? 'text-warning' : 'text-text-primary'}`}>
+                              {p.score}/{p.total_questions}
+                            </span>
+                          ) : (
+                            <span className="text-text-secondary/50">—</span>
+                          )}
                         </td>
                         <td className="px-4 py-3 text-sm">
-                          <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${result.completed_at ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'}`}>
-                            {result.completed_at ? 'Завершил' : 'В процессе'}
+                          <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${p.completed_at ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'}`}>
+                            {p.completed_at ? 'Завершил' : 'В процессе'}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-sm text-text-secondary">{result.completed_at ? parseBackendDate(result.completed_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) : '-'}</td>
-                        <td className="px-4 py-3 text-sm">
-                          <button onClick={() => setAnswerModal(result)} className="text-xs text-info hover:text-info/80 font-medium transition-colors">Ответы</button>
-                        </td>
+                        <td className="px-4 py-3 text-sm text-text-secondary">{p.completed_at ? parseBackendDate(p.completed_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) : parseBackendDate(p.joined_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -253,11 +256,11 @@ const SessionMonitor: React.FC = () => {
         <div className="p-6 border-t border-gray-100 dark:border-gray-600">
           <button
             onClick={() => {
-              if (!sessionData || results.length === 0) { alert('Нет данных для экспорта'); return; }
-              const exportData = results.map(r => ({
-                student_name: r.display_name, class_name: r.class_name, score: r.score,
-                total_questions: r.total_questions, completed_at: r.completed_at || '',
-                percentage: r.total_questions > 0 ? Math.round((r.score / r.total_questions) * 100) : 0
+              if (!sessionData || participants.length === 0) { alert('Нет данных для экспорта'); return; }
+              const exportData = participants.filter(p => p.completed_at).map(p => ({
+                student_name: p.display_name, class_name: p.class_name, score: p.score || 0,
+                total_questions: p.total_questions, completed_at: p.completed_at || '',
+                percentage: p.total_questions > 0 ? Math.round(((p.score || 0) / p.total_questions) * 100) : 0
               }));
               const csvContent = exportSessionResultsToCsv(exportData, {
                 title: sessionData.title || '', code: sessionData.code, subject: sessionData.subject || '',
@@ -291,34 +294,6 @@ const SessionMonitor: React.FC = () => {
             <button onClick={() => { setQrModal(false); setQrDataUrl(''); }} className="mt-6 text-sm text-gray-400 hover:text-gray-600 transition-colors">
               Закрыть
             </button>
-          </div>
-        </div>
-      )}
-
-      {answerModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-fadeIn" onClick={() => setAnswerModal(null)}>
-          <div className="bg-surface rounded-xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-y-auto animate-scaleIn" onClick={e => e.stopPropagation()}>
-            <div className="p-4 border-b border-gray-200 dark:border-gray-600 flex justify-between items-center">
-              <h3 className="font-bold text-text-primary">Ответы: {answerModal.display_name}</h3>
-              <button onClick={() => setAnswerModal(null)} className="text-text-secondary hover:text-text-primary transition-colors">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-              </button>
-            </div>
-            <div className="p-4 space-y-3">
-              <p className="text-sm text-text-secondary mb-2">
-                Результат: <strong className="text-text-primary">{answerModal.score}/{answerModal.total_questions}</strong>
-              </p>
-              {answerModal.answers.length === 0 ? (
-                <p className="text-sm text-text-secondary/60">Детальные ответы недоступны</p>
-              ) : (
-                answerModal.answers.map((a, i) => (
-                  <div key={i} className="p-3 rounded-lg bg-background/50 text-sm flex justify-between items-center">
-                    <span className="text-text-secondary">{a.question_id}</span>
-                    <span className="font-mono font-bold text-text-primary">Ответ: {a.answer.toUpperCase()}</span>
-                  </div>
-                ))
-              )}
-            </div>
           </div>
         </div>
       )}

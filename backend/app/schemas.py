@@ -116,6 +116,22 @@ class ResultWithStudentResponse(ResultResponse):
     student_display_name: str = ""
     student_class_name: str = ""
 
+# Session participant schemas
+class SessionJoinRequest(BaseModel):
+    student_id: uuid.UUID
+
+class ParticipantResponse(BaseModel):
+    student_id: uuid.UUID
+    display_name: str
+    class_name: str
+    joined_at: datetime
+    completed_at: Optional[datetime] = None
+    score: Optional[int] = None
+    total_questions: int = 0
+
+    class Config:
+        from_attributes = True
+
 # Import schemas
 class QuizImportPreview(BaseModel):
     success: bool
