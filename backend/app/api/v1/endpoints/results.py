@@ -37,7 +37,10 @@ def get_session_results(session_id: uuid.UUID, skip: int = 0, limit: int = 100, 
     if not db_session:
         raise HTTPException(status_code=404, detail="Session not found")
 
-    results = db.query(models.Result).options(joinedload(models.Result.student)).filter(
+    results = db.query(models.Result).options(
+        joinedload(models.Result.student),
+        joinedload(models.Result.session).joinedload(models.Session.quiz)
+    ).filter(
         models.Result.session_id == session_id
     ).offset(skip).limit(limit).all()
 
@@ -45,9 +48,10 @@ def get_session_results(session_id: uuid.UUID, skip: int = 0, limit: int = 100, 
         schemas.ResultWithStudentResponse(
             id=r.id,
             score=r.score,
-            total_questions=r.total_questions or 0,
+            total_questions=r.total_questions if r.total_questions is not None else 0,
             answers_json=r.answers_json,
             completed_at=r.completed_at,
+            quiz_title=r.session.quiz.title if r.session and r.session.quiz else "",
             student_display_name=r.student.display_name if r.student else "",
             student_class_name=r.student.class_name if r.student else "",
         )
@@ -72,7 +76,7 @@ def get_student_results(student_id: uuid.UUID, skip: int = 0, limit: int = 100, 
         schemas.ResultResponse(
             id=r.id,
             score=r.score,
-            total_questions=r.total_questions or 0,
+            total_questions=r.total_questions if r.total_questions is not None else 0,
             answers_json=r.answers_json,
             completed_at=r.completed_at,
             quiz_title=r.session.quiz.title if r.session and r.session.quiz else "",

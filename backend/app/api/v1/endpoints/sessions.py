@@ -64,15 +64,17 @@ def join_session(code: str, body: schemas.SessionJoinRequest, db: Session = Depe
     student = crud.get_student(db, student_id=body.student_id)
     if student is None:
         raise HTTPException(status_code=404, detail="Student not found")
-    crud.join_session(db, session_id=db_session.id, student_id=body.student_id)
+    participant = crud.join_session(db, session_id=db_session.id, student_id=body.student_id)
+    db_quiz = crud.get_quiz(db, quiz_id=db_session.quiz_id)
+    total = len(db_quiz.questions) if db_quiz else 0
     return schemas.ParticipantResponse(
         student_id=student.id,
         display_name=student.display_name,
         class_name=student.class_name,
-        joined_at=datetime.now(timezone.utc),
+        joined_at=participant.joined_at,
         completed_at=None,
         score=None,
-        total_questions=0
+        total_questions=total
     )
 
 

@@ -32,7 +32,7 @@ def create_teacher(teacher: schemas.TeacherCreate, db: Session = Depends(get_db)
             detail="Teacher with this PIN already exists"
         )
     new_teacher = crud.create_teacher(db=db, teacher=teacher)
-    crud.clone_base_quiz_for_teacher(db, new_teacher.id)
+    crud.clone_public_quizzes_for_teacher(db, new_teacher.id)
     return new_teacher
 
 @router.get("/", response_model=List[schemas.TeacherResponse])
