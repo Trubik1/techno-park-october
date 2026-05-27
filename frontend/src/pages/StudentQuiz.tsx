@@ -36,7 +36,6 @@ const OPTION_COLORS = [
 ];
 
 const CORRECT_COLOR = 'bg-green-500';
-const WRONG_COLOR = 'bg-red-500';
 const WRONG_SELECTED_COLOR = 'bg-red-700';
 const WRONG_OTHER_COLOR = 'bg-red-400';
 
@@ -55,6 +54,7 @@ const StudentQuiz: React.FC = () => {
   const { student } = useStudent();
 
   const studentIdRef = useRef<string | null>(null);
+  const submitQuizRef = useRef<() => void>(() => {});
 
   const [quizData, setQuizData] = useState<QuizData | null>(null);
   const [sessionData, setSessionData] = useState<SessionData | null>(null);
@@ -67,10 +67,8 @@ const StudentQuiz: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   const [shuffleOrder, setShuffleOrder] = useState<string[]>([]);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
-  const dataLoadedRef = useRef(false);
 
   const clearTimers = () => {
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
@@ -79,139 +77,73 @@ const StudentQuiz: React.FC = () => {
 
   useEffect(() => {
     if (!code) { navigate('/student/entry'); return; }
-    if (!student || dataLoadedRef.current) return;
+    if (!student || quizData) return;
     studentIdRef.current = student.id;
-    dataLoadedRef.current = true;
     let cancelled = false;
-    const run = async () => {
+
+    (async () => {
       try {
-        setIsLoading(true);
-        const sessionResponse = await fetch(`/api/sessions/${code}`);
-        if (!sessionResponse.ok) throw new Error('Сессия не найдена');
-        const sData: SessionData = await sessionResponse.json();
+        const sessionRes = await fetch('/api/sessions/' + code);
+        if (!sessionRes.ok) throw new Error('Session not found');
+        const sData = await sessionRes.json();
         if (cancelled) return;
         setSessionData(sData);
 
-        const quizResponse = await fetch(`/api/quizzes/${sData.quiz_id}`);
-        if (!quizResponse.ok) throw new Error('Тест не найден');
-        const qData = await quizResponse.json();
+        const quizRes = await fetch('/api/quizzes/' + sData.quiz_id);
+        if (!quizRes.ok) throw new Error('Quiz not found');
+        const qData = await quizRes.json();
 
-        const questionsResponse = await fetch(`/api/questions/?quiz_id=${sData.quiz_id}`);
-        if (!questionsResponse.ok) throw new Error('Вопросы не найдены');
-        const questionsData = await questionsResponse.json();
-        const questions: Question[] = questionsData.map((q: any) => ({
-          id: q.id, text: q.text, opt_a: q.opt_a, opt_b: q.opt_b,
-          opt_c: q.opt_c, opt_d: q.opt_d, explanation: q.explanation,
-          correct: q.correct,
+        const questionsRes = await fetch('/api/questions/?quiz_id=' + sData.quiz_id);
+        if (!questionsRes.ok) throw new Error('Questions not found');
+        const rawQuestions = await questionsRes.json();
+        const questions: Question[] = rawQuestions.map((q: any) => ({
+          id: q.id, text: q.text,
+          opt_a: q.opt_a, opt_b: q.opt_b, opt_c: q.opt_c, opt_d: q.opt_d,
+          explanation: q.explanation, correct: q.correct,
         }));
         if (cancelled) return;
         setQuizData({ id: qData.id, title: qData.title, questions });
         setShuffleOrder(shuffleArray(['a', 'b', 'c', 'd']));
 
-        // Присоединяемся к сессии, при 404 перерегистрируемся
-        await doJoin(code, student.id);
-      } catch {
-        if (!cancelled) setError('Не удалось загрузить тест. Проверьте код сессии и попробуйте снова.');
-      } finally { if (!cancelled) setIsLoading(false); }
-    };
-    run();
-    return () => { cancelled = true; clearTimers(); };
-  }, [code, navigate, student]);
-
-  const doJoin = async (code: string, sid: string) => {
-    const joinRes = await fetch(`/api/sessions/${code}/join`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ student_id: sid }),
-    });
-    if (joinRes.ok) return;
-    const errData = await joinRes.json().catch(() => ({}));
-    if (joinRes.status === 404 && errData.detail === 'Student not found') {
-      const reReg = await fetch('/api/students/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ display_name: student!.display_name, class_name: student!.class_name }),
-      });
-      if (reReg.ok) {
-        const newStudent = await reReg.json();
-        localStorage.setItem('classquiz_student', JSON.stringify(newStudent));
-        studentIdRef.current = newStudent.id;
-        await fetch(`/api/sessions/${code}/join`, {
+        const joinRes = await fetch('/api/sessions/' + code + '/join', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ student_id: newStudent.id }),
+          body: JSON.stringify({ student_id: student.id }),
         });
+        if (joinRes.status === 404) {
+          const errData = await joinRes.json().catch(() => ({}));
+          if (errData.detail === 'Student not found') {
+            const regRes = await fetch('/api/students/register', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ display_name: student.display_name, class_name: student.class_name }),
+            });
+            if (regRes.ok) {
+              const newStudent = await regRes.json();
+              localStorage.setItem('classquiz_student', JSON.stringify(newStudent));
+              studentIdRef.current = newStudent.id;
+              await fetch('/api/sessions/' + code + '/join', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ student_id: newStudent.id }),
+              });
+            }
+          }
+        }
+      } catch (e: any) {
+        if (!cancelled) setError(e.message || 'Failed to load quiz');
+      } finally {
+        if (!cancelled) setIsLoading(false);
       }
-    }
-  };
+    })();
 
-  useEffect(() => {
-    if (quizData && !isSubmitted) startTimer();
-  }, [quizData]);
-
-  const startTimer = () => {
-    clearTimers();
-    setTimeLeft(30);
-    timerRef.current = setInterval(() => {
-      setTimeLeft(prev => (prev === null || prev <= 1 ? 0 : prev - 1));
-    }, 1000);
-  };
-
-  const moveToNext = () => {
-    if (!quizData) return;
-    if (currentQuestionIndex < quizData.questions.length - 1) {
-      setShowExplanation(false);
-      setSelectedOption(null);
-      setCurrentQuestionIndex(prev => prev + 1);
-      startTimer();
-    } else {
-      submitQuiz();
-    }
-  };
-
-  const handleAnswerSelect = (originalKey: string) => {
-    if (!quizData || isSubmitted || showExplanation) return;
-    setSelectedOption(selectedOption === originalKey ? null : originalKey);
-  };
-
-  const confirmAnswer = () => {
-    if (!quizData || isSubmitted || !selectedOption) return;
-    const qId = quizData.questions[currentQuestionIndex].id;
-    setAnswers(prev => ({ ...prev, [qId]: selectedOption }));
-    setShowExplanation(true);
-    setSelectedOption(null);
-    clearTimers();
-    timeoutRef.current = setTimeout(() => {
-      timeoutRef.current = null;
-      moveToNext();
-    }, 2000);
-  };
-
-  // Keyboard shortcuts: 1-4 to select by display position, A-D to select by original letter, Enter to confirm
-  useEffect(() => {
-    if (!quizData || isSubmitted || shuffleOrder.length !== 4) return;
-    const handleKey = (e: KeyboardEvent) => {
-      if (showExplanation || isSubmitted) return;
-      const key = e.key.toLowerCase();
-      if (['1', '2', '3', '4'].includes(key)) {
-        const idx = parseInt(key) - 1;
-        e.preventDefault();
-        handleAnswerSelect(shuffleOrder[idx]);
-      } else if (['a', 'b', 'c', 'd'].includes(key)) {
-        e.preventDefault();
-        handleAnswerSelect(key);
-      } else if (key === 'enter' && selectedOption) {
-        e.preventDefault();
-        confirmAnswer();
-      }
-    };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [quizData, isSubmitted, showExplanation, currentQuestionIndex, shuffleOrder, selectedOption]);
+    return () => { cancelled = true; clearTimers(); };
+  }, [code, navigate, student]);
 
   const submitQuiz = useCallback(async () => {
     if (!quizData || !studentIdRef.current || !sessionData) return;
     clearTimers();
+    setError(null);
     try {
       setIsLoading(true);
       let score = 0;
@@ -234,14 +166,78 @@ const StudentQuiz: React.FC = () => {
       });
       if (!response.ok) {
         const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.detail || 'Не удалось сохранить результаты');
+        throw new Error(errData.detail || 'Failed to save results');
       }
       setIsSubmitted(true);
-    } catch {
-      setError('Не удалось отправить результаты. Пожалуйста, попробуйте снова.');
+    } catch (e: any) {
+      setError(e.message || 'Failed to submit results');
       setIsLoading(false);
     } finally { setIsLoading(false); }
   }, [quizData, sessionData, answers]);
+
+  submitQuizRef.current = submitQuiz;
+
+  const moveToNext = () => {
+    if (!quizData) return;
+    if (currentQuestionIndex < quizData.questions.length - 1) {
+      setShowExplanation(false);
+      setSelectedOption(null);
+      setCurrentQuestionIndex(prev => prev + 1);
+      startTimer();
+    } else {
+      submitQuizRef.current();
+    }
+  };
+
+  useEffect(() => {
+    if (quizData && !isSubmitted) startTimer();
+  }, [quizData]);
+
+  const startTimer = () => {
+    clearTimers();
+    setTimeLeft(30);
+    timerRef.current = setInterval(() => {
+      setTimeLeft(prev => (prev === null || prev <= 1 ? 0 : prev - 1));
+    }, 1000);
+  };
+
+  const handleAnswerSelect = (originalKey: string) => {
+    if (!quizData || isSubmitted || showExplanation) return;
+    setSelectedOption(selectedOption === originalKey ? null : originalKey);
+  };
+
+  const confirmAnswer = () => {
+    if (!quizData || isSubmitted || !selectedOption) return;
+    const qId = quizData.questions[currentQuestionIndex].id;
+    setAnswers(prev => ({ ...prev, [qId]: selectedOption }));
+    setShowExplanation(true);
+    setSelectedOption(null);
+    clearTimers();
+    timeoutRef.current = setTimeout(() => {
+      timeoutRef.current = null;
+      moveToNext();
+    }, 2000);
+  };
+
+  useEffect(() => {
+    if (!quizData || isSubmitted || shuffleOrder.length !== 4) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (showExplanation || isSubmitted) return;
+      const key = e.key.toLowerCase();
+      if (['1', '2', '3', '4'].includes(key)) {
+        e.preventDefault();
+        handleAnswerSelect(shuffleOrder[parseInt(key) - 1]);
+      } else if (['a', 'b', 'c', 'd'].includes(key)) {
+        e.preventDefault();
+        handleAnswerSelect(key);
+      } else if (key === 'enter' && selectedOption) {
+        e.preventDefault();
+        confirmAnswer();
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [quizData, isSubmitted, showExplanation, currentQuestionIndex, shuffleOrder, selectedOption]);
 
   if (isLoading && !quizData) {
     return (
@@ -282,13 +278,10 @@ const StudentQuiz: React.FC = () => {
   const currentQuestion = quizData.questions[currentQuestionIndex];
   const progress = ((currentQuestionIndex + 1) / quizData.questions.length) * 100;
   const correctCount = quizData.questions.filter(q => answers[q.id] === q.correct).length;
-
   const options = shuffleOrder.map(origKey => ({
     originalKey: origKey,
-    value: currentQuestion[`opt_${origKey}` as keyof Question] as string,
+    value: currentQuestion[('opt_' + origKey) as keyof Question] as string,
   }));
-
-  const hint = `Клавиши: 1-4 для выбранных цветов или A-D для вариантов`;
 
   return (
     <div className="page-container flex items-center justify-center relative">
@@ -306,22 +299,22 @@ const StudentQuiz: React.FC = () => {
               <p className="mt-1 text-sm text-white/80">Вопрос {currentQuestionIndex + 1} из {quizData.questions.length}</p>
             </div>
             {timeLeft !== null && !isSubmitted && (
-              <div className={`text-2xl font-bold tabular-nums ${timeLeft <= 5 && timeLeft > 0 ? 'text-error animate-pulse' : 'text-white'}`}>
-                {timeLeft > 0 ? `${timeLeft}с` : '0с'}
+              <div className={'text-2xl font-bold tabular-nums ' + (timeLeft <= 5 && timeLeft > 0 ? 'text-error animate-pulse' : 'text-white')}>
+                {timeLeft > 0 ? timeLeft + 'с' : '0с'}
               </div>
             )}
           </div>
         </div>
 
         <div className="h-2 bg-gray-100 dark:bg-gray-700">
-          <div className="h-full bg-gradient-to-r from-primary to-secondary transition-all duration-500 ease-out rounded-r-full" style={{ width: `${progress}%` }}></div>
+          <div className="h-full bg-gradient-to-r from-primary to-secondary transition-all duration-500 ease-out rounded-r-full" style={{ width: progress + '%' }}></div>
         </div>
 
         <div className="p-6 md:p-8 animate-fadeIn" key={currentQuestionIndex}>
           <div className="mb-6">
             <h3 className="text-xl font-semibold text-text-primary">{currentQuestion.text}</h3>
             {!showExplanation && !isSubmitted && (
-              <p className="mt-2 text-xs text-text-secondary/50">{hint}</p>
+              <p className="mt-2 text-xs text-text-secondary/50">Клавиши: 1-4 для выбранных цветов или A-D для вариантов</p>
             )}
           </div>
 
@@ -336,7 +329,7 @@ const StudentQuiz: React.FC = () => {
               let badgeClass = 'bg-white/20 text-white';
 
               if (!showResult) {
-                bgClass = isSelected ? `${color.bg} brightness-75` : color.bg;
+                bgClass = isSelected ? color.bg + ' brightness-75' : color.bg;
               } else if (isCorrect) {
                 bgClass = CORRECT_COLOR;
               } else if (isSelected) {
@@ -362,10 +355,10 @@ const StudentQuiz: React.FC = () => {
                   key={opt.originalKey}
                   onClick={() => handleAnswerSelect(opt.originalKey)}
                   disabled={isSubmitted || showExplanation}
-                  className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 ${bgClass} ${borderClass} disabled:cursor-default active:scale-[0.99] text-white hover:brightness-110 ${extraRing}`}
+                  className={'w-full text-left p-4 rounded-xl border-2 transition-all duration-200 ' + bgClass + ' ' + borderClass + ' disabled:cursor-default active:scale-[0.99] text-white hover:brightness-110 ' + extraRing}
                 >
                   <div className="flex items-start gap-3">
-                    <span className={`flex items-center justify-center w-8 h-8 rounded-lg text-sm font-bold shrink-0 ${badgeClass}`}>
+                    <span className={'flex items-center justify-center w-8 h-8 rounded-lg text-sm font-bold shrink-0 ' + badgeClass}>
                       {color.label}
                     </span>
                     <span className="pt-1.5 font-medium">{opt.value}</span>
@@ -398,6 +391,14 @@ const StudentQuiz: React.FC = () => {
             </div>
           )}
 
+          {!isSubmitted && currentQuestionIndex === quizData.questions.length - 1 && (
+            <div className="mt-6">
+              <button onClick={() => submitQuizRef.current()} disabled={!answers[currentQuestion.id]} className="btn-success w-full">
+                Завершить тест
+              </button>
+            </div>
+          )}
+
           {!showExplanation && !isSubmitted && currentQuestionIndex < quizData.questions.length - 1 && (
             <div className="mt-6 flex justify-between">
               {currentQuestionIndex > 0 && (
@@ -407,14 +408,6 @@ const StudentQuiz: React.FC = () => {
               )}
               <button onClick={() => { clearTimers(); moveToNext(); }} disabled={!answers[currentQuestion.id]} className="btn-primary btn-sm ml-auto">
                 Следующий →
-              </button>
-            </div>
-          )}
-
-          {!showExplanation && !isSubmitted && currentQuestionIndex === quizData.questions.length - 1 && (
-            <div className="mt-6">
-              <button onClick={submitQuiz} disabled={!answers[currentQuestion.id]} className="btn-success w-full">
-                Завершить тест
               </button>
             </div>
           )}

@@ -60,10 +60,22 @@ def get_student_results(student_id: uuid.UUID, skip: int = 0, limit: int = 100, 
     Получить все результаты для конкретного ученика.
     Используется в личном кабинете ученика.
     """
-    # Check if student exists
     db_student = crud.get_student(db, student_id=student_id)
     if not db_student:
         raise HTTPException(status_code=404, detail="Student not found")
     
-    results = crud.get_results_by_student(db, student_id=student_id, skip=skip, limit=limit)
-    return results
+    results = db.query(models.Result).options(
+        joinedload(models.Result.session).joinedload(models.Session.quiz)
+    ).filter(models.Result.student_id == student_id).offset(skip).limit(limit).all()
+    
+    return [
+        schemas.ResultResponse(
+            id=r.id,
+            score=r.score,
+            total_questions=r.total_questions or 0,
+            answers_json=r.answers_json,
+            completed_at=r.completed_at,
+            quiz_title=r.session.quiz.title if r.session and r.session.quiz else "",
+        )
+        for r in results
+    ]

@@ -10,8 +10,6 @@ interface QuizHistoryItem {
   score: number;
   totalQuestions: number;
   completedAt: string;
-  subject?: string;
-  grade?: string;
 }
 
 const StudentHistory: React.FC = () => {
@@ -26,30 +24,23 @@ const StudentHistory: React.FC = () => {
     const loadHistory = async () => {
       try {
         setIsLoading(true);
-        const savedHistory = localStorage.getItem(`classquiz_history_${student.id}`);
-        if (savedHistory) { setHistory(JSON.parse(savedHistory)); setIsLoading(false); return; }
-        await new Promise(resolve => setTimeout(resolve, 800));
-        const mockHistory: QuizHistoryItem[] = [
-          { id: '1', title: 'Математика: Дроби', score: 8, totalQuestions: 10, completedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), subject: 'Математика', grade: '8' },
-          { id: '2', title: 'Физика: Механика', score: 6, totalQuestions: 10, completedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), subject: 'Физика', grade: '8' },
-          { id: '3', title: 'История: Древний Рим', score: 9, totalQuestions: 10, completedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), subject: 'История', grade: '8' },
-        ];
-        setHistory(mockHistory);
-        localStorage.setItem(`classquiz_history_${student.id}`, JSON.stringify(mockHistory));
+        const res = await fetch('/api/results/student/' + student.id);
+        if (!res.ok) throw new Error('Failed to load');
+        const data = await res.json();
+        const items: QuizHistoryItem[] = data.map((r: any) => ({
+          id: r.id,
+          title: r.quiz_title || 'Тест',
+          score: r.score,
+          totalQuestions: r.total_questions,
+          completedAt: r.completed_at,
+        }));
+        setHistory(items);
       } catch {
-        setError('Не удалось загрузить историю тестов. Пожалуйста, попробуйте снова.');
+        setError('Не удалось загрузить историю тестов.');
       } finally { setIsLoading(false); }
     };
     loadHistory();
   }, [student, navigate]);
-
-  const clearHistory = () => {
-    if (!student) return;
-    if (window.confirm('Вы уверены, что хотите удалить всю историю тестов?')) {
-      localStorage.removeItem(`classquiz_history_${student.id}`);
-      setHistory([]);
-    }
-  };
 
   if (isLoading && history.length === 0) {
     return (
@@ -78,9 +69,10 @@ const StudentHistory: React.FC = () => {
 
   const totalQuestions = history.reduce((sum, item) => sum + item.totalQuestions, 0);
   const correctAnswers = history.reduce((sum, item) => sum + item.score, 0);
-  const totalScore = history.length > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+  const averageScore = history.length > 0 ? ((correctAnswers / totalQuestions) * 10).toFixed(2) : '0.00';
   const bestScore = history.length > 0 ? Math.round(Math.max(...history.map(item => (item.score / item.totalQuestions) * 100))) : 0;
   const worstScore = history.length > 0 ? Math.round(Math.min(...history.map(item => (item.score / item.totalQuestions) * 100))) : 0;
+  const totalPercent = history.length > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
   const initials = student?.display_name?.charAt(0)?.toUpperCase() || '?';
 
   return (
@@ -112,8 +104,8 @@ const StudentHistory: React.FC = () => {
                 <p className="text-2xl font-bold text-text-primary">{history.length}</p>
               </div>
               <div className="stat-card">
-                <p className="text-sm font-medium text-text-secondary">Средний результат</p>
-                <p className={`text-2xl font-bold ${totalScore >= 80 ? 'text-success' : totalScore >= 60 ? 'text-warning' : 'text-error'}`}>{totalScore}%</p>
+                <p className="text-sm font-medium text-text-secondary">Средний балл</p>
+                <p className="text-2xl font-bold text-text-primary">{averageScore}</p>
               </div>
               <div className="stat-card">
                 <p className="text-sm font-medium text-text-secondary">Лучший</p>
@@ -134,7 +126,7 @@ const StudentHistory: React.FC = () => {
                   <span className="text-text-primary">Ответов: <strong>{totalQuestions}</strong></span>
                   <span className="text-text-primary">Верных: <strong className="text-success">{correctAnswers}</strong></span>
                   <span className="text-text-primary">Ошибок: <strong className="text-error">{totalQuestions - correctAnswers}</strong></span>
-                  <span className="text-text-primary">Точность: <strong className={totalScore >= 80 ? 'text-success' : totalScore >= 60 ? 'text-warning' : 'text-error'}>{totalScore}%</strong></span>
+                  <span className="text-text-primary">Точность: <strong className={totalPercent >= 80 ? 'text-success' : totalPercent >= 60 ? 'text-warning' : 'text-error'}>{totalPercent}%</strong></span>
                 </div>
               </div>
             </div>
@@ -151,7 +143,6 @@ const StudentHistory: React.FC = () => {
           <div className="card animate-slideUp">
             <div className="p-6 border-b border-gray-100 flex justify-between items-center">
               <h2 className="text-xl font-bold text-text-primary">История тестов</h2>
-              <button onClick={clearHistory} className="text-sm text-text-secondary hover:text-error transition-colors">Очистить историю</button>
             </div>
             <div className="p-6 grid gap-4">
               {history.map((item, index) => {
@@ -166,12 +157,11 @@ const StudentHistory: React.FC = () => {
                       <div className="flex flex-col sm:flex-row justify-between items-start gap-2 mb-3">
                         <div>
                           <h3 className="text-lg font-semibold text-text-primary">{item.title}</h3>
-                          {item.subject && <p className="text-sm text-text-secondary mt-0.5">{item.subject} • {item.grade} класс</p>}
                         </div>
-                        <span className={`px-3 py-1 text-xs font-bold rounded-full shrink-0 ${badgeClasses}`}>{percentage}%</span>
+                        <span className={'px-3 py-1 text-xs font-bold rounded-full shrink-0 ' + badgeClasses}>{percentage}%</span>
                       </div>
                       <div className="h-2 bg-gray-100 rounded-full mb-3">
-                        <div className={`h-full rounded-full transition-all duration-500 ${barClasses}`} style={{ width: `${percentage}%` }}></div>
+                        <div className={'h-full rounded-full transition-all duration-500 ' + barClasses} style={{ width: percentage + '%' }}></div>
                       </div>
                       <div className="flex justify-between items-center text-sm text-text-secondary">
                         <span>Балл: <strong>{item.score}/{item.totalQuestions}</strong></span>
@@ -184,14 +174,6 @@ const StudentHistory: React.FC = () => {
             </div>
           </div>
         )}
-
-        <div className="card animate-slideUp">
-          <div className="p-6 border-b border-gray-100 dark:border-gray-700">
-            <h2 className="text-xl font-bold text-text-primary">Настройки</h2>
-          </div>
-          <div className="p-6 space-y-4">
-          </div>
-        </div>
 
         <div className="flex gap-3">
           <button onClick={() => navigate('/student/quiz-entry')} className="btn-primary flex-1">Подключиться к тесту</button>

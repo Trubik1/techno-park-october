@@ -110,6 +110,7 @@ class ResultResponse(BaseModel):
     total_questions: int
     answers_json: str
     completed_at: datetime
+    quiz_title: str = ""
     
     class Config:
         from_attributes = True
