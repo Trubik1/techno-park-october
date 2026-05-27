@@ -65,7 +65,7 @@ def create_teacher(db: Session, teacher: schemas.TeacherCreate):
     return db_teacher
 
 # Quiz CRUD
-BASE_QUIZ_TITLE = "Древние люди на территории Беларуси"
+BASE_QUIZ_TITLE = "Билет 1. Древние люди на территории Беларуси"
 
 def get_quiz(db: Session, quiz_id: uuid.UUID):
     return db.query(models.Quiz).filter(models.Quiz.id == quiz_id).first()
@@ -73,43 +73,43 @@ def get_quiz(db: Session, quiz_id: uuid.UUID):
 def get_quizzes(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Quiz).offset(skip).limit(limit).all()
 
-def clone_base_quiz_for_teacher(db: Session, teacher_id: uuid.UUID):
-    base_quiz = db.query(models.Quiz).filter(models.Quiz.title == BASE_QUIZ_TITLE).first()
-    if not base_quiz:
-        return
-    qs = db.query(models.Question).filter(models.Question.quiz_id == base_quiz.id).all()
-    if not qs:
-        return
-    # Check if this teacher already has a copy
-    existing = db.query(models.Quiz).filter(
-        models.Quiz.title == BASE_QUIZ_TITLE,
-        models.Quiz.teacher_id == teacher_id,
-    ).first()
-    if existing:
-        return
-    clone = models.Quiz(
-        id=uuid.uuid4(),
-        title=BASE_QUIZ_TITLE,
-        subject=base_quiz.subject,
-        grade=base_quiz.grade,
-        teacher_id=teacher_id,
-        created_at=datetime.now(timezone.utc),
-        is_public=False,
-    )
-    db.add(clone)
-    db.flush()
-    for q in qs:
-        db.add(models.Question(
+def clone_public_quizzes_for_teacher(db: Session, teacher_id: uuid.UUID):
+    public_quizzes = db.query(models.Quiz).filter(models.Quiz.is_public == True).all()
+    for base_quiz in public_quizzes:
+        qs = db.query(models.Question).filter(models.Question.quiz_id == base_quiz.id).all()
+        if not qs:
+            continue
+        existing = db.query(models.Quiz).filter(
+            models.Quiz.title == base_quiz.title,
+            models.Quiz.teacher_id == teacher_id,
+        ).first()
+        if existing:
+            continue
+        clone = models.Quiz(
             id=uuid.uuid4(),
-            quiz_id=clone.id,
-            text=q.text,
-            opt_a=q.opt_a,
-            opt_b=q.opt_b,
-            opt_c=q.opt_c,
-            opt_d=q.opt_d,
-            correct=q.correct,
-            explanation=q.explanation or "",
-        ))
+            title=base_quiz.title,
+            subject=base_quiz.subject,
+            grade=base_quiz.grade,
+            teacher_id=teacher_id,
+            created_at=datetime.now(timezone.utc),
+            is_public=False,
+            time_limit_quiz=base_quiz.time_limit_quiz,
+            time_limit_question=base_quiz.time_limit_question,
+        )
+        db.add(clone)
+        db.flush()
+        for q in qs:
+            db.add(models.Question(
+                id=uuid.uuid4(),
+                quiz_id=clone.id,
+                text=q.text,
+                opt_a=q.opt_a,
+                opt_b=q.opt_b,
+                opt_c=q.opt_c,
+                opt_d=q.opt_d,
+                correct=q.correct,
+                explanation=q.explanation,
+            ))
     db.commit()
 
 def create_quiz(db: Session, quiz: schemas.QuizCreate, teacher_id: uuid.UUID):
@@ -205,7 +205,7 @@ def create_result(db: Session, result: schemas.ResultCreate, session_id: uuid.UU
         session_id=session_id,
         student_id=student_id,
         score=result.score,
-        total_questions=result.total_questions or len(result.answers),
+        total_questions=result.total_questions if result.total_questions is not None else len(result.answers),
         answers_json=answers_json
     )
     db.add(db_result)
