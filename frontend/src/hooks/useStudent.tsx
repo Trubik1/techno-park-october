@@ -27,6 +27,19 @@ export const StudentProvider = ({ children }: { children: React.ReactNode }) => 
       const studentData = localStorage.getItem('classquiz_student');
       if (studentData) {
         const parsedStudent = JSON.parse(studentData);
+        // Проверяем, что студент ещё существует в БД
+        const res = await fetch(`/api/students/`).catch(() => null);
+        if (res && res.ok) {
+          const students = await res.json();
+          const exists = students.some((s: any) => s.id === parsedStudent.id);
+          if (!exists) {
+            console.warn('Student not found in DB, clearing localStorage');
+            localStorage.removeItem('classquiz_student');
+            setStudent(null);
+            setIsRegistered(false);
+            return;
+          }
+        }
         setStudent(parsedStudent);
         setIsRegistered(true);
       }

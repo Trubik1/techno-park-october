@@ -53,7 +53,7 @@ const QuizImportForm: React.FC = () => {
       formData.append('title', quizTitle.trim());
       formData.append('subject', quizSubject.trim());
       formData.append('grade', quizGrade.trim());
-      const res = await fetch('/api/import/preview/', { method: 'POST', body: formData });
+      const res = await fetch('/api/quizzes/import/preview', { method: 'POST', body: formData });
       if (!res.ok) { const err = await res.json(); throw new Error(err.detail || 'Ошибка предпросмотра'); }
       setPreviewData(await res.json());
     } catch (err: any) {
@@ -73,7 +73,7 @@ const QuizImportForm: React.FC = () => {
       const teacher = JSON.parse(teacherData);
 
       const quizPayload = { title: quizTitle.trim(), subject: quizSubject.trim(), grade: quizGrade.trim(), is_public: isPublic };
-      const res = await fetch(`/api/import/confirm/?teacher_id=${teacher.id}`, {
+      const res = await fetch(`/api/quizzes/import/confirm/?teacher_id=${teacher.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ quiz_data: quizPayload, questions: previewData.questions }),

@@ -106,8 +106,26 @@ const StudentQuiz: React.FC = () => {
           body: JSON.stringify({ student_id: student.id }),
         });
         if (!joinRes.ok) {
-          const errText = await joinRes.text();
-          console.error('[StudentQuiz] join failed:', joinRes.status, errText);
+          const errData = await joinRes.json().catch(() => ({}));
+          console.error('[StudentQuiz] join failed:', joinRes.status, errData);
+          if (joinRes.status === 404 && errData.detail === 'Student not found') {
+            console.log('[StudentQuiz] re-registering student...');
+            const reReg = await fetch('/api/students/register', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ display_name: student.display_name, class_name: student.class_name }),
+            });
+            if (reReg.ok) {
+              const newStudent = await reReg.json();
+              localStorage.setItem('classquiz_student', JSON.stringify(newStudent));
+              const retryJoin = await fetch(`/api/sessions/${code}/join`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ student_id: newStudent.id }),
+              });
+              if (retryJoin.ok) console.log('[StudentQuiz] join OK after re-register');
+            }
+          }
         } else {
           console.log('[StudentQuiz] join OK');
         }
