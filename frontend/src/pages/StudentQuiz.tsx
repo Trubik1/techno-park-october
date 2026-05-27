@@ -19,6 +19,8 @@ interface QuizData {
   id: string;
   title: string;
   questions: Question[];
+  time_limit_quiz?: number | null;
+  time_limit_question?: number | null;
 }
 
 interface SessionData {
@@ -70,6 +72,8 @@ const StudentQuiz: React.FC = () => {
   const [shuffleOrder, setShuffleOrder] = useState<string[]>([]);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
+  const loadingCodeRef = useRef<string | null>(null);
+
   const clearTimers = () => {
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
     if (timeoutRef.current) { clearTimeout(timeoutRef.current); timeoutRef.current = null; }
@@ -77,7 +81,9 @@ const StudentQuiz: React.FC = () => {
 
   useEffect(() => {
     if (!code) { navigate('/student/entry'); return; }
-    if (!student || quizData) return;
+    if (!student) return;
+    if (loadingCodeRef.current === code) return;
+    loadingCodeRef.current = code;
     studentIdRef.current = student.id;
     let cancelled = false;
 
@@ -102,7 +108,7 @@ const StudentQuiz: React.FC = () => {
           explanation: q.explanation, correct: q.correct,
         }));
         if (cancelled) return;
-        setQuizData({ id: qData.id, title: qData.title, questions });
+        setQuizData({ id: qData.id, title: qData.title, questions, time_limit_quiz: qData.time_limit_quiz, time_limit_question: qData.time_limit_question });
         setShuffleOrder(shuffleArray(['a', 'b', 'c', 'd']));
 
         const joinRes = await fetch('/api/sessions/' + code + '/join', {
@@ -110,28 +116,31 @@ const StudentQuiz: React.FC = () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ student_id: student.id }),
         });
-        if (joinRes.status === 404) {
-          const errData = await joinRes.json().catch(() => ({}));
-          if (errData.detail === 'Student not found') {
-            const regRes = await fetch('/api/students/register', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ display_name: student.display_name, class_name: student.class_name }),
-            });
-            if (regRes.ok) {
-              const newStudent = await regRes.json();
-              localStorage.setItem('classquiz_student', JSON.stringify(newStudent));
-              studentIdRef.current = newStudent.id;
-              await fetch('/api/sessions/' + code + '/join', {
+        if (!joinRes.ok) {
+          if (joinRes.status === 404) {
+            const errData = await joinRes.json().catch(() => ({}));
+            if (errData.detail === 'Student not found') {
+              const regRes = await fetch('/api/students/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ student_id: newStudent.id }),
+                body: JSON.stringify({ display_name: student.display_name, class_name: student.class_name }),
               });
+              if (regRes.ok) {
+                const newStudent = await regRes.json();
+                localStorage.setItem('classquiz_student', JSON.stringify(newStudent));
+                studentIdRef.current = newStudent.id;
+                const retryRes = await fetch('/api/sessions/' + code + '/join', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ student_id: newStudent.id }),
+                });
+                if (!retryRes.ok) console.warn('Re-join after re-registration failed');
+              }
             }
           }
         }
-      } catch (e: any) {
-        if (!cancelled) setError(e.message || 'Failed to load quiz');
+      } catch (e: unknown) {
+        if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load quiz');
       } finally {
         if (!cancelled) setIsLoading(false);
       }
@@ -141,7 +150,7 @@ const StudentQuiz: React.FC = () => {
   }, [code, navigate, student]);
 
   const submitQuiz = useCallback(async () => {
-    if (!quizData || !studentIdRef.current || !sessionData) return;
+    if (isSubmitted || !quizData || !studentIdRef.current || !sessionData) return;
     clearTimers();
     setError(null);
     try {
@@ -169,11 +178,11 @@ const StudentQuiz: React.FC = () => {
         throw new Error(errData.detail || 'Failed to save results');
       }
       setIsSubmitted(true);
-    } catch (e: any) {
-      setError(e.message || 'Failed to submit results');
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Failed to submit results');
       setIsLoading(false);
     } finally { setIsLoading(false); }
-  }, [quizData, sessionData, answers]);
+  }, [quizData, sessionData, answers, isSubmitted]);
 
   submitQuizRef.current = submitQuiz;
 
@@ -183,19 +192,32 @@ const StudentQuiz: React.FC = () => {
       setShowExplanation(false);
       setSelectedOption(null);
       setCurrentQuestionIndex(prev => prev + 1);
-      startTimer();
+      if (!quizData.time_limit_quiz) startQuestionTimer();
     } else {
       submitQuizRef.current();
     }
   };
 
   useEffect(() => {
-    if (quizData && !isSubmitted) startTimer();
-  }, [quizData]);
+    if (quizData && !isSubmitted) {
+      if (quizData.time_limit_quiz) {
+        clearTimers();
+        setTimeLeft(quizData.time_limit_quiz);
+        timerRef.current = setInterval(() => {
+          setTimeLeft(prev => {
+            if (prev === null || prev <= 1) { submitQuizRef.current(); return 0; }
+            return prev - 1;
+          });
+        }, 1000);
+      } else {
+        startQuestionTimer();
+      }
+    }
+  }, [quizData, isSubmitted]);
 
-  const startTimer = () => {
+  const startQuestionTimer = () => {
     clearTimers();
-    setTimeLeft(30);
+    setTimeLeft(quizData?.time_limit_question || 30);
     timerRef.current = setInterval(() => {
       setTimeLeft(prev => (prev === null || prev <= 1 ? 0 : prev - 1));
     }, 1000);
@@ -203,7 +225,7 @@ const StudentQuiz: React.FC = () => {
 
   const handleAnswerSelect = (originalKey: string) => {
     if (!quizData || isSubmitted || showExplanation) return;
-    setSelectedOption(selectedOption === originalKey ? null : originalKey);
+    setSelectedOption(prev => prev === originalKey ? null : originalKey);
   };
 
   const confirmAnswer = () => {
@@ -212,6 +234,9 @@ const StudentQuiz: React.FC = () => {
     setAnswers(prev => ({ ...prev, [qId]: selectedOption }));
     setShowExplanation(true);
     setSelectedOption(null);
+    if (quizData?.time_limit_quiz) {
+      return;
+    }
     clearTimers();
     timeoutRef.current = setTimeout(() => {
       timeoutRef.current = null;
@@ -229,7 +254,8 @@ const StudentQuiz: React.FC = () => {
         handleAnswerSelect(shuffleOrder[parseInt(key) - 1]);
       } else if (['a', 'b', 'c', 'd'].includes(key)) {
         e.preventDefault();
-        handleAnswerSelect(key);
+        const positions: Record<string, number> = { a: 0, b: 1, c: 2, d: 3 };
+        handleAnswerSelect(shuffleOrder[positions[key]]);
       } else if (key === 'enter' && selectedOption) {
         e.preventDefault();
         confirmAnswer();
@@ -299,8 +325,12 @@ const StudentQuiz: React.FC = () => {
               <p className="mt-1 text-sm text-white/80">Вопрос {currentQuestionIndex + 1} из {quizData.questions.length}</p>
             </div>
             {timeLeft !== null && !isSubmitted && (
-              <div className={'text-2xl font-bold tabular-nums ' + (timeLeft <= 5 && timeLeft > 0 ? 'text-error animate-pulse' : 'text-white')}>
-                {timeLeft > 0 ? timeLeft + 'с' : '0с'}
+              <div className={'text-2xl font-bold tabular-nums ' + (timeLeft <= 30 && timeLeft > 0 ? 'text-error animate-pulse' : 'text-white')}>
+                {timeLeft > 0 ? (
+                  quizData.time_limit_quiz
+                    ? Math.floor(timeLeft / 60) + ':' + String(timeLeft % 60).padStart(2, '0')
+                    : timeLeft + 'с'
+                ) : '0с'}
               </div>
             )}
           </div>
@@ -402,11 +432,11 @@ const StudentQuiz: React.FC = () => {
           {!showExplanation && !isSubmitted && currentQuestionIndex < quizData.questions.length - 1 && (
             <div className="mt-6 flex justify-between">
               {currentQuestionIndex > 0 && (
-                <button onClick={() => { clearTimers(); setCurrentQuestionIndex(prev => prev - 1); setShowExplanation(false); setSelectedOption(null); startTimer(); }} className="btn-secondary btn-sm">
+                <button onClick={() => { setCurrentQuestionIndex(prev => prev - 1); setShowExplanation(false); setSelectedOption(null); if (!quizData?.time_limit_quiz) { clearTimers(); startQuestionTimer(); } }} className="btn-secondary btn-sm">
                   ← Назад
                 </button>
               )}
-              <button onClick={() => { clearTimers(); moveToNext(); }} disabled={!answers[currentQuestion.id]} className="btn-primary btn-sm ml-auto">
+              <button onClick={() => { if (!quizData?.time_limit_quiz) clearTimers(); moveToNext(); }} disabled={!answers[currentQuestion.id]} className="btn-primary btn-sm ml-auto">
                 Следующий →
               </button>
             </div>

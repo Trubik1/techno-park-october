@@ -7,10 +7,13 @@ import BackButton from '../components/BackButton';
 const StudentQuizEntry: React.FC = () => {
   const [sessionCode, setSessionCode] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const { student, isRegistered } = useStudent();
+  const [localLoading, setLocalLoading] = useState(false);
+  const { student, isRegistered, isLoading } = useStudent();
   const navigate = useNavigate();
 
+  if (isLoading) {
+    return <div className="page-container flex items-center justify-center"><div className="spinner"></div></div>;
+  }
   if (!isRegistered || !student) {
     return <Navigate to="/student/entry" replace />;
   }
@@ -18,7 +21,7 @@ const StudentQuizEntry: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setIsLoading(true);
+    setLocalLoading(true);
     try {
       const code = sessionCode.trim().toUpperCase();
       if (!code) {
@@ -48,7 +51,7 @@ const StudentQuizEntry: React.FC = () => {
     } catch {
       setError('Произошла ошибка. Пожалуйста, попробуйте снова.');
     } finally {
-      setIsLoading(false);
+      setLocalLoading(false);
     }
   };
 
@@ -105,8 +108,8 @@ const StudentQuizEntry: React.FC = () => {
             </div>
           )}
 
-          <button type="submit" disabled={isLoading} className="btn-primary w-full">
-            {isLoading ? (
+          <button type="submit" disabled={localLoading} className="btn-primary w-full">
+            {localLoading ? (
               <span className="flex items-center justify-center gap-2">
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                 Подключение...
