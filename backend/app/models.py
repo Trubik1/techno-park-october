@@ -35,6 +35,8 @@ class Quiz(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     teacher_id = Column(Uuid(as_uuid=True), ForeignKey("teachers.id"), nullable=False)
     is_public = Column(Boolean, default=False)
+    time_limit_quiz = Column(Integer, nullable=True, default=2700)
+    time_limit_question = Column(Integer, nullable=True, default=30)
 
     teacher = relationship("Teacher", back_populates="quizzes")
     questions = relationship("Question", back_populates="quiz", cascade="all, delete-orphan")

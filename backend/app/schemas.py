@@ -40,6 +40,8 @@ class QuizBase(BaseModel):
     subject: str = Field(..., min_length=1, max_length=100)
     grade: str = Field(..., min_length=1, max_length=50)
     is_public: bool = False
+    time_limit_quiz: Optional[int] = 2700
+    time_limit_question: Optional[int] = 30
 
 class QuizCreate(QuizBase):
     pass
