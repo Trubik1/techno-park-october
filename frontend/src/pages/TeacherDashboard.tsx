@@ -17,6 +17,7 @@ const TeacherDashboard: React.FC = () => {
   const [startingId, setStartingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeSubject, setActiveSubject] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [tab, setTab] = useState<'my' | 'public'>('my');
   const [teacherId, setTeacherId] = useState<string | null>(null);
 
@@ -51,9 +52,10 @@ const TeacherDashboard: React.FC = () => {
     return [...new Set(myQuizzes.map(q => q.subject))].sort();
   }, [myQuizzes]);
 
-  const filteredMyQuizzes = activeSubject
+  const filteredMyQuizzes = (activeSubject
     ? myQuizzes.filter(q => q.subject === activeSubject)
-    : myQuizzes;
+    : myQuizzes
+  ).filter(q => q.title.toLowerCase().includes(searchQuery.toLowerCase()));
 
   const publicSubjects = useMemo(() => {
     return [...new Set(publicQuizzes.map(q => q.subject))].sort();
@@ -61,9 +63,10 @@ const TeacherDashboard: React.FC = () => {
 
   const [publicSubject, setPublicSubject] = useState<string | null>(null);
 
-  const filteredPublicQuizzes = publicSubject
+  const filteredPublicQuizzes = (publicSubject
     ? publicQuizzes.filter(q => q.subject === publicSubject)
-    : publicQuizzes;
+    : publicQuizzes
+  ).filter(q => q.title.toLowerCase().includes(searchQuery.toLowerCase()));
 
   if (isLoading && myQuizzes.length === 0 && publicQuizzes.length === 0) {
     return (
@@ -123,33 +126,41 @@ const TeacherDashboard: React.FC = () => {
           </div>
         </div>
 
-        {tab === 'my' && myQuizzes.length === 0 && (
-          <div className="p-8 text-center animate-fadeIn">
-            <p className="text-text-secondary">У вас пока нет созданных тестов.</p>
-            <p className="mt-2 text-sm text-text-secondary/60">Нажмите кнопку выше, чтобы создать первый тест или импортировать его из файла.</p>
-          </div>
-        )}
-
-        {tab === 'public' && publicQuizzes.length === 0 && (
-          <div className="p-8 text-center animate-fadeIn">
-            <p className="text-text-secondary">Публичных тестов от других учителей пока нет.</p>
-            <p className="mt-2 text-sm text-text-secondary/60">Создайте тест и сделайте его публичным, чтобы он появился здесь.</p>
-          </div>
-        )}
-
-        {(tab === 'my' && myQuizzes.length > 0) && (
+        {(tab === 'my') && (
           <div className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-text-primary">Мои тесты</h2>
-              {subjects.length > 0 && (
-                <div className="flex gap-1 flex-wrap">
-                  <button onClick={() => setActiveSubject(null)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${activeSubject === null ? 'bg-primary text-white shadow-md shadow-primary/30' : 'bg-gray-100 dark:bg-gray-700 text-text-secondary hover:bg-gray-200 dark:hover:bg-gray-600'}`}>Все</button>
-                  {subjects.map(s => (
-                    <button key={s} onClick={() => setActiveSubject(s)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${activeSubject === s ? 'bg-primary text-white shadow-md shadow-primary/30' : 'bg-gray-100 dark:bg-gray-700 text-text-secondary hover:bg-gray-200 dark:hover:bg-gray-600'}`}>{s}</button>
-                  ))}
-                </div>
-              )}
+            <div className="flex flex-col gap-4 mb-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-text-primary">Мои тесты</h2>
+                {subjects.length > 0 && (
+                  <div className="flex gap-1 flex-wrap">
+                    <button onClick={() => setActiveSubject(null)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${activeSubject === null ? 'bg-primary text-white shadow-md shadow-primary/30' : 'bg-gray-100 dark:bg-gray-700 text-text-secondary hover:bg-gray-200 dark:hover:bg-gray-600'}`}>Все</button>
+                    {subjects.map(s => (
+                      <button key={s} onClick={() => setActiveSubject(s)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${activeSubject === s ? 'bg-primary text-white shadow-md shadow-primary/30' : 'bg-gray-100 dark:bg-gray-700 text-text-secondary hover:bg-gray-200 dark:hover:bg-gray-600'}`}>{s}</button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="relative">
+                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary/50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Поиск по названию..."
+                  className="input pl-10"
+                />
+              </div>
             </div>
+            {myQuizzes.length === 0 ? (
+              <div className="p-8 text-center animate-fadeIn">
+                <p className="text-text-secondary">У вас пока нет созданных тестов.</p>
+                <p className="mt-2 text-sm text-text-secondary/60">Нажмите кнопку выше, чтобы создать первый тест или импортировать его из файла.</p>
+              </div>
+            ) : filteredMyQuizzes.length === 0 ? (
+              <div className="p-8 text-center animate-fadeIn">
+                <p className="text-text-secondary">Тесты не найдены. Попробуйте изменить параметры поиска.</p>
+              </div>
+            ) : (
             <div className="grid gap-4">
               {filteredMyQuizzes.map((quiz, index) => (
                 <div key={quiz.id} className="card-hover border border-gray-100 animate-slideUp hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300" style={{ animationDelay: `${index * 0.1}s` }}>
@@ -194,22 +205,45 @@ const TeacherDashboard: React.FC = () => {
                 </div>
               ))}
             </div>
+          )}
           </div>
         )}
 
-        {tab === 'public' && publicQuizzes.length > 0 && (
+        {tab === 'public' && (
           <div className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-text-primary">Общие тесты</h2>
-              {publicSubjects.length > 0 && (
-                <div className="flex gap-1 flex-wrap">
-                  <button onClick={() => setPublicSubject(null)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${publicSubject === null ? 'bg-primary text-white shadow-md shadow-primary/30' : 'bg-gray-100 dark:bg-gray-700 text-text-secondary hover:bg-gray-200 dark:hover:bg-gray-600'}`}>Все</button>
-                  {publicSubjects.map(s => (
-                    <button key={s} onClick={() => setPublicSubject(s)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${publicSubject === s ? 'bg-primary text-white shadow-md shadow-primary/30' : 'bg-gray-100 dark:bg-gray-700 text-text-secondary hover:bg-gray-200 dark:hover:bg-gray-600'}`}>{s}</button>
-                  ))}
-                </div>
-              )}
+            <div className="flex flex-col gap-4 mb-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-text-primary">Общие тесты</h2>
+                {publicSubjects.length > 0 && (
+                  <div className="flex gap-1 flex-wrap">
+                    <button onClick={() => setPublicSubject(null)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${publicSubject === null ? 'bg-primary text-white shadow-md shadow-primary/30' : 'bg-gray-100 dark:bg-gray-700 text-text-secondary hover:bg-gray-200 dark:hover:bg-gray-600'}`}>Все</button>
+                    {publicSubjects.map(s => (
+                      <button key={s} onClick={() => setPublicSubject(s)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${publicSubject === s ? 'bg-primary text-white shadow-md shadow-primary/30' : 'bg-gray-100 dark:bg-gray-700 text-text-secondary hover:bg-gray-200 dark:hover:bg-gray-600'}`}>{s}</button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="relative">
+                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary/50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Поиск по названию..."
+                  className="input pl-10"
+                />
+              </div>
             </div>
+            {publicQuizzes.length === 0 ? (
+              <div className="p-8 text-center animate-fadeIn">
+                <p className="text-text-secondary">Публичных тестов от других учителей пока нет.</p>
+                <p className="mt-2 text-sm text-text-secondary/60">Создайте тест и сделайте его публичным, чтобы он появился здесь.</p>
+              </div>
+            ) : filteredPublicQuizzes.length === 0 ? (
+              <div className="p-8 text-center animate-fadeIn">
+                <p className="text-text-secondary">Тесты не найдены. Попробуйте изменить параметры поиска.</p>
+              </div>
+            ) : (
             <div className="grid gap-4">
               {filteredPublicQuizzes.map((quiz, index) => (
                 <div key={quiz.id} className="card-hover border border-gray-100 animate-slideUp hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300" style={{ animationDelay: `${index * 0.1}s` }}>
@@ -253,6 +287,7 @@ const TeacherDashboard: React.FC = () => {
                 </div>
               ))}
             </div>
+          )}
           </div>
         )}
 
