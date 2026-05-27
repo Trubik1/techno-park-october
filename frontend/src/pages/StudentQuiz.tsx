@@ -76,7 +76,8 @@ const StudentQuiz: React.FC = () => {
 
   useEffect(() => {
     if (!code) { navigate('/student/entry'); return; }
-    if (!student) return;
+    if (!student) { console.log('[StudentQuiz] waiting for student...'); return; }
+    console.log('[StudentQuiz] student loaded, fetching quiz data', student.id);
     const fetchQuizData = async () => {
       try {
         setIsLoading(true);
@@ -99,12 +100,19 @@ const StudentQuiz: React.FC = () => {
         }));
         setQuizData({ id: qData.id, title: qData.title, questions });
         setShuffleOrder(shuffleArray(['a', 'b', 'c', 'd']));
-        fetch(`/api/sessions/${code}/join`, {
+        const joinRes = await fetch(`/api/sessions/${code}/join`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ student_id: student.id }),
-        }).catch(() => {});
-      } catch {
+        });
+        if (!joinRes.ok) {
+          const errText = await joinRes.text();
+          console.error('[StudentQuiz] join failed:', joinRes.status, errText);
+        } else {
+          console.log('[StudentQuiz] join OK');
+        }
+      } catch (err) {
+        console.error('[StudentQuiz] error:', err);
         setError('Не удалось загрузить тест. Проверьте код сессии и попробуйте снова.');
       } finally { setIsLoading(false); }
     };
