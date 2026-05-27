@@ -3,6 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { exportSessionResultsToCsv, downloadCsv } from '../utils/csvExport';
 import QRCode from 'qrcode';
 
+function parseBackendDate(dateStr: string | null | undefined): Date {
+  if (!dateStr) return new Date();
+  return new Date(dateStr + (dateStr.endsWith('Z') || dateStr.includes('+') ? '' : 'Z'));
+}
+
 interface SessionData {
   id: string; quiz_id: string; code: string; status: string;
   started_at: string; closed_at: string | null;
@@ -152,12 +157,15 @@ const SessionMonitor: React.FC = () => {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
             <div>
               <h1 className="text-2xl font-bold">{sessionData.title || 'Мониторинг сессии'}</h1>
-              <p className="text-sm text-white/80">{sessionData.subject} {sessionData.grade} • Код: <span className="font-mono font-bold">{sessionData.code}</span>
-                <button onClick={() => setQrModal(true)} className="ml-2 inline-flex items-center gap-1 text-xs bg-white/15 hover:bg-white/25 px-2 py-0.5 rounded transition-colors" title="Показать QR-код">
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
+              <p className="text-sm text-white/80">{sessionData.subject} {sessionData.grade}</p>
+              <div className="mt-3 inline-flex items-center gap-2 bg-white/15 rounded-xl px-4 py-2">
+                <span className="text-xs text-white/70">Код сессии:</span>
+                <span className="text-2xl font-bold tracking-[0.15em] font-mono text-white">{sessionData.code}</span>
+                <button onClick={() => setQrModal(true)} className="ml-1 inline-flex items-center gap-1 text-xs bg-white/15 hover:bg-white/25 px-2 py-1 rounded-lg transition-colors" title="Показать QR-код">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
                   QR
                 </button>
-              </p>
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <span className={`px-3 py-1 text-xs font-semibold rounded-full ${isActive ? 'bg-success/20 text-success' : 'bg-error/20 text-error'}`}>
@@ -169,8 +177,8 @@ const SessionMonitor: React.FC = () => {
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-white/80">
-            <div><span className="font-medium">Начало:</span> {new Date(sessionData.started_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</div>
-            <div><span className="font-medium">Длительность:</span> {Math.floor((Date.now() - new Date(sessionData.started_at).getTime()) / 60000)} мин</div>
+            <div><span className="font-medium">Начало:</span> {parseBackendDate(sessionData.started_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</div>
+            <div><span className="font-medium">Длительность:</span> {Math.floor((Date.now() - parseBackendDate(sessionData.started_at).getTime()) / 60000)} мин</div>
             <div className="flex items-center gap-2">
               <span className="font-medium">Обновлено:</span> {new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
               {isActive && (
@@ -199,7 +207,10 @@ const SessionMonitor: React.FC = () => {
                 </svg>
               </div>
               <p className="text-text-secondary">Пока нет участников в этой сессии</p>
-              <p className="mt-1 text-sm text-text-secondary/60">Ожидайте, пока ученики подключатся по коду: <span className="font-mono font-bold text-primary">{sessionData.code}</span></p>
+              <p className="mt-4 text-sm text-text-secondary/60">Ожидайте, пока ученики подключатся по коду:</p>
+              <div className="mt-2 inline-flex items-center gap-2 bg-primary/10 rounded-xl px-5 py-3 border border-primary/20">
+                <span className="text-3xl font-bold tracking-[0.25em] font-mono text-primary">{sessionData.code}</span>
+              </div>
             </div>
           ) : (
             <>
@@ -226,7 +237,7 @@ const SessionMonitor: React.FC = () => {
                             {result.completed_at ? 'Завершил' : 'В процессе'}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-sm text-text-secondary">{result.completed_at ? new Date(result.completed_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) : '-'}</td>
+                        <td className="px-4 py-3 text-sm text-text-secondary">{result.completed_at ? parseBackendDate(result.completed_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) : '-'}</td>
                         <td className="px-4 py-3 text-sm">
                           <button onClick={() => setAnswerModal(result)} className="text-xs text-info hover:text-info/80 font-medium transition-colors">Ответы</button>
                         </td>
