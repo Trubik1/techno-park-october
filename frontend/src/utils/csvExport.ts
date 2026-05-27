@@ -87,7 +87,8 @@ export const exportSessionResultsToCsv = (
  * @param filename Name of the file
  */
 export const downloadCsv = (content: string, filename: string): void => {
-  const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+  const bom = '\uFEFF';
+  const blob = new Blob([bom + content], { type: 'text/csv;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   
   const link = document.createElement('a');
@@ -99,6 +100,5 @@ export const downloadCsv = (content: string, filename: string): void => {
   link.click();
   document.body.removeChild(link);
   
-  // Clean up
-  URL.revokeObjectURL(url);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 };
