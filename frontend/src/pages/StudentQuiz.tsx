@@ -54,6 +54,8 @@ const StudentQuiz: React.FC = () => {
   const navigate = useNavigate();
   const { student } = useStudent();
 
+  const studentIdRef = useRef<string | null>(null);
+
   const [quizData, setQuizData] = useState<QuizData | null>(null);
   const [sessionData, setSessionData] = useState<SessionData | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -68,6 +70,7 @@ const StudentQuiz: React.FC = () => {
 
   const [shuffleOrder, setShuffleOrder] = useState<string[]>([]);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const dataLoadedRef = useRef(false);
 
   const clearTimers = () => {
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
@@ -76,14 +79,17 @@ const StudentQuiz: React.FC = () => {
 
   useEffect(() => {
     if (!code) { navigate('/student/entry'); return; }
-    if (!student) { console.log('[StudentQuiz] waiting for student...'); return; }
-    console.log('[StudentQuiz] student loaded, fetching quiz data', student.id);
-    const fetchQuizData = async () => {
+    if (!student || dataLoadedRef.current) return;
+    studentIdRef.current = student.id;
+    dataLoadedRef.current = true;
+    let cancelled = false;
+    const run = async () => {
       try {
         setIsLoading(true);
         const sessionResponse = await fetch(`/api/sessions/${code}`);
         if (!sessionResponse.ok) throw new Error('Сессия не найдена');
         const sData: SessionData = await sessionResponse.json();
+        if (cancelled) return;
         setSessionData(sData);
 
         const quizResponse = await fetch(`/api/quizzes/${sData.quiz_id}`);
@@ -98,45 +104,46 @@ const StudentQuiz: React.FC = () => {
           opt_c: q.opt_c, opt_d: q.opt_d, explanation: q.explanation,
           correct: q.correct,
         }));
+        if (cancelled) return;
         setQuizData({ id: qData.id, title: qData.title, questions });
         setShuffleOrder(shuffleArray(['a', 'b', 'c', 'd']));
-        const joinRes = await fetch(`/api/sessions/${code}/join`, {
+
+        // Присоединяемся к сессии, при 404 перерегистрируемся
+        await doJoin(code, student.id);
+      } catch {
+        if (!cancelled) setError('Не удалось загрузить тест. Проверьте код сессии и попробуйте снова.');
+      } finally { if (!cancelled) setIsLoading(false); }
+    };
+    run();
+    return () => { cancelled = true; clearTimers(); };
+  }, [code, navigate, student]);
+
+  const doJoin = async (code: string, sid: string) => {
+    const joinRes = await fetch(`/api/sessions/${code}/join`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ student_id: sid }),
+    });
+    if (joinRes.ok) return;
+    const errData = await joinRes.json().catch(() => ({}));
+    if (joinRes.status === 404 && errData.detail === 'Student not found') {
+      const reReg = await fetch('/api/students/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ display_name: student!.display_name, class_name: student!.class_name }),
+      });
+      if (reReg.ok) {
+        const newStudent = await reReg.json();
+        localStorage.setItem('classquiz_student', JSON.stringify(newStudent));
+        studentIdRef.current = newStudent.id;
+        await fetch(`/api/sessions/${code}/join`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ student_id: student.id }),
+          body: JSON.stringify({ student_id: newStudent.id }),
         });
-        if (!joinRes.ok) {
-          const errData = await joinRes.json().catch(() => ({}));
-          console.error('[StudentQuiz] join failed:', joinRes.status, errData);
-          if (joinRes.status === 404 && errData.detail === 'Student not found') {
-            console.log('[StudentQuiz] re-registering student...');
-            const reReg = await fetch('/api/students/register', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ display_name: student.display_name, class_name: student.class_name }),
-            });
-            if (reReg.ok) {
-              const newStudent = await reReg.json();
-              localStorage.setItem('classquiz_student', JSON.stringify(newStudent));
-              const retryJoin = await fetch(`/api/sessions/${code}/join`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ student_id: newStudent.id }),
-              });
-              if (retryJoin.ok) console.log('[StudentQuiz] join OK after re-register');
-            }
-          }
-        } else {
-          console.log('[StudentQuiz] join OK');
-        }
-      } catch (err) {
-        console.error('[StudentQuiz] error:', err);
-        setError('Не удалось загрузить тест. Проверьте код сессии и попробуйте снова.');
-      } finally { setIsLoading(false); }
-    };
-    fetchQuizData();
-    return () => clearTimers();
-  }, [code, navigate, student]);
+      }
+    }
+  };
 
   useEffect(() => {
     if (quizData && !isSubmitted) startTimer();
@@ -203,7 +210,7 @@ const StudentQuiz: React.FC = () => {
   }, [quizData, isSubmitted, showExplanation, currentQuestionIndex, shuffleOrder, selectedOption]);
 
   const submitQuiz = useCallback(async () => {
-    if (!quizData || !student || !sessionData) return;
+    if (!quizData || !studentIdRef.current || !sessionData) return;
     clearTimers();
     try {
       setIsLoading(true);
@@ -222,7 +229,7 @@ const StudentQuiz: React.FC = () => {
           total_questions: quizData.questions.length,
           answers: answerItems,
           session_id: sessionData.id,
-          student_id: student.id,
+          student_id: studentIdRef.current,
         }),
       });
       if (!response.ok) {
@@ -234,7 +241,7 @@ const StudentQuiz: React.FC = () => {
       setError('Не удалось отправить результаты. Пожалуйста, попробуйте снова.');
       setIsLoading(false);
     } finally { setIsLoading(false); }
-  }, [quizData, student, sessionData, answers]);
+  }, [quizData, sessionData, answers]);
 
   if (isLoading && !quizData) {
     return (
