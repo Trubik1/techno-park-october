@@ -27,6 +27,9 @@ with engine.connect() as conn:
     if row and 'is_public' not in row[0]:
         conn.execute(text("ALTER TABLE quizzes ADD COLUMN is_public BOOLEAN DEFAULT 0"))
         conn.commit()
+    # Обновляем is_public для сидированных тестов
+    conn.execute(text("UPDATE quizzes SET is_public = 1 WHERE title IN ('Древние люди на территории Беларуси', 'Полоцкое и Туровское княжества') AND (is_public IS NULL OR is_public = 0)"))
+    conn.commit()
     # Добавляем total_questions в results, если нет
     cursor2 = conn.execute(text("SELECT sql FROM sqlite_master WHERE type='table' AND name='results'"))
     row2 = cursor2.fetchone()
