@@ -23,18 +23,23 @@ from app.db.database import SessionLocal
 from app.crud import BASE_QUIZ_TITLE
 from app import models
 
-_db = SessionLocal()
-try:
-    exists = _db.query(models.Quiz).filter(models.Quiz.title == BASE_QUIZ_TITLE).first()
-    if not exists:
-        from seed_quiz_b1v1 import seed
-        seed()
-        print("Base quiz auto-seeded on startup")
-    else:
-        qc = _db.query(models.Question).filter(models.Question.quiz_id == exists.id).count()
-        print(f"Base quiz already present ({qc} questions)")
-finally:
-    _db.close()
+def _ensure_seed(title, module_name):
+    _db = SessionLocal()
+    try:
+        exists = _db.query(models.Quiz).filter(models.Quiz.title == title).first()
+        if not exists:
+            import importlib
+            mod = importlib.import_module(module_name)
+            mod.seed()
+            print(f"Quiz auto-seeded on startup: {title}")
+        else:
+            qc = _db.query(models.Question).filter(models.Question.quiz_id == exists.id).count()
+            print(f"Quiz already present: {title} ({qc} questions)")
+    finally:
+        _db.close()
+
+_ensure_seed(BASE_QUIZ_TITLE, "seed_quiz_b1v1")
+_ensure_seed("Полоцкое и Туровское княжества", "seed_quiz_b2")
 
 # Включаем API роутер
 app.include_router(api_router, prefix="/api")
