@@ -13,13 +13,14 @@ interface QuizHistoryItem {
 }
 
 const StudentHistory: React.FC = () => {
-  const { student } = useStudent();
+  const { student, isLoading: isStudentLoading } = useStudent();
   const navigate = useNavigate();
   const [history, setHistory] = useState<QuizHistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (isStudentLoading) return;
     if (!student) { navigate('/student/entry'); return; }
     const loadHistory = async () => {
       try {
@@ -40,9 +41,9 @@ const StudentHistory: React.FC = () => {
       } finally { setIsLoading(false); }
     };
     loadHistory();
-  }, [student, navigate]);
+  }, [student, navigate, isStudentLoading]);
 
-  if (isLoading && history.length === 0) {
+  if ((isLoading || isStudentLoading) && history.length === 0) {
     return (
       <div className="page-container flex items-center justify-center">
         <div className="text-center animate-fadeIn">

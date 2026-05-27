@@ -13,6 +13,7 @@ interface StudentContextType {
   loadStudent: () => Promise<void>;
   clearStudent: () => void;
   isRegistered: boolean;
+  isLoading: boolean;
 }
 
 const StudentContext = createContext<StudentContextType | null>(null);
@@ -20,6 +21,7 @@ const StudentContext = createContext<StudentContextType | null>(null);
 export const StudentProvider = ({ children }: { children: React.ReactNode }) => {
   const [student, setStudent] = useState<Student | null>(null);
   const [isRegistered, setIsRegistered] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Загрузка студента из localStorage при монтировании компонента
   const loadStudent = useCallback(async () => {
@@ -34,6 +36,8 @@ export const StudentProvider = ({ children }: { children: React.ReactNode }) => 
       console.error('Error loading student from localStorage:', error);
       setStudent(null);
       setIsRegistered(false);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -90,7 +94,8 @@ export const StudentProvider = ({ children }: { children: React.ReactNode }) => 
     registerStudent,
     loadStudent,
     clearStudent,
-    isRegistered
+    isRegistered,
+    isLoading,
   };
 
   return (
