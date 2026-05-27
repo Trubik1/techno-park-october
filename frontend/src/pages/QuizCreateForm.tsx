@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { downloadCsv } from '../utils/csvExport';
 
@@ -28,6 +28,18 @@ const QuizCreateForm: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [existingSubjects, setExistingSubjects] = useState<string[]>([]);
+  const [showSubjectDropdown, setShowSubjectDropdown] = useState(false);
+
+  useEffect(() => {
+    const teacherData = localStorage.getItem('classquiz_teacher');
+    if (!teacherData) return;
+    const teacher = JSON.parse(teacherData);
+    fetch('/api/quizzes/').then(r => r.json()).then((all: any[]) => {
+      const subs = [...new Set(all.filter(q => q.teacher_id === teacher.id).map(q => q.subject))].sort();
+      setExistingSubjects(subs);
+    }).catch(() => {});
+  }, []);
 
   const genId = () => Date.now() + Math.random();
 
@@ -184,8 +196,24 @@ const QuizCreateForm: React.FC = () => {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="label">Предмет</label>
-                  <input type="text" value={subject} onChange={e => { setSubject(e.target.value); setErrors(prev => ({ ...prev, subject: undefined })); }} placeholder="Например: Математика" className={`input ${errors.subject ? 'input-error' : ''}`} />
+                  <label className="label">Предмет (вкладка)</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={subject}
+                      onChange={e => { setSubject(e.target.value); setErrors(prev => ({ ...prev, subject: undefined })); }}
+                      onFocus={() => setShowSubjectDropdown(true)}
+                      onBlur={() => setTimeout(() => setShowSubjectDropdown(false), 200)}
+                      placeholder="Например: История Беларуси"
+                      className={`input ${errors.subject ? 'input-error' : ''}`}
+                      list="subjects-list"
+                    />
+                    <datalist id="subjects-list">
+                      {existingSubjects.filter(s => s !== subject).map(s => (
+                        <option key={s} value={s} />
+                      ))}
+                    </datalist>
+                  </div>
                   {errors.subject && <p className="error-text mt-1">{errors.subject}</p>}
                 </div>
                 <div>

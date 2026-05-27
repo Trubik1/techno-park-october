@@ -195,7 +195,7 @@ def seed(destructive=False):
         id=uuid.uuid4(),
         title=TITLE,
         subject="История Беларуси",
-        grade="11",
+        grade="9",
         teacher_id=teacher.id,
         created_at=datetime.now(timezone.utc)
     )

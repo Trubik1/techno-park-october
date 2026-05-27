@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface QuizImportPreview {
@@ -20,6 +20,17 @@ const QuizImportForm: React.FC = () => {
   const [isImporting, setIsImporting] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [importSuccess, setImportSuccess] = useState(false);
+  const [existingSubjects, setExistingSubjects] = useState<string[]>([]);
+
+  useEffect(() => {
+    const teacherData = localStorage.getItem('classquiz_teacher');
+    if (!teacherData) return;
+    const teacher = JSON.parse(teacherData);
+    fetch('/api/quizzes/').then(r => r.json()).then((all: any[]) => {
+      const subs = [...new Set(all.filter(q => q.teacher_id === teacher.id).map(q => q.subject))].sort();
+      setExistingSubjects(subs);
+    }).catch(() => {});
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -86,8 +97,13 @@ const QuizImportForm: React.FC = () => {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="label">Предмет</label>
-                  <input type="text" value={quizSubject} onChange={(e) => setQuizSubject(e.target.value)} placeholder="Например: Математика" className="input" />
+                  <label className="label">Предмет (вкладка)</label>
+                  <input type="text" value={quizSubject} onChange={(e) => setQuizSubject(e.target.value)} placeholder="Например: История Беларуси" className="input" list="subjects-import-list" />
+                  <datalist id="subjects-import-list">
+                    {existingSubjects.filter(s => s !== quizSubject).map(s => (
+                      <option key={s} value={s} />
+                    ))}
+                  </datalist>
                 </div>
                 <div>
                   <label className="label">Класс</label>

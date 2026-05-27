@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserMenu from '../components/UserMenu';
 import BackButton from '../components/BackButton';
@@ -19,6 +19,7 @@ const TeacherDashboard: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [startingId, setStartingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [activeSubject, setActiveSubject] = useState<string | null>(null);
 
   const loadQuizzes = useCallback(async () => {
     try {
@@ -37,6 +38,15 @@ const TeacherDashboard: React.FC = () => {
   }, [navigate]);
 
   useEffect(() => { loadQuizzes(); }, [loadQuizzes]);
+
+  const subjects = useMemo(() => {
+    const unique = [...new Set(quizzes.map(q => q.subject))].sort();
+    return unique;
+  }, [quizzes]);
+
+  const filteredQuizzes = activeSubject
+    ? quizzes.filter(q => q.subject === activeSubject)
+    : quizzes;
 
   if (isLoading && quizzes.length === 0) {
     return (
@@ -95,10 +105,31 @@ const TeacherDashboard: React.FC = () => {
           </div>
         ) : (
           <div className="p-6">
-            <h2 className="text-xl font-bold text-text-primary mb-4">Мои тесты</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-text-primary">Мои тесты</h2>
+              {subjects.length > 0 && (
+                <div className="flex gap-1 flex-wrap">
+                  <button
+                    onClick={() => setActiveSubject(null)}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${activeSubject === null ? 'bg-primary text-white shadow-md shadow-primary/30' : 'bg-gray-100 dark:bg-gray-700 text-text-secondary hover:bg-gray-200 dark:hover:bg-gray-600'}`}
+                  >
+                    Все
+                  </button>
+                  {subjects.map(s => (
+                    <button
+                      key={s}
+                      onClick={() => setActiveSubject(s)}
+                      className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${activeSubject === s ? 'bg-primary text-white shadow-md shadow-primary/30' : 'bg-gray-100 dark:bg-gray-700 text-text-secondary hover:bg-gray-200 dark:hover:bg-gray-600'}`}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <div className="grid gap-4">
-              {quizzes.map((quiz, index) => (
-                <div key={quiz.id} className="card-hover border border-gray-100 animate-slideUp" style={{ animationDelay: `${index * 0.1}s` }}>
+              {filteredQuizzes.map((quiz, index) => (
+                <div key={quiz.id} className="card-hover border border-gray-100 animate-slideUp hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300" style={{ animationDelay: `${index * 0.1}s` }}>
                   <div className="p-5">
                     <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-3">
                       <div className="flex-1 min-w-0">
