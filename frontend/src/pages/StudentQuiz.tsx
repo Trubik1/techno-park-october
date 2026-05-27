@@ -37,6 +37,8 @@ const OPTION_COLORS = [
 
 const CORRECT_COLOR = 'bg-green-500';
 const WRONG_COLOR = 'bg-red-500';
+const WRONG_SELECTED_COLOR = 'bg-red-700';
+const WRONG_OTHER_COLOR = 'bg-red-400';
 
 function shuffleArray<T>(arr: T[]): T[] {
   const shuffled = [...arr];
@@ -299,23 +301,29 @@ const StudentQuiz: React.FC = () => {
               } else if (isCorrect) {
                 bgClass = CORRECT_COLOR;
               } else if (isSelected) {
-                bgClass = WRONG_COLOR;
+                bgClass = WRONG_SELECTED_COLOR;
+                badgeClass = 'bg-white/25 text-white';
               } else {
-                bgClass = 'bg-gray-400 dark:bg-gray-600';
-                badgeClass = 'bg-white/10 text-white/70';
+                bgClass = WRONG_OTHER_COLOR;
+                badgeClass = 'bg-white/15 text-white/80';
               }
 
               const borderClass = isSelected && !showResult ? color.border
                 : showResult && isCorrect ? 'border-green-500'
-                : showResult && isSelected && !isCorrect ? 'border-red-500'
+                : showResult && isSelected && !isCorrect ? 'border-red-700'
+                : showResult && !isSelected && !isCorrect ? 'border-red-400'
                 : 'border-transparent';
+
+              const extraRing = isSelected && !showResult ? 'ring-2 ring-white/50'
+                : showResult && isSelected && !isCorrect ? 'ring-2 ring-red-300'
+                : '';
 
               return (
                 <button
                   key={opt.originalKey}
                   onClick={() => handleAnswerSelect(opt.originalKey)}
                   disabled={isSubmitted || showExplanation}
-                  className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 ${bgClass} ${borderClass} disabled:cursor-default active:scale-[0.99] text-white hover:brightness-110 ${isSelected && !showResult ? 'ring-2 ring-white/50' : ''}`}
+                  className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 ${bgClass} ${borderClass} disabled:cursor-default active:scale-[0.99] text-white hover:brightness-110 ${extraRing}`}
                 >
                   <div className="flex items-start gap-3">
                     <span className={`flex items-center justify-center w-8 h-8 rounded-lg text-sm font-bold shrink-0 ${badgeClass}`}>
@@ -354,7 +362,7 @@ const StudentQuiz: React.FC = () => {
           {!showExplanation && !isSubmitted && currentQuestionIndex < quizData.questions.length - 1 && (
             <div className="mt-6 flex justify-between">
               {currentQuestionIndex > 0 && (
-                <button onClick={() => { clearTimers(); setCurrentQuestionIndex(prev => prev - 1); setShowExplanation(false); startTimer(); }} className="btn-secondary btn-sm">
+                <button onClick={() => { clearTimers(); setCurrentQuestionIndex(prev => prev - 1); setShowExplanation(false); setSelectedOption(null); startTimer(); }} className="btn-secondary btn-sm">
                   ← Назад
                 </button>
               )}
