@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+interface QuestionPreview {
+  text: string; opt_a: string; opt_b: string; opt_c: string; opt_d: string; correct: string; explanation: string | null;
+}
+
 interface QuizImportPreview {
-  success: boolean;
-  message: string;
-  questions_count: number;
-  questions: { text: string; opt_a: string; opt_b: string; opt_c: string; opt_d: string; correct: string; explanation: string | null; }[];
-  errors: string[];
+  success: boolean; message: string; questions_count: number;
+  questions: QuestionPreview[]; errors: string[];
 }
 
 const QuizImportForm: React.FC = () => {
@@ -14,6 +15,7 @@ const QuizImportForm: React.FC = () => {
   const [quizTitle, setQuizTitle] = useState('');
   const [quizSubject, setQuizSubject] = useState('');
   const [quizGrade, setQuizGrade] = useState('');
+  const [isPublic, setIsPublic] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewData, setPreviewData] = useState<QuizImportPreview | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -40,42 +42,50 @@ const QuizImportForm: React.FC = () => {
     }
   };
 
-  const handleQuizChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    if (name === 'title') setQuizTitle(value);
-    else if (name === 'subject') setQuizSubject(value);
-    else if (name === 'grade') setQuizGrade(value);
-    setPreviewData(null);
-  };
-
   const handlePreview = async () => {
     if (!selectedFile) { setUploadError('Пожалуйста, выберите файл для загрузки'); return; }
     if (!quizTitle.trim() || !quizSubject.trim() || !quizGrade.trim()) { setUploadError('Пожалуйста, заполните все поля метаданных теста'); return; }
     setIsUploading(true);
     setUploadError(null);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    const mockPreview: QuizImportPreview = {
-      success: true, message: 'Успешно предварительно просмотрено 5 вопросов', questions_count: 5,
-      questions: [
-        { text: 'Какой оператор используется для присваивания значения переменной в Python?', opt_a: '=', opt_b: '==', opt_c: '===', opt_d: ':=', correct: 'a', explanation: 'Оператор = используется для присваивания, == для сравнения равенства' },
-        { text: 'Какой тип данных используется для хранения целочисленных значений в Python?', opt_a: 'int', opt_b: 'float', opt_c: 'str', opt_d: 'bool', correct: 'a', explanation: 'int - для целых чисел' },
-        { text: 'Как создать пустой список в Python?', opt_a: '[]', opt_b: '{}', opt_c: '()', opt_d: '<>', correct: 'a', explanation: 'Квадратные скобки [] создают пустой список' },
-        { text: 'Какое ключевое слово используется для определения функции в Python?', opt_a: 'function', opt_b: 'def', opt_c: 'func', opt_d: 'define', correct: 'b', explanation: 'def - ключевое слово для определения функций' },
-        { text: 'Какой оператор используется для возведения в степень в Python?', opt_a: '^', opt_b: '**', opt_c: '//', opt_d: '%', correct: 'b', explanation: '** - оператор возведения в степень' },
-      ], errors: []
-    };
-    setPreviewData(mockPreview);
-    setIsUploading(false);
+    try {
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('title', quizTitle.trim());
+      formData.append('subject', quizSubject.trim());
+      formData.append('grade', quizGrade.trim());
+      const res = await fetch('/api/import/preview/', { method: 'POST', body: formData });
+      if (!res.ok) { const err = await res.json(); throw new Error(err.detail || 'Ошибка предпросмотра'); }
+      setPreviewData(await res.json());
+    } catch (err: any) {
+      setUploadError(err.message || 'Ошибка загрузки файла');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleConfirmImport = async () => {
     if (!previewData || !previewData.success) { setUploadError('Невозможно импортировать тест без успешного предварительного просмотра'); return; }
     setIsImporting(true);
     setUploadError(null);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setImportSuccess(true);
-    setTimeout(() => navigate('/teacher/dashboard'), 2000);
-    setIsImporting(false);
+    try {
+      const teacherData = localStorage.getItem('classquiz_teacher');
+      if (!teacherData) { navigate('/teacher/login'); return; }
+      const teacher = JSON.parse(teacherData);
+
+      const quizPayload = { title: quizTitle.trim(), subject: quizSubject.trim(), grade: quizGrade.trim(), is_public: isPublic };
+      const res = await fetch(`/api/import/confirm/?teacher_id=${teacher.id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quiz_data: quizPayload, questions: previewData.questions }),
+      });
+      if (!res.ok) { const err = await res.json(); throw new Error(err.detail || 'Ошибка импорта'); }
+      setImportSuccess(true);
+      setTimeout(() => navigate('/teacher/dashboard'), 2000);
+    } catch (err: any) {
+      setUploadError(err.message || 'Ошибка импорта');
+    } finally {
+      setIsImporting(false);
+    }
   };
 
   return (
@@ -89,7 +99,7 @@ const QuizImportForm: React.FC = () => {
         </div>
 
         <div className="p-6 md:p-8">
-          <form className="space-y-6">
+          <form className="space-y-6" onSubmit={e => { e.preventDefault(); handlePreview(); }}>
             <div className="space-y-4">
               <div>
                 <label className="label">Название теста</label>
@@ -112,6 +122,10 @@ const QuizImportForm: React.FC = () => {
                     {['8', '9', '10', '11'].map(g => <option key={g} value={g}>{g} класс</option>)}
                   </select>
                 </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <input type="checkbox" id="is-public-import" checked={isPublic} onChange={e => setIsPublic(e.target.checked)} className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
+                <label htmlFor="is-public-import" className="text-sm text-text-secondary cursor-pointer select-none">Сделать тест публичным (доступен всем учителям)</label>
               </div>
             </div>
 
@@ -137,7 +151,7 @@ const QuizImportForm: React.FC = () => {
                 {uploadError && <div className="error-box"><p className="error-text">{uploadError}</p></div>}
                 {!isUploading && selectedFile && !previewData && (
                   <div className="flex justify-end">
-                    <button type="button" onClick={handlePreview} className="btn-primary">Предварительный просмотр</button>
+                    <button type="submit" className="btn-primary">Предварительный просмотр</button>
                   </div>
                 )}
                 {isUploading && (
@@ -200,7 +214,7 @@ const QuizImportForm: React.FC = () => {
 
             {!previewData && (
               <div className="pt-6 border-t border-gray-100">
-                <button type="button" disabled={isUploading || !selectedFile || !quizTitle.trim() || !quizSubject.trim() || !quizGrade.trim()} onClick={handlePreview} className="btn-primary w-full">
+                <button type="submit" disabled={isUploading || !selectedFile || !quizTitle.trim() || !quizSubject.trim() || !quizGrade.trim()} className="btn-primary w-full">
                   {isUploading ? 'Загрузка...' : 'Выполнить предварительный просмотр'}
                 </button>
                 <p className="mt-2 text-xs text-text-secondary/60">Все поля обязательны для заполнения</p>

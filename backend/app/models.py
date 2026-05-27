@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, CheckConstraint, Uuid, UniqueConstraint
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text, Boolean, CheckConstraint, Uuid, UniqueConstraint
 from sqlalchemy.orm import relationship
 import uuid
 from datetime import datetime, timezone
@@ -34,6 +34,7 @@ class Quiz(Base):
     grade = Column(String(50), nullable=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     teacher_id = Column(Uuid(as_uuid=True), ForeignKey("teachers.id"), nullable=False)
+    is_public = Column(Boolean, default=False)
 
     teacher = relationship("Teacher", back_populates="quizzes")
     questions = relationship("Question", back_populates="quiz", cascade="all, delete-orphan")

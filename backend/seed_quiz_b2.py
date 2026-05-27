@@ -178,7 +178,8 @@ def seed(destructive=False):
         subject="История Беларуси",
         grade="9",
         teacher_id=teacher.id,
-        created_at=datetime.now(timezone.utc)
+        created_at=datetime.now(timezone.utc),
+        is_public=True,
     )
     db.add(quiz)
     db.commit()

@@ -4,22 +4,21 @@ import UserMenu from '../components/UserMenu';
 import BackButton from '../components/BackButton';
 
 interface Quiz {
-  id: string;
-  title: string;
-  subject: string;
-  grade: string;
-  teacher_id: string;
-  created_at: string;
-  question_count: number;
+  id: string; title: string; subject: string; grade: string;
+  teacher_id: string; teacher_name: string; created_at: string;
+  question_count: number; is_public: boolean;
 }
 
 const TeacherDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+  const [myQuizzes, setMyQuizzes] = useState<Quiz[]>([]);
+  const [publicQuizzes, setPublicQuizzes] = useState<Quiz[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [startingId, setStartingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeSubject, setActiveSubject] = useState<string | null>(null);
+  const [tab, setTab] = useState<'my' | 'public'>('my');
+  const [teacherId, setTeacherId] = useState<string | null>(null);
 
   const loadQuizzes = useCallback(async () => {
     try {
@@ -28,10 +27,19 @@ const TeacherDashboard: React.FC = () => {
       const teacherData = localStorage.getItem('classquiz_teacher');
       if (!teacherData) { navigate('/teacher/login'); return; }
       const teacher = JSON.parse(teacherData);
-      const res = await fetch('/api/quizzes/');
-      if (!res.ok) throw new Error('Ошибка загрузки');
-      const all: Quiz[] = await res.json();
-      setQuizzes(all.filter(q => q.teacher_id === teacher.id));
+      setTeacherId(teacher.id);
+
+      const [myRes, publicRes] = await Promise.all([
+        fetch(`/api/quizzes/?teacher_id=${teacher.id}`),
+        fetch('/api/quizzes/?public=true'),
+      ]);
+      if (!myRes.ok || !publicRes.ok) throw new Error('Ошибка загрузки');
+
+      const myData: Quiz[] = await myRes.json();
+      const publicData: Quiz[] = await publicRes.json();
+
+      setMyQuizzes(myData);
+      setPublicQuizzes(publicData.filter(q => q.teacher_id !== teacher.id));
     } catch {
       setError('Не удалось загрузить список тестов.');
     } finally { setIsLoading(false); }
@@ -40,15 +48,24 @@ const TeacherDashboard: React.FC = () => {
   useEffect(() => { loadQuizzes(); }, [loadQuizzes]);
 
   const subjects = useMemo(() => {
-    const unique = [...new Set(quizzes.map(q => q.subject))].sort();
-    return unique;
-  }, [quizzes]);
+    return [...new Set(myQuizzes.map(q => q.subject))].sort();
+  }, [myQuizzes]);
 
-  const filteredQuizzes = activeSubject
-    ? quizzes.filter(q => q.subject === activeSubject)
-    : quizzes;
+  const filteredMyQuizzes = activeSubject
+    ? myQuizzes.filter(q => q.subject === activeSubject)
+    : myQuizzes;
 
-  if (isLoading && quizzes.length === 0) {
+  const publicSubjects = useMemo(() => {
+    return [...new Set(publicQuizzes.map(q => q.subject))].sort();
+  }, [publicQuizzes]);
+
+  const [publicSubject, setPublicSubject] = useState<string | null>(null);
+
+  const filteredPublicQuizzes = publicSubject
+    ? publicQuizzes.filter(q => q.subject === publicSubject)
+    : publicQuizzes;
+
+  if (isLoading && myQuizzes.length === 0 && publicQuizzes.length === 0) {
     return (
       <div className="page-container flex items-center justify-center">
         <div className="text-center animate-fadeIn">
@@ -96,45 +113,111 @@ const TeacherDashboard: React.FC = () => {
               </button>
             </div>
           </div>
+          <div className="flex gap-1 mt-4">
+            <button onClick={() => setTab('my')} className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${tab === 'my' ? 'bg-white/20 text-white' : 'text-white/60 hover:text-white hover:bg-white/10'}`}>
+              Мои тесты
+            </button>
+            <button onClick={() => setTab('public')} className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${tab === 'public' ? 'bg-white/20 text-white' : 'text-white/60 hover:text-white hover:bg-white/10'}`}>
+              Общие тесты {publicQuizzes.length > 0 && <span className="ml-1 text-xs bg-white/20 px-1.5 py-0.5 rounded-full">{publicQuizzes.length}</span>}
+            </button>
+          </div>
         </div>
 
-        {quizzes.length === 0 ? (
+        {tab === 'my' && myQuizzes.length === 0 && (
           <div className="p-8 text-center animate-fadeIn">
             <p className="text-text-secondary">У вас пока нет созданных тестов.</p>
             <p className="mt-2 text-sm text-text-secondary/60">Нажмите кнопку выше, чтобы создать первый тест или импортировать его из файла.</p>
           </div>
-        ) : (
+        )}
+
+        {tab === 'public' && publicQuizzes.length === 0 && (
+          <div className="p-8 text-center animate-fadeIn">
+            <p className="text-text-secondary">Публичных тестов от других учителей пока нет.</p>
+            <p className="mt-2 text-sm text-text-secondary/60">Создайте тест и сделайте его публичным, чтобы он появился здесь.</p>
+          </div>
+        )}
+
+        {(tab === 'my' && myQuizzes.length > 0) && (
           <div className="p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-text-primary">Мои тесты</h2>
               {subjects.length > 0 && (
                 <div className="flex gap-1 flex-wrap">
-                  <button
-                    onClick={() => setActiveSubject(null)}
-                    className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${activeSubject === null ? 'bg-primary text-white shadow-md shadow-primary/30' : 'bg-gray-100 dark:bg-gray-700 text-text-secondary hover:bg-gray-200 dark:hover:bg-gray-600'}`}
-                  >
-                    Все
-                  </button>
+                  <button onClick={() => setActiveSubject(null)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${activeSubject === null ? 'bg-primary text-white shadow-md shadow-primary/30' : 'bg-gray-100 dark:bg-gray-700 text-text-secondary hover:bg-gray-200 dark:hover:bg-gray-600'}`}>Все</button>
                   {subjects.map(s => (
-                    <button
-                      key={s}
-                      onClick={() => setActiveSubject(s)}
-                      className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${activeSubject === s ? 'bg-primary text-white shadow-md shadow-primary/30' : 'bg-gray-100 dark:bg-gray-700 text-text-secondary hover:bg-gray-200 dark:hover:bg-gray-600'}`}
-                    >
-                      {s}
-                    </button>
+                    <button key={s} onClick={() => setActiveSubject(s)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${activeSubject === s ? 'bg-primary text-white shadow-md shadow-primary/30' : 'bg-gray-100 dark:bg-gray-700 text-text-secondary hover:bg-gray-200 dark:hover:bg-gray-600'}`}>{s}</button>
                   ))}
                 </div>
               )}
             </div>
             <div className="grid gap-4">
-              {filteredQuizzes.map((quiz, index) => (
+              {filteredMyQuizzes.map((quiz, index) => (
                 <div key={quiz.id} className="card-hover border border-gray-100 animate-slideUp hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300" style={{ animationDelay: `${index * 0.1}s` }}>
                   <div className="p-5">
                     <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-3">
                       <div className="flex-1 min-w-0">
                         <h3 className="text-lg font-semibold text-text-primary truncate">{quiz.title}</h3>
                         <p className="text-sm text-text-secondary"><span className="font-medium">{quiz.subject}</span> • {quiz.grade} класс</p>
+                      </div>
+                      <span className="px-3 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary shrink-0">{quiz.question_count} вопросов</span>
+                    </div>
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                      <div className="flex items-center gap-2 text-sm text-text-secondary/60">
+                        <span>Создан: {new Date(quiz.created_at).toLocaleDateString('ru-RU', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+                        {quiz.is_public && <span className="px-2 py-0.5 text-xs rounded-full bg-success/10 text-success">Публичный</span>}
+                      </div>
+                      <div className="flex gap-2 w-full sm:w-auto">
+                        <button
+                          onClick={async () => {
+                            setStartingId(quiz.id);
+                            try {
+                              const res = await fetch(`/api/sessions/?quiz_id=${quiz.id}`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ status: 'active' }),
+                              });
+                              if (!res.ok) { setError('Не удалось создать сессию'); return; }
+                              const session = await res.json();
+                              navigate(`/teacher/dashboard/session/${session.code}`);
+                            } catch {
+                              setError('Не удалось создать сессию');
+                            } finally { setStartingId(null); }
+                          }}
+                          disabled={startingId !== null}
+                          className="btn-sm btn-success flex-1 sm:flex-none disabled:opacity-50"
+                        >
+                          {startingId === quiz.id ? 'Запуск...' : '▶ Запустить'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {tab === 'public' && publicQuizzes.length > 0 && (
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-text-primary">Общие тесты</h2>
+              {publicSubjects.length > 0 && (
+                <div className="flex gap-1 flex-wrap">
+                  <button onClick={() => setPublicSubject(null)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${publicSubject === null ? 'bg-primary text-white shadow-md shadow-primary/30' : 'bg-gray-100 dark:bg-gray-700 text-text-secondary hover:bg-gray-200 dark:hover:bg-gray-600'}`}>Все</button>
+                  {publicSubjects.map(s => (
+                    <button key={s} onClick={() => setPublicSubject(s)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${publicSubject === s ? 'bg-primary text-white shadow-md shadow-primary/30' : 'bg-gray-100 dark:bg-gray-700 text-text-secondary hover:bg-gray-200 dark:hover:bg-gray-600'}`}>{s}</button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="grid gap-4">
+              {filteredPublicQuizzes.map((quiz, index) => (
+                <div key={quiz.id} className="card-hover border border-gray-100 animate-slideUp hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300" style={{ animationDelay: `${index * 0.1}s` }}>
+                  <div className="p-5">
+                    <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-3">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg font-semibold text-text-primary truncate">{quiz.title}</h3>
+                        <p className="text-sm text-text-secondary"><span className="font-medium">{quiz.subject}</span> • {quiz.grade} класс • <span className="text-text-secondary/60">Автор: {quiz.teacher_name}</span></p>
                       </div>
                       <span className="px-3 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary shrink-0">{quiz.question_count} вопросов</span>
                     </div>

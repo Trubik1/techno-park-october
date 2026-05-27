@@ -39,6 +39,7 @@ class QuizBase(BaseModel):
     title: str = Field(..., min_length=1, max_length=200)
     subject: str = Field(..., min_length=1, max_length=100)
     grade: str = Field(..., min_length=1, max_length=50)
+    is_public: bool = False
 
 class QuizCreate(QuizBase):
     pass
@@ -48,7 +49,8 @@ class QuizResponse(QuizBase):
     teacher_id: uuid.UUID
     question_count: int = 0
     created_at: datetime
-    
+    teacher_name: str = ""
+
     class Config:
         from_attributes = True
 

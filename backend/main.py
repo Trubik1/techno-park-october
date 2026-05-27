@@ -18,6 +18,22 @@ app.add_middleware(
 # Создаём таблицы БД при старте
 Base.metadata.create_all(bind=engine)
 
+# Простая миграция для добавления колонок, которых может не быть в старой БД
+from sqlalchemy import text
+with engine.connect() as conn:
+    # Добавляем is_public в quizzes, если нет
+    cursor = conn.execute(text("SELECT sql FROM sqlite_master WHERE type='table' AND name='quizzes'"))
+    row = cursor.fetchone()
+    if row and 'is_public' not in row[0]:
+        conn.execute(text("ALTER TABLE quizzes ADD COLUMN is_public BOOLEAN DEFAULT 0"))
+        conn.commit()
+    # Добавляем total_questions в results, если нет
+    cursor2 = conn.execute(text("SELECT sql FROM sqlite_master WHERE type='table' AND name='results'"))
+    row2 = cursor2.fetchone()
+    if row2 and 'total_questions' not in row2[0]:
+        conn.execute(text("ALTER TABLE results ADD COLUMN total_questions INTEGER DEFAULT 0"))
+        conn.commit()
+
 # Авто-сидирование базового теста при пустой БД
 from app.db.database import SessionLocal
 from app.crud import BASE_QUIZ_TITLE

@@ -155,4 +155,7 @@ def confirm_quiz_import(
     
     # Обновляем объект теста, чтобы включить вопросы (опционально)
     db.refresh(db_quiz)
-    return db_quiz
+    d = {c.name: getattr(db_quiz, c.name) for c in db_quiz.__table__.columns}
+    d['question_count'] = len(db_quiz.questions) if hasattr(db_quiz, 'questions') else 0
+    d['teacher_name'] = db_quiz.teacher.name if db_quiz.teacher else ""
+    return schemas.QuizResponse(**d)

@@ -93,7 +93,8 @@ def clone_base_quiz_for_teacher(db: Session, teacher_id: uuid.UUID):
         subject=base_quiz.subject,
         grade=base_quiz.grade,
         teacher_id=teacher_id,
-        created_at=datetime.now(timezone.utc)
+        created_at=datetime.now(timezone.utc),
+        is_public=False,
     )
     db.add(clone)
     db.flush()
@@ -116,7 +117,8 @@ def create_quiz(db: Session, quiz: schemas.QuizCreate, teacher_id: uuid.UUID):
         title=quiz.title,
         subject=quiz.subject,
         grade=quiz.grade,
-        teacher_id=teacher_id
+        teacher_id=teacher_id,
+        is_public=quiz.is_public
     )
     db.add(db_quiz)
     db.commit()

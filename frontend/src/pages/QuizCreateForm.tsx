@@ -28,6 +28,7 @@ const QuizCreateForm: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [isPublic, setIsPublic] = useState(false);
   const [existingSubjects, setExistingSubjects] = useState<string[]>([]);
   const [showSubjectDropdown, setShowSubjectDropdown] = useState(false);
 
@@ -126,7 +127,7 @@ const QuizCreateForm: React.FC = () => {
       const quizRes = await fetch(`/api/quizzes/?teacher_id=${teacher.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: title.trim(), subject: subject.trim(), grade: grade.trim() }),
+        body: JSON.stringify({ title: title.trim(), subject: subject.trim(), grade: grade.trim(), is_public: isPublic }),
       });
       if (!quizRes.ok) throw new Error('Не удалось создать тест');
       const quiz = await quizRes.json();
@@ -229,6 +230,10 @@ const QuizCreateForm: React.FC = () => {
                 <label className="label">Количество вопросов</label>
                 <input type="number" value={questionCount} onChange={e => setQuestionCount(parseInt(e.target.value) || 10)} min={1} max={100} className="input" />
                 {errors.questionCount && <p className="error-text mt-1">{errors.questionCount}</p>}
+              </div>
+              <div className="flex items-center gap-3">
+                <input type="checkbox" id="is-public" checked={isPublic} onChange={e => setIsPublic(e.target.checked)} className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
+                <label htmlFor="is-public" className="text-sm text-text-secondary cursor-pointer select-none">Сделать тест публичным (доступен всем учителям)</label>
               </div>
               <div className="flex gap-3 pt-4">
                 <button onClick={handleStart} className="btn-primary flex-1">Заполнить вопросы ({questionCount} шт.)</button>
