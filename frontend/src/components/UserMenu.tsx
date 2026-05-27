@@ -12,8 +12,10 @@ interface QuizHistoryItem {
 
 const TeacherMenu: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const navigate = useNavigate();
-  const teacherData = localStorage.getItem('classquiz_teacher');
-  const teacher = teacherData ? JSON.parse(teacherData) : null;
+  let teacherData: string | null = null;
+  try { teacherData = localStorage.getItem('classquiz_teacher'); } catch { teacherData = null; }
+  let teacher = null;
+  try { teacher = teacherData ? JSON.parse(teacherData) : null; } catch { teacher = null; }
 
   const handleLogout = () => {
     localStorage.removeItem('classquiz_teacher');
@@ -44,7 +46,7 @@ const StudentMenu: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   useEffect(() => {
     if (student) {
       const saved = localStorage.getItem(`classquiz_history_${student.id}`);
-      if (saved) setHistory(JSON.parse(saved));
+      if (saved) try { setHistory(JSON.parse(saved)); } catch { /* corrupted data */ }
     }
   }, [student]);
 
@@ -147,7 +149,8 @@ const UserMenu: React.FC<UserMenuProps> = ({ role }) => {
   }, []);
 
   const teacherData = localStorage.getItem('classquiz_teacher');
-  const teacher = role === 'teacher' && teacherData ? JSON.parse(teacherData) : null;
+  let teacher = null;
+  try { teacher = role === 'teacher' && teacherData ? JSON.parse(teacherData) : null; } catch { teacher = null; }
 
   const initials = role === 'student'
     ? student?.display_name?.charAt(0)?.toUpperCase() || '?'

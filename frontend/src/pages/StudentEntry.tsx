@@ -46,7 +46,7 @@ const StudentEntry: React.FC = () => {
         return;
       }
       const fullClass = `${group} · ${typeLabels[userType].label}`;
-      const student = await registerStudent(displayName, fullClass);
+      const student = await registerStudent(name, fullClass);
       if (student) {
         navigate('/student/quiz-entry');
       } else {

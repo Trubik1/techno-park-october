@@ -14,11 +14,12 @@ const TeacherLogin: React.FC = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!pin.trim()) {
+    const trimmedPin = pin.trim();
+    if (!trimmedPin) {
       setError('Пожалуйста, введите PIN-код');
       return;
     }
-    if (pin.length < 6) {
+    if (trimmedPin.length < 6) {
       setError('PIN-код должен содержать минимум 6 символов');
       return;
     }
@@ -27,7 +28,7 @@ const TeacherLogin: React.FC = () => {
       const response = await fetch('/api/teachers/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pin: pin.trim() }),
+        body: JSON.stringify({ pin: trimmedPin }),
       });
       if (!response.ok) throw new Error('Неверный PIN-код');
       const teacherData = await response.json();
@@ -43,21 +44,22 @@ const TeacherLogin: React.FC = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!pin.trim()) {
+    const trimmedPin = pin.trim();
+    if (!trimmedPin) {
       setError('Пожалуйста, введите PIN-код');
       return;
     }
-    if (pin.length < 6) {
+    if (trimmedPin.length < 6) {
       setError('PIN-код должен содержать минимум 6 символов');
       return;
     }
-    if (pin !== confirmPin) {
+    if (trimmedPin !== confirmPin.trim()) {
       setError('PIN-коды не совпадают');
       return;
     }
     setIsLoading(true);
     try {
-      const body: Record<string, string> = { pin: pin.trim() };
+      const body: Record<string, string> = { pin: trimmedPin };
       if (name.trim()) body.name = name.trim();
       const response = await fetch('/api/teachers/', {
         method: 'POST',
