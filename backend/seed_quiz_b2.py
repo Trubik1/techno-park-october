@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from app.db.database import SessionLocal
 from app import models
 
-TITLE = "Полоцкое и Туровское княжества"
+TITLE = "Билет 2. Полоцкое и Туровское княжества"
 
 QUESTIONS_DATA = [
     {
@@ -140,7 +140,6 @@ QUESTIONS_DATA = [
 ]
 
 def seed(destructive=False):
-    SessionLocal().close()
     db = SessionLocal()
 
     teacher = db.query(models.Teacher).filter(
@@ -166,6 +165,7 @@ def seed(destructive=False):
         db.query(models.Question).filter(models.Question.quiz_id == quiz.id).delete()
         db.delete(quiz)
         db.commit()
+        quiz = None
 
     if quiz:
         db.query(models.Question).filter(models.Question.quiz_id == quiz.id).delete()
@@ -180,6 +180,8 @@ def seed(destructive=False):
         teacher_id=teacher.id,
         created_at=datetime.now(timezone.utc),
         is_public=True,
+        time_limit_quiz=2700,
+        time_limit_question=30,
     )
     db.add(quiz)
     db.commit()

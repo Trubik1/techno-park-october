@@ -1,6 +1,6 @@
 """
 Idempotent seed script: creates teacher (PIN 123456) and
-quiz "Древние люди на территории Беларуси" (14 questions).
+quiz "Билет 1. Древние люди на территории Беларуси" (14 questions).
 
 Safe to re-run — skips if both teacher and quiz already exist.
 Also exports CSV to ../quizzes/ on first creation.
@@ -14,7 +14,7 @@ from app import models
 pwd = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 PIN = "123456"
-TITLE = "Древние люди на территории Беларуси"
+TITLE = "Билет 1. Древние люди на территории Беларуси"
 
 QUESTIONS_DATA = [
     {
@@ -165,8 +165,7 @@ def seed(destructive=False):
         db.commit()
         db.refresh(teacher)
     else:
-        teacher.pin_hash = pwd.hash(PIN)
-        db.commit()
+        pass
 
     # --- Find or create quiz ---
     quiz = db.query(models.Quiz).filter(
@@ -174,9 +173,10 @@ def seed(destructive=False):
         models.Quiz.teacher_id == teacher.id,
     ).first()
 
-    if quiz and db.query(models.Question).filter(models.Question.quiz_id == quiz.id).count() == 14:
+    expected = len(QUESTIONS_DATA)
+
+    if quiz and db.query(models.Question).filter(models.Question.quiz_id == quiz.id).count() == expected:
         if not destructive:
-            qc = db.query(models.Question).filter(models.Question.quiz_id == quiz.id).count()
             db.close()
             return False  # already exists
 
@@ -184,6 +184,7 @@ def seed(destructive=False):
         db.query(models.Question).filter(models.Question.quiz_id == quiz.id).delete()
         db.delete(quiz)
         db.commit()
+        quiz = None
 
     # Delete partial quiz if exists
     if quiz:
@@ -199,6 +200,8 @@ def seed(destructive=False):
         teacher_id=teacher.id,
         created_at=datetime.now(timezone.utc),
         is_public=True,
+        time_limit_quiz=2700,
+        time_limit_question=30,
     )
     db.add(quiz)
     db.commit()
