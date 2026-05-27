@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface QuestionPreview {
@@ -12,10 +12,15 @@ interface QuizImportPreview {
 
 const QuizImportForm: React.FC = () => {
   const navigate = useNavigate();
+  const navigateTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => () => { if (navigateTimeoutRef.current) clearTimeout(navigateTimeoutRef.current); }, []);
   const [quizTitle, setQuizTitle] = useState('');
   const [quizSubject, setQuizSubject] = useState('');
   const [quizGrade, setQuizGrade] = useState('');
   const [isPublic, setIsPublic] = useState(false);
+  const [timerMode, setTimerMode] = useState<'quiz' | 'question'>('quiz');
+  const [timeLimitQuiz, setTimeLimitQuiz] = useState(45);
+  const [timeLimitQuestion, setTimeLimitQuestion] = useState(30);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewData, setPreviewData] = useState<QuizImportPreview | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -70,9 +75,17 @@ const QuizImportForm: React.FC = () => {
     try {
       const teacherData = localStorage.getItem('classquiz_teacher');
       if (!teacherData) { navigate('/teacher/login'); return; }
-      const teacher = JSON.parse(teacherData);
+      let teacher;
+      try { teacher = JSON.parse(teacherData); } catch { throw new Error('Повреждённые данные учителя'); }
 
-      const quizPayload = { title: quizTitle.trim(), subject: quizSubject.trim(), grade: quizGrade.trim(), is_public: isPublic };
+      const quizPayload: Record<string, any> = { title: quizTitle.trim(), subject: quizSubject.trim(), grade: quizGrade.trim(), is_public: isPublic };
+      if (timerMode === 'quiz') {
+        quizPayload.time_limit_quiz = timeLimitQuiz * 60;
+        quizPayload.time_limit_question = null;
+      } else {
+        quizPayload.time_limit_quiz = null;
+        quizPayload.time_limit_question = timeLimitQuestion;
+      }
       const res = await fetch(`/api/quizzes/import/confirm/?teacher_id=${teacher.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -80,7 +93,7 @@ const QuizImportForm: React.FC = () => {
       });
       if (!res.ok) { const err = await res.json(); throw new Error(err.detail || 'Ошибка импорта'); }
       setImportSuccess(true);
-      setTimeout(() => navigate('/teacher/dashboard'), 2000);
+      navigateTimeoutRef.current = setTimeout(() => navigate('/teacher/dashboard'), 2000);
     } catch (err: any) {
       setUploadError(err.message || 'Ошибка импорта');
     } finally {
@@ -127,12 +140,74 @@ const QuizImportForm: React.FC = () => {
                 <input type="checkbox" id="is-public-import" checked={isPublic} onChange={e => setIsPublic(e.target.checked)} className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
                 <label htmlFor="is-public-import" className="text-sm text-text-secondary cursor-pointer select-none">Сделать тест публичным (доступен всем учителям)</label>
               </div>
+
+              <div className="pt-2 border-t border-gray-100">
+                <label className="label">Ограничение по времени</label>
+                <div className="flex gap-2 mb-3">
+                  <button type="button" onClick={() => setTimerMode('quiz')} className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${timerMode === 'quiz' ? 'bg-primary text-white shadow-md shadow-primary/30' : 'bg-gray-100 dark:bg-gray-700 text-text-secondary hover:bg-gray-200 dark:hover:bg-gray-600'}`}>На весь тест</button>
+                  <button type="button" onClick={() => setTimerMode('question')} className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${timerMode === 'question' ? 'bg-primary text-white shadow-md shadow-primary/30' : 'bg-gray-100 dark:bg-gray-700 text-text-secondary hover:bg-gray-200 dark:hover:bg-gray-600'}`}>На один вопрос</button>
+                </div>
+                {timerMode === 'quiz' ? (
+                  <div className="flex items-center gap-3">
+                    <input type="number" value={timeLimitQuiz} onChange={e => setTimeLimitQuiz(Math.max(1, parseInt(e.target.value) || 45))} min={1} max={180} className="input w-24" />
+                    <span className="text-sm text-text-secondary">минут</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <input type="number" value={timeLimitQuestion} onChange={e => setTimeLimitQuestion(Math.max(5, parseInt(e.target.value) || 30))} min={5} max={300} className="input w-24" />
+                    <span className="text-sm text-text-secondary">секунд на вопрос</span>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div>
               <h2 className="text-xl font-bold text-text-primary mb-4">Загрузка файла с вопросами</h2>
               <div className="space-y-4">
                 <p className="text-sm text-text-secondary">Поддерживаемые форматы: CSV, XLS, XLSX. Обязательные колонки: question, opt_a, opt_b, opt_c, opt_d, correct</p>
+
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-800">
+                  <div className="p-3 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 text-xs font-medium text-text-secondary flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    Пример оформления таблицы
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-xs">
+                      <thead>
+                        <tr className="bg-gray-50 dark:bg-gray-900">
+                          <th className="px-3 py-2 text-left font-medium text-text-secondary">question</th>
+                          <th className="px-3 py-2 text-left font-medium text-text-secondary">opt_a</th>
+                          <th className="px-3 py-2 text-left font-medium text-text-secondary">opt_b</th>
+                          <th className="px-3 py-2 text-left font-medium text-text-secondary">opt_c</th>
+                          <th className="px-3 py-2 text-left font-medium text-text-secondary">opt_d</th>
+                          <th className="px-3 py-2 text-left font-medium text-text-secondary">correct</th>
+                          <th className="px-3 py-2 text-left font-medium text-text-secondary">explanation</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                        <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                          <td className="px-3 py-2 text-text-primary">Сколько будет 2+2?</td>
+                          <td className="px-3 py-2 text-text-primary">3</td>
+                          <td className="px-3 py-2 text-text-primary">4</td>
+                          <td className="px-3 py-2 text-text-primary">5</td>
+                          <td className="px-3 py-2 text-text-primary">6</td>
+                          <td className="px-3 py-2 font-bold text-success">b</td>
+                          <td className="px-3 py-2 text-text-secondary">2+2=4</td>
+                        </tr>
+                        <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                          <td className="px-3 py-2 text-text-primary">Столица Франции?</td>
+                          <td className="px-3 py-2 text-text-primary">Лондон</td>
+                          <td className="px-3 py-2 text-text-primary">Берлин</td>
+                          <td className="px-3 py-2 text-text-primary">Париж</td>
+                          <td className="px-3 py-2 text-text-primary">Мадрид</td>
+                          <td className="px-3 py-2 font-bold text-success">c</td>
+                          <td className="px-3 py-2 text-text-secondary"></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
                 <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 cursor-pointer">
                   <input type="file" id="file-input" accept=".csv,.xls,.xlsx" className="hidden" onChange={handleFileChange} />
                   <label htmlFor="file-input" className="cursor-pointer">

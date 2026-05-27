@@ -29,6 +29,9 @@ const QuizCreateForm: React.FC = () => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isPublic, setIsPublic] = useState(false);
+  const [timerMode, setTimerMode] = useState<'quiz' | 'question'>('quiz');
+  const [timeLimitQuiz, setTimeLimitQuiz] = useState(45);
+  const [timeLimitQuestion, setTimeLimitQuestion] = useState(30);
   const [existingSubjects, setExistingSubjects] = useState<string[]>([]);
   const [showSubjectDropdown, setShowSubjectDropdown] = useState(false);
 
@@ -124,10 +127,20 @@ const QuizCreateForm: React.FC = () => {
       if (!teacherData) { navigate('/teacher/login'); return; }
       const teacher = JSON.parse(teacherData);
 
+      const quizPayload: Record<string, any> = {
+        title: title.trim(), subject: subject.trim(), grade: grade.trim(), is_public: isPublic,
+      };
+      if (timerMode === 'quiz') {
+        quizPayload.time_limit_quiz = timeLimitQuiz * 60;
+        quizPayload.time_limit_question = null;
+      } else {
+        quizPayload.time_limit_quiz = null;
+        quizPayload.time_limit_question = timeLimitQuestion;
+      }
       const quizRes = await fetch(`/api/quizzes/?teacher_id=${teacher.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: title.trim(), subject: subject.trim(), grade: grade.trim(), is_public: isPublic }),
+        body: JSON.stringify(quizPayload),
       });
       if (!quizRes.ok) throw new Error('Не удалось создать тест');
       const quiz = await quizRes.json();
@@ -235,6 +248,26 @@ const QuizCreateForm: React.FC = () => {
                 <input type="checkbox" id="is-public" checked={isPublic} onChange={e => setIsPublic(e.target.checked)} className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
                 <label htmlFor="is-public" className="text-sm text-text-secondary cursor-pointer select-none">Сделать тест публичным (доступен всем учителям)</label>
               </div>
+
+              <div className="pt-2 border-t border-gray-100">
+                <label className="label">Ограничение по времени</label>
+                <div className="flex gap-2 mb-3">
+                  <button type="button" onClick={() => setTimerMode('quiz')} className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${timerMode === 'quiz' ? 'bg-primary text-white shadow-md shadow-primary/30' : 'bg-gray-100 dark:bg-gray-700 text-text-secondary hover:bg-gray-200 dark:hover:bg-gray-600'}`}>На весь тест</button>
+                  <button type="button" onClick={() => setTimerMode('question')} className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${timerMode === 'question' ? 'bg-primary text-white shadow-md shadow-primary/30' : 'bg-gray-100 dark:bg-gray-700 text-text-secondary hover:bg-gray-200 dark:hover:bg-gray-600'}`}>На один вопрос</button>
+                </div>
+                {timerMode === 'quiz' ? (
+                  <div className="flex items-center gap-3">
+                    <input type="number" value={timeLimitQuiz} onChange={e => setTimeLimitQuiz(Math.max(1, parseInt(e.target.value) || 45))} min={1} max={180} className="input w-24" />
+                    <span className="text-sm text-text-secondary">минут</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <input type="number" value={timeLimitQuestion} onChange={e => setTimeLimitQuestion(Math.max(5, parseInt(e.target.value) || 30))} min={5} max={300} className="input w-24" />
+                    <span className="text-sm text-text-secondary">секунд на вопрос</span>
+                  </div>
+                )}
+              </div>
+
               <div className="flex gap-3 pt-4">
                 <button onClick={handleStart} className="btn-primary flex-1">Заполнить вопросы ({questionCount} шт.)</button>
               </div>
