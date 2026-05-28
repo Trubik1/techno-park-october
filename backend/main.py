@@ -26,9 +26,6 @@ with engine.connect() as conn:
     if row and 'is_public' not in row[0]:
         conn.execute(text("ALTER TABLE quizzes ADD COLUMN is_public BOOLEAN DEFAULT 0"))
         conn.commit()
-    # Помечаем сидированные тесты (билеты) как публичные
-    conn.execute(text("UPDATE quizzes SET is_public = 1 WHERE title LIKE 'Билет %' AND (is_public IS NULL OR is_public = 0)"))
-    conn.commit()
     # Добавляем total_questions в results, если нет
     cursor2 = conn.execute(text("SELECT sql FROM sqlite_master WHERE type='table' AND name='results'"))
     row2 = cursor2.fetchone()
@@ -88,6 +85,25 @@ _ensure_seed("Билет 22. БССР 1940-1980-е: образование, на
 _ensure_seed("Билет 23. Государственный суверенитет РБ. Хозяйство XIV-XVIII вв.", "seed_quiz_b23")
 _ensure_seed("Билет 24. Внешняя политика РБ. Хозяйственная жизнь IX-XIII вв.", "seed_quiz_b24")
 _ensure_seed("Билет 25. Соцэкономразвитие РБ. Восточные славяне на территории Беларуси", "seed_quiz_b25")
+
+# Удаляем клоны сидированных тестов (созданные старым clone_public_quizzes_for_teacher)
+# и сбрасываем is_public у оставшихся копий
+with engine.connect() as conn:
+    from app.crud import verify_pin
+    first_teacher = conn.execute(text("SELECT id FROM teachers ORDER BY created_at ASC LIMIT 1")).fetchone()
+    if first_teacher:
+        _seed_tid = str(first_teacher[0])
+        # Удаляем вопросы клонов
+        conn.execute(text(f"DELETE FROM questions WHERE quiz_id IN (SELECT id FROM quizzes WHERE title LIKE 'Билет %' AND teacher_id != '{_seed_tid}')"))
+        # Удаляем результаты клонов
+        conn.execute(text(f"DELETE FROM results WHERE session_id IN (SELECT id FROM sessions WHERE quiz_id IN (SELECT id FROM quizzes WHERE title LIKE 'Билет %' AND teacher_id != '{_seed_tid}'))"))
+        # Удаляем сессии клонов
+        conn.execute(text(f"DELETE FROM sessions WHERE quiz_id IN (SELECT id FROM quizzes WHERE title LIKE 'Билет %' AND teacher_id != '{_seed_tid}'))"))
+        # Удаляем участников сессий клонов
+        conn.execute(text(f"DELETE FROM session_participants WHERE session_id IN (SELECT id FROM sessions WHERE quiz_id IN (SELECT id FROM quizzes WHERE title LIKE 'Билет %' AND teacher_id != '{_seed_tid}'))"))
+        # Удаляем сами клоны
+        conn.execute(text(f"DELETE FROM quizzes WHERE title LIKE 'Билет %' AND teacher_id != '{_seed_tid}'"))
+        conn.commit()
 
 # Включаем API роутер
 app.include_router(api_router, prefix="/api")
