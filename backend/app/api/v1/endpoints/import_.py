@@ -160,7 +160,7 @@ def confirm_quiz_import(
         subject=quiz_data.subject,
         grade=quiz_data.grade,
         teacher_id=teacher_id,
-        is_public=True
+        is_public=quiz_data.is_public
     )
     db.add(db_quiz)
     db.flush()

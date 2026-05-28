@@ -17,6 +17,7 @@ const QuizImportForm: React.FC = () => {
   const [quizTitle, setQuizTitle] = useState('');
   const [quizSubject, setQuizSubject] = useState('');
   const [quizGrade, setQuizGrade] = useState('');
+  const [isPublic, setIsPublic] = useState(false);
   const [timerMode, setTimerMode] = useState<'quiz' | 'question'>('quiz');
   const [timeLimitQuiz, setTimeLimitQuiz] = useState(45);
   const [timeLimitQuestion, setTimeLimitQuestion] = useState(30);
@@ -77,7 +78,7 @@ const QuizImportForm: React.FC = () => {
       let teacher;
       try { teacher = JSON.parse(teacherData); } catch { throw new Error('Повреждённые данные учителя'); }
 
-      const quizPayload: Record<string, any> = { title: quizTitle.trim(), subject: quizSubject.trim(), grade: quizGrade.trim() };
+      const quizPayload: Record<string, any> = { title: quizTitle.trim(), subject: quizSubject.trim(), grade: quizGrade.trim(), is_public: isPublic };
       if (timerMode === 'quiz') {
         quizPayload.time_limit_quiz = timeLimitQuiz * 60;
         quizPayload.time_limit_question = null;
@@ -135,7 +136,11 @@ const QuizImportForm: React.FC = () => {
                   </select>
                 </div>
               </div>
-              
+              <div className="flex items-center gap-3">
+                <input type="checkbox" id="is-public-import" checked={isPublic} onChange={e => setIsPublic(e.target.checked)} className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
+                <label htmlFor="is-public-import" className="text-sm text-text-secondary cursor-pointer select-none">Сделать тест публичным (доступен всем учителям)</label>
+              </div>
+
               <div className="pt-2 border-t border-gray-100">
                 <label className="label">Ограничение по времени</label>
                 <div className="flex gap-2 mb-3">
