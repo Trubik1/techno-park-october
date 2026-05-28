@@ -3,6 +3,7 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import { useStudent } from '../hooks/useStudent';
 import UserMenu from '../components/UserMenu';
 import BackButton from '../components/BackButton';
+import PixelOtpInput from '../components/PixelOtpInput';
 
 const StudentQuizEntry: React.FC = () => {
   const [sessionCode, setSessionCode] = useState('');
@@ -82,23 +83,16 @@ const StudentQuizEntry: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="label flex items-center gap-2">
+            <label className="label flex items-center justify-center gap-2 mb-3">
               <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
               </svg>
               Ключ тестового мероприятия
             </label>
-            <input
-              type="text"
+            <PixelOtpInput
               value={sessionCode}
-              onChange={(e) => {
-                const value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-                setSessionCode(value);
-              }}
-              maxLength={4}
-              placeholder="A1B2"
-              className="input text-center text-2xl font-bold tracking-[0.5em] uppercase"
-              autoFocus
+              onChange={setSessionCode}
+              length={4}
             />
           </div>
 
