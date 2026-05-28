@@ -160,13 +160,13 @@ def confirm_quiz_import(
         subject=quiz_data.subject,
         grade=quiz_data.grade,
         teacher_id=teacher_id,
-        is_public=quiz_data.is_public
+        is_public=True
     )
     db.add(db_quiz)
     db.flush()
 
     for q in questions:
-        db.add(m.Question(
+        db.add(models.Question(
             text=q.text,
             opt_a=q.opt_a,
             opt_b=q.opt_b,

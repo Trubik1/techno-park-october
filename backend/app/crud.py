@@ -118,7 +118,7 @@ def create_quiz(db: Session, quiz: schemas.QuizCreate, teacher_id: uuid.UUID):
         subject=quiz.subject,
         grade=quiz.grade,
         teacher_id=teacher_id,
-        is_public=quiz.is_public
+        is_public=True
     )
     db.add(db_quiz)
     db.commit()

@@ -28,7 +28,6 @@ const QuizCreateForm: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [isPublic, setIsPublic] = useState(false);
   const [timerMode, setTimerMode] = useState<'quiz' | 'question'>('quiz');
   const [timeLimitQuiz, setTimeLimitQuiz] = useState(45);
   const [timeLimitQuestion, setTimeLimitQuestion] = useState(30);
@@ -128,7 +127,7 @@ const QuizCreateForm: React.FC = () => {
       const teacher = JSON.parse(teacherData);
 
       const quizPayload: Record<string, any> = {
-        title: title.trim(), subject: subject.trim(), grade: grade.trim(), is_public: isPublic,
+        title: title.trim(), subject: subject.trim(), grade: grade.trim(),
       };
       if (timerMode === 'quiz') {
         quizPayload.time_limit_quiz = timeLimitQuiz * 60;
@@ -244,11 +243,7 @@ const QuizCreateForm: React.FC = () => {
                 <input type="number" value={questionCount} onChange={e => setQuestionCount(parseInt(e.target.value) || 10)} min={1} max={100} className="input" />
                 {errors.questionCount && <p className="error-text mt-1">{errors.questionCount}</p>}
               </div>
-              <div className="flex items-center gap-3">
-                <input type="checkbox" id="is-public" checked={isPublic} onChange={e => setIsPublic(e.target.checked)} className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
-                <label htmlFor="is-public" className="text-sm text-text-secondary cursor-pointer select-none">Сделать тест публичным (доступен всем учителям)</label>
-              </div>
-
+              
               <div className="pt-2 border-t border-gray-100">
                 <label className="label">Ограничение по времени</label>
                 <div className="flex gap-2 mb-3">

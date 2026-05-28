@@ -26,23 +26,9 @@ with engine.connect() as conn:
     if row and 'is_public' not in row[0]:
         conn.execute(text("ALTER TABLE quizzes ADD COLUMN is_public BOOLEAN DEFAULT 0"))
         conn.commit()
-    # Обновляем is_public для сидированных тестов (только оригиналы, не клоны)
-    conn.execute(text("UPDATE quizzes SET is_public = 1 WHERE teacher_id IS NULL AND title IN ('Билет 1. Древние люди на территории Беларуси', 'Билет 2. Полоцкое и Туровское княжества', 'Билет 3. Христианизация белорусских земель. Внешняя политика Республики Беларусь', 'Билет 4. Образование ВКЛ. Наука, образование, культура и спорт в РБ', 'Билет 5. Борьба с крестоносцами. Культура БССР 1940-1980-е', 'Билет 6. Франциск Скорина. Общественно-политическая жизнь в БССР', 'Билет 7. Отечественная война 1812 г. Социально-экономическое развитие БССР', 'Билет 8. Люблинская уния. Наш край в годы ВОВ (г. Гомель)', 'Билет 9. Формирование белорусской народности. Вклад в победу над нацизмом', 'Билет 10. Аграрные реформы XIX-XX вв. ВОВ в памяти народа', 'Билет 11. Революции 1905-1907 и 1917 гг. Освобождение Беларуси', 'Билет 12. Беларусь в годы Первой мировой войны. Воссоединение Западной Беларуси с БССР', 'Билет 13. Октябрьская революция 1917 г. Партизанское движение в годы ВОВ', 'Билет 14. Создание ССРБ. Германский оккупационный режим 1941-1944', 'Билет 15. Польско-советская война 1919-1921. НЭП в БССР', 'Билет 16. Политика белорусизации. Начало Великой Отечественной войны', 'Билет 17. Индустриализация и коллективизация в БССР. Становление национальной государственности', 'Билет 18. Западная Беларусь в составе Польши. Культура Беларуси XIX — начала XX в.', 'Билет 19. Подвиг народа в ВОВ. Наш край в XIII-XVIII вв.', 'Билет 20. Геноцид населения Беларуси в ВОВ. Культура XIV-XVIII вв.', 'Билет 21. БССР 1940-1980-е: соцэкономразвитие. Разделы Речи Посполитой', 'Билет 22. БССР 1940-1980-е: образование, наука, культура. Хозяйство XIX - нач. XX в.', 'Билет 23. Государственный суверенитет РБ. Хозяйство XIV-XVIII вв.', 'Билет 24. Внешняя политика РБ. Хозяйственная жизнь IX-XIII вв.', 'Билет 25. Соцэкономразвитие РБ. Восточные славяне на территории Беларуси') AND (is_public IS NULL OR is_public = 0)"))
+    # Все тесты теперь публичные и доступны всем учителям
+    conn.execute(text("UPDATE quizzes SET is_public = 1"))
     conn.commit()
-    # Исправляем клоны, ошибочно ставшие публичными — сбрасываем is_public
-    from passlib.context import CryptContext
-    _pwd = CryptContext(schemes=["bcrypt"], deprecated="auto")
-    _seed_ids = conn.execute(text("SELECT id FROM teachers")).fetchall()
-    _seed_tid = None
-    for (_sid,) in _seed_ids:
-        _row = conn.execute(text(f"SELECT pin_hash FROM teachers WHERE id = '{_sid}'")).fetchone()
-        if _row and _pwd.verify("123456", _row[0]):
-            _seed_tid = str(_sid)
-            break
-    if _seed_tid:
-        conn.execute(text(f"UPDATE quizzes SET is_public = 0 WHERE teacher_id != '{_seed_tid}' AND title LIKE 'Билет %' AND is_public = 1"))
-        conn.execute(text(f"UPDATE quizzes SET is_public = 1 WHERE teacher_id = '{_seed_tid}' AND title LIKE 'Билет %' AND (is_public IS NULL OR is_public = 0)"))
-        conn.commit()
     # Добавляем total_questions в results, если нет
     cursor2 = conn.execute(text("SELECT sql FROM sqlite_master WHERE type='table' AND name='results'"))
     row2 = cursor2.fetchone()
