@@ -50,10 +50,19 @@ const TeacherDashboard: React.FC = () => {
     return [...new Set(myQuizzes.map(q => q.subject))].sort();
   }, [myQuizzes]);
 
+  const sortByTicket = (a: Quiz, b: Quiz) => {
+    const ma = a.title.match(/Билет\s+(\d+)/);
+    const mb = b.title.match(/Билет\s+(\d+)/);
+    if (ma && mb) return parseInt(ma[1]) - parseInt(mb[1]);
+    if (ma) return -1;
+    if (mb) return 1;
+    return a.title.localeCompare(b.title);
+  };
+
   const filteredMyQuizzes = (activeSubject
     ? myQuizzes.filter(q => q.subject === activeSubject)
     : myQuizzes
-  ).filter(q => q.title.toLowerCase().includes(searchQuery.toLowerCase()));
+  ).filter(q => q.title.toLowerCase().includes(searchQuery.toLowerCase())).sort(sortByTicket);
 
   const publicSubjects = useMemo(() => {
     return [...new Set(publicQuizzes.map(q => q.subject))].sort();
@@ -64,7 +73,7 @@ const TeacherDashboard: React.FC = () => {
   const filteredPublicQuizzes = (publicSubject
     ? publicQuizzes.filter(q => q.subject === publicSubject)
     : publicQuizzes
-  ).filter(q => q.title.toLowerCase().includes(searchQuery.toLowerCase()));
+  ).filter(q => q.title.toLowerCase().includes(searchQuery.toLowerCase())).sort(sortByTicket);
 
   if (isLoading && myQuizzes.length === 0 && publicQuizzes.length === 0) {
     return (

@@ -98,7 +98,7 @@ with engine.connect() as conn:
         # Удаляем результаты клонов
         conn.execute(text(f"DELETE FROM results WHERE session_id IN (SELECT id FROM sessions WHERE quiz_id IN (SELECT id FROM quizzes WHERE title LIKE 'Билет %' AND teacher_id != '{_seed_tid}'))"))
         # Удаляем сессии клонов
-        conn.execute(text(f"DELETE FROM sessions WHERE quiz_id IN (SELECT id FROM quizzes WHERE title LIKE 'Билет %' AND teacher_id != '{_seed_tid}'))"))
+        conn.execute(text(f"DELETE FROM sessions WHERE quiz_id IN (SELECT id FROM quizzes WHERE title LIKE 'Билет %' AND teacher_id != '{_seed_tid}')"))
         # Удаляем участников сессий клонов
         conn.execute(text(f"DELETE FROM session_participants WHERE session_id IN (SELECT id FROM sessions WHERE quiz_id IN (SELECT id FROM quizzes WHERE title LIKE 'Билет %' AND teacher_id != '{_seed_tid}'))"))
         # Удаляем сами клоны
