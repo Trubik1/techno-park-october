@@ -46,6 +46,14 @@ class QuizBase(BaseModel):
 class QuizCreate(QuizBase):
     pass
 
+class QuizUpdate(BaseModel):
+    title: Optional[str] = Field(None, min_length=1, max_length=200)
+    subject: Optional[str] = Field(None, min_length=1, max_length=100)
+    grade: Optional[str] = Field(None, min_length=1, max_length=50)
+    is_public: Optional[bool] = None
+    time_limit_quiz: Optional[int] = None
+    time_limit_question: Optional[int] = None
+
 class QuizResponse(QuizBase):
     id: uuid.UUID
     teacher_id: uuid.UUID
@@ -151,3 +159,34 @@ class LiveSessionData(BaseModel):
     quiz_title: str
     total_questions: int
     results: List[dict]  # Will contain student answers and scores
+
+# Teacher PIN reset
+class TeacherPinReset(BaseModel):
+    old_pin: str = Field(..., min_length=6, max_length=10)
+    new_pin: str = Field(..., min_length=6, max_length=10)
+
+# Answer review
+class AnswerReviewItem(BaseModel):
+    question_text: str
+    opt_a: str
+    opt_b: str
+    opt_c: str
+    opt_d: str
+    student_answer: str
+    correct_answer: str
+    is_correct: bool
+    explanation: Optional[str] = None
+
+class AnswerReviewResponse(BaseModel):
+    quiz_title: str
+    answers: List[AnswerReviewItem]
+    score: int
+    total: int
+
+# Leaderboard
+class LeaderboardEntry(BaseModel):
+    rank: int
+    student_name: str
+    score: int
+    total: int
+    percentage: float

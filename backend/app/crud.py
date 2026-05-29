@@ -118,12 +118,33 @@ def create_quiz(db: Session, quiz: schemas.QuizCreate, teacher_id: uuid.UUID):
         subject=quiz.subject,
         grade=quiz.grade,
         teacher_id=teacher_id,
-        is_public=quiz.is_public
+        is_public=quiz.is_public,
+        time_limit_quiz=quiz.time_limit_quiz,
+        time_limit_question=quiz.time_limit_question,
     )
     db.add(db_quiz)
     db.commit()
     db.refresh(db_quiz)
     return db_quiz
+
+def update_quiz(db: Session, quiz_id: uuid.UUID, quiz_update: schemas.QuizUpdate):
+    db_quiz = db.query(models.Quiz).filter(models.Quiz.id == quiz_id).first()
+    if not db_quiz:
+        return None
+    update_data = quiz_update.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_quiz, key, value)
+    db.commit()
+    db.refresh(db_quiz)
+    return db_quiz
+
+def delete_quiz(db: Session, quiz_id: uuid.UUID):
+    db_quiz = db.query(models.Quiz).filter(models.Quiz.id == quiz_id).first()
+    if not db_quiz:
+        return False
+    db.delete(db_quiz)
+    db.commit()
+    return True
 
 # Question CRUD
 def get_question(db: Session, question_id: uuid.UUID):
@@ -147,6 +168,24 @@ def create_question(db: Session, question: schemas.QuestionCreate, quiz_id: uuid
     db.commit()
     db.refresh(db_question)
     return db_question
+
+def delete_question(db: Session, question_id: uuid.UUID):
+    db_question = db.query(models.Question).filter(models.Question.id == question_id).first()
+    if not db_question:
+        return False
+    db.delete(db_question)
+    db.commit()
+    return True
+
+# Teacher CRUD (continued)
+def update_teacher_pin(db: Session, teacher_id: uuid.UUID, new_pin: str):
+    db_teacher = db.query(models.Teacher).filter(models.Teacher.id == teacher_id).first()
+    if not db_teacher:
+        return None
+    db_teacher.pin_hash = hash_pin(new_pin)
+    db.commit()
+    db.refresh(db_teacher)
+    return db_teacher
 
 # Session CRUD
 def get_session(db: Session, session_id: uuid.UUID):
@@ -211,7 +250,26 @@ def create_result(db: Session, result: schemas.ResultCreate, session_id: uuid.UU
     db.add(db_result)
     db.commit()
     db.refresh(db_result)
+
+    # Auto-close session if all participants have submitted
+    _auto_close_session_if_all_complete(db, session_id)
+
     return db_result
+
+def _auto_close_session_if_all_complete(db: Session, session_id: uuid.UUID):
+    db_session = db.query(models.Session).filter(models.Session.id == session_id).first()
+    if not db_session or db_session.status != "active":
+        return
+    total_participants = db.query(models.SessionParticipant).filter(
+        models.SessionParticipant.session_id == session_id
+    ).count()
+    total_results = db.query(models.Result).filter(
+        models.Result.session_id == session_id
+    ).count()
+    if total_participants > 0 and total_results >= total_participants:
+        db_session.status = "closed"
+        db_session.closed_at = datetime.now(timezone.utc)
+        db.commit()
 
 
 # Session participant CRUD
@@ -249,3 +307,28 @@ def get_participants_by_session(db: Session, session_id: uuid.UUID):
     ).filter(
         models.SessionParticipant.session_id == session_id
     ).all()
+
+def get_session_leaderboard(db: Session, session_id: uuid.UUID):
+    rows = db.query(
+        models.Student.display_name,
+        models.Result.score,
+        models.Result.total_questions,
+        models.Result.completed_at
+    ).join(
+        models.Result, models.Result.student_id == models.Student.id
+    ).filter(
+        models.Result.session_id == session_id
+    ).order_by(
+        models.Result.score.desc(),
+        models.Result.completed_at.asc()
+    ).all()
+    result = []
+    for rank, (name, score, total, completed) in enumerate(rows, start=1):
+        result.append({
+            "rank": rank,
+            "student_name": name,
+            "score": score,
+            "total": total or 0,
+            "percentage": round((score / total * 100) if total else 0, 1),
+        })
+    return result
