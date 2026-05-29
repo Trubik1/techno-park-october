@@ -10,8 +10,53 @@ interface QuizHistoryItem {
   completedAt: string;
 }
 
+const PinResetModal: React.FC<{ teacherId: string; onClose: () => void }> = ({ teacherId, onClose }) => {
+  const [oldPin, setOldPin] = useState('');
+  const [newPin, setNewPin] = useState('');
+  const [confirmPin, setConfirmPin] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleReset = async () => {
+    setError('');
+    if (newPin.length < 6 || newPin.length > 10) { setError('PIN должен быть от 6 до 10 символов'); return; }
+    if (newPin !== confirmPin) { setError('PIN-коды не совпадают'); return; }
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/teachers/${teacherId}/pin`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ old_pin: oldPin, new_pin: newPin }),
+      });
+      if (!res.ok) { const d = await res.json().catch(() => ({})); setError(d.detail || 'Ошибка смены PIN'); return; }
+      alert('PIN-код успешно изменён!');
+      onClose();
+    } catch { setError('Ошибка смены PIN'); }
+    finally { setSaving(false); }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 animate-fadeIn" onClick={onClose}>
+      <div className="bg-surface rounded-2xl shadow-2xl p-6 max-w-sm w-full animate-scaleIn" onClick={e => e.stopPropagation()}>
+        <h3 className="text-lg font-bold text-text-primary mb-4">Сменить PIN-код</h3>
+        <div className="space-y-3">
+          <input type="password" className="input" placeholder="Старый PIN" value={oldPin} onChange={e => setOldPin(e.target.value)} maxLength={10} />
+          <input type="password" className="input" placeholder="Новый PIN (6-10 символов)" value={newPin} onChange={e => setNewPin(e.target.value)} maxLength={10} />
+          <input type="password" className="input" placeholder="Подтвердите новый PIN" value={confirmPin} onChange={e => setConfirmPin(e.target.value)} maxLength={10} />
+          {error && <p className="text-sm text-error">{error}</p>}
+        </div>
+        <div className="flex gap-3 mt-6">
+          <button onClick={onClose} className="btn-secondary flex-1">Отмена</button>
+          <button onClick={handleReset} disabled={saving} className="btn-primary flex-1">{saving ? 'Сохранение...' : 'Сменить'}</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const TeacherMenu: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const navigate = useNavigate();
+  const [showPinReset, setShowPinReset] = useState(false);
   let teacherData: string | null = null;
   try { teacherData = localStorage.getItem('classquiz_teacher'); } catch { teacherData = null; }
   let teacher = null;
@@ -29,11 +74,20 @@ const TeacherMenu: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         <p className="font-semibold text-text-primary">{teacher?.name || 'Учитель'}</p>
         <p className="text-xs text-text-secondary mt-0.5">Учитель</p>
       </div>
+      <div className="p-2">
+        <button onClick={() => { setShowPinReset(true); }} className="w-full text-left px-3 py-2 rounded-lg text-sm text-text-primary hover:bg-primary/5 transition-colors flex items-center gap-2">
+          <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+          Сменить PIN
+        </button>
+      </div>
       <div className="p-2 border-t border-gray-100 dark:border-gray-700">
         <button onClick={handleLogout} className="w-full text-left px-3 py-2 rounded-lg text-sm text-error hover:bg-error/5 transition-colors">
           Выйти из аккаунта
         </button>
       </div>
+      {showPinReset && teacher && (
+        <PinResetModal teacherId={teacher.id} onClose={() => setShowPinReset(false)} />
+      )}
     </div>
   );
 };
