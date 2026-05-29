@@ -71,6 +71,7 @@ const StudentQuiz: React.FC = () => {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [shuffleOrder, setShuffleOrder] = useState<string[]>([]);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [resultId, setResultId] = useState<string | null>(null);
 
   const loadingCodeRef = useRef<string | null>(null);
 
@@ -177,6 +178,8 @@ const StudentQuiz: React.FC = () => {
         const errData = await response.json().catch(() => ({}));
         throw new Error(errData.detail || 'Failed to save results');
       }
+      const resultData = await response.json();
+      setResultId(resultData.id);
       setIsSubmitted(true);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Failed to submit results');
@@ -456,7 +459,8 @@ const StudentQuiz: React.FC = () => {
                 Ваш результат: <span className="font-bold text-2xl text-text-primary">{correctCount}/{quizData.questions.length}</span>
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-3 mt-6">
-                <button onClick={() => navigate('/student/history')} className="btn-primary">Посмотреть историю</button>
+                {resultId && <button onClick={() => navigate(`/student/review/${resultId}`)} className="btn-primary">Посмотреть ответы</button>}
+                <button onClick={() => navigate('/student/history')} className="btn-secondary">История</button>
                 <button onClick={() => navigate('/student/entry')} className="btn-secondary">Начать новый тест</button>
               </div>
             </div>

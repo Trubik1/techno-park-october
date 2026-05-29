@@ -13,6 +13,7 @@ const StudentHistory = React.lazy(() => import('./pages/StudentHistory'));
 const QuizCreateForm = React.lazy(() => import('./pages/QuizCreateForm'));
 const QuizImportForm = React.lazy(() => import('./pages/QuizImportForm'));
 const SessionMonitor = React.lazy(() => import('./pages/SessionMonitor'));
+const StudentQuizReview = React.lazy(() => import('./pages/StudentQuizReview'));
 
 const PageLoader: React.FC = () => (
   <div className="min-h-screen bg-background flex items-center justify-center p-4 animate-fadeIn">
@@ -77,6 +78,7 @@ function App() {
               <Route path="/student/quiz-entry" element={<StudentQuizEntry />} />
               <Route path="/student/quiz/:code" element={<StudentQuiz />} />
               <Route path="/student/history" element={<StudentHistory />} />
+              <Route path="/student/review/:resultId" element={<StudentQuizReview />} />
               <Route path="/" element={<Navigate replace to="/student/entry" />} />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
