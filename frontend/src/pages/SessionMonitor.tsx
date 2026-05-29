@@ -31,6 +31,8 @@ const SessionMonitor: React.FC = () => {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [qrModal, setQrModal] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState('');
+  const [monitorTab, setMonitorTab] = useState<'participants' | 'leaderboard'>('participants');
+  const [leaderboard, setLeaderboard] = useState<{ rank: number; student_name: string; score: number; total: number; percentage: number }[]>([]);
   const refreshIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -56,6 +58,9 @@ const SessionMonitor: React.FC = () => {
         joined_at: p.joined_at, completed_at: p.completed_at,
         score: p.score, total_questions: p.total_questions || 0
       })));
+
+      const lbRes = await fetch(`/api/sessions/${sessionInfo.id}/leaderboard`);
+      if (lbRes.ok) setLeaderboard(await lbRes.json());
     } catch (err) {
       setError('Не удалось загрузить данные сессии. Проверьте подключение и попробуйте снова.');
     } finally { setIsLoading(false); }
@@ -168,8 +173,8 @@ const SessionMonitor: React.FC = () => {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <span className={`px-3 py-1 text-xs font-semibold rounded-full ${isActive ? 'bg-success/20 text-success' : 'bg-error/20 text-error'}`}>
-                {isActive ? 'Активна' : 'Завершена'}
+              <span className={`px-3 py-1 text-xs font-semibold rounded-full ${isActive ? 'bg-success/20 text-success' : participants.length > 0 && participants.every(p => p.completed_at) ? 'bg-blue-500/20 text-blue-500' : 'bg-error/20 text-error'}`}>
+                {isActive ? 'Активна' : participants.length > 0 && participants.every(p => p.completed_at) ? 'Завершена (все сдали)' : 'Завершена'}
               </span>
               {isActive && (
                 <button onClick={handleCloseSession} className="btn-sm bg-white/20 text-white hover:bg-white/30 transition-colors rounded-lg">Завершить сессию</button>
@@ -198,58 +203,110 @@ const SessionMonitor: React.FC = () => {
           </div>
         </div>
 
+        <div className="flex gap-1 px-6 pt-4">
+          <button onClick={() => setMonitorTab('participants')} className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${monitorTab === 'participants' ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-700 text-text-secondary hover:bg-gray-200 dark:hover:bg-gray-600'}`}>
+            Участники {participants.length > 0 && <span className="ml-1 text-xs opacity-70">({participants.length})</span>}
+          </button>
+          <button onClick={() => setMonitorTab('leaderboard')} className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${monitorTab === 'leaderboard' ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-700 text-text-secondary hover:bg-gray-200 dark:hover:bg-gray-600'}`}>
+            Рейтинг {leaderboard.length > 0 && <span className="ml-1 text-xs opacity-70">({leaderboard.length})</span>}
+          </button>
+        </div>
+
         <div className="p-6">
-          {participants.length === 0 ? (
-            <div className="text-center py-8 animate-fadeIn">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-background mb-4">
-                <svg className="w-8 h-8 text-text-secondary/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
+          {monitorTab === 'participants' && (
+            participants.length === 0 ? (
+              <div className="text-center py-8 animate-fadeIn">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-background mb-4">
+                  <svg className="w-8 h-8 text-text-secondary/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <p className="text-text-secondary">Пока нет участников в этой сессии</p>
+                <p className="mt-4 text-sm text-text-secondary/60">Ожидайте, пока ученики подключатся по коду:</p>
+                <div className="mt-2 inline-flex items-center gap-2 bg-primary/10 rounded-xl px-5 py-3 border border-primary/20">
+                  <span className="text-3xl font-bold tracking-[0.25em] font-mono text-primary">{sessionData.code}</span>
+                </div>
               </div>
-              <p className="text-text-secondary">Пока нет участников в этой сессии</p>
-              <p className="mt-4 text-sm text-text-secondary/60">Ожидайте, пока ученики подключатся по коду:</p>
-              <div className="mt-2 inline-flex items-center gap-2 bg-primary/10 rounded-xl px-5 py-3 border border-primary/20">
-                <span className="text-3xl font-bold tracking-[0.25em] font-mono text-primary">{sessionData.code}</span>
-              </div>
-            </div>
-          ) : (
-            <>
-              <h2 className="text-xl font-bold text-text-primary mb-4">Участники <span className="text-sm font-normal text-text-secondary">({participants.length})</span></h2>
-              <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-600">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
-                  <thead className="bg-gray-50 dark:bg-gray-800">
-                    <tr>
-                      {['Ученик', 'Класс', 'Балл', 'Статус', 'Время'].map(h => (
-                        <th key={h} className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {participants.map((p, i) => (
-                      <tr key={p.student_id} className="bg-white dark:bg-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors animate-fadeIn" style={{ animationDelay: `${i * 0.05}s` }}>
-                        <td className="px-4 py-3 text-sm font-medium text-text-primary">{p.display_name}</td>
-                        <td className="px-4 py-3 text-sm text-text-secondary">{p.class_name}</td>
-                        <td className="px-4 py-3 text-sm font-bold">
-                          {p.completed_at ? (
-                            <span className={`${p.score === 0 ? 'text-error' : p.score! >= p.total_questions * 0.8 ? 'text-success' : p.score! >= p.total_questions * 0.6 ? 'text-warning' : 'text-text-primary'}`}>
-                              {p.score}/{p.total_questions}
-                            </span>
-                          ) : (
-                            <span className="text-text-secondary/50">—</span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3 text-sm">
-                          <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${p.completed_at ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'}`}>
-                            {p.completed_at ? 'Завершил' : 'В процессе'}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-sm text-text-secondary">{p.completed_at ? parseBackendDate(p.completed_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) : parseBackendDate(p.joined_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</td>
+            ) : (
+              <>
+                <h2 className="text-xl font-bold text-text-primary mb-4">Участники <span className="text-sm font-normal text-text-secondary">({participants.length})</span></h2>
+                <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-600">
+                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+                    <thead className="bg-gray-50 dark:bg-gray-800">
+                      <tr>
+                        {['Ученик', 'Класс', 'Балл', 'Статус', 'Время'].map(h => (
+                          <th key={h} className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">{h}</th>
+                        ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {participants.map((p, i) => (
+                        <tr key={p.student_id} className="bg-white dark:bg-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors animate-fadeIn" style={{ animationDelay: `${i * 0.05}s` }}>
+                          <td className="px-4 py-3 text-sm font-medium text-text-primary">{p.display_name}</td>
+                          <td className="px-4 py-3 text-sm text-text-secondary">{p.class_name}</td>
+                          <td className="px-4 py-3 text-sm font-bold">
+                            {p.completed_at ? (
+                              <span className={`${p.score === 0 ? 'text-error' : p.score! >= p.total_questions * 0.8 ? 'text-success' : p.score! >= p.total_questions * 0.6 ? 'text-warning' : 'text-text-primary'}`}>
+                                {p.score}/{p.total_questions}
+                              </span>
+                            ) : (
+                              <span className="text-text-secondary/50">—</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-sm">
+                            <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${p.completed_at ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'}`}>
+                              {p.completed_at ? 'Завершил' : 'В процессе'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-text-secondary">{p.completed_at ? parseBackendDate(p.completed_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) : parseBackendDate(p.joined_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )
+          )}
+
+          {monitorTab === 'leaderboard' && (
+            leaderboard.length === 0 ? (
+              <div className="text-center py-8 animate-fadeIn">
+                <p className="text-text-secondary">Нет данных для рейтинга. Участники ещё не завершили тест.</p>
               </div>
-            </>
+            ) : (
+              <>
+                <h2 className="text-xl font-bold text-text-primary mb-4">Рейтинг <span className="text-sm font-normal text-text-secondary">({leaderboard.length})</span></h2>
+                <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-600">
+                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+                    <thead className="bg-gray-50 dark:bg-gray-800">
+                      <tr>
+                        {['Место', 'Ученик', 'Баллы', '%'].map(h => (
+                          <th key={h} className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {leaderboard.map((entry, i) => (
+                        <tr key={entry.rank} className="bg-white dark:bg-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors animate-fadeIn" style={{ animationDelay: `${i * 0.05}s` }}>
+                          <td className="px-4 py-3 text-sm">
+                            <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${entry.rank === 1 ? 'bg-yellow-400 text-yellow-900' : entry.rank === 2 ? 'bg-gray-300 text-gray-700' : entry.rank === 3 ? 'bg-amber-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-text-secondary'}`}>
+                              {entry.rank}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-sm font-medium text-text-primary">{entry.student_name}</td>
+                          <td className="px-4 py-3 text-sm font-bold text-text-primary">{entry.score}/{entry.total}</td>
+                          <td className="px-4 py-3 text-sm">
+                            <span className={`font-semibold ${entry.percentage >= 80 ? 'text-success' : entry.percentage >= 60 ? 'text-warning' : 'text-error'}`}>
+                              {entry.percentage}%
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )
           )}
         </div>
 
