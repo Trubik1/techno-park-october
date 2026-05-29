@@ -40,3 +40,12 @@ def read_question(question_id: uuid.UUID, db: Session = Depends(get_db)):
     if db_question is None:
         raise HTTPException(status_code=404, detail="Question not found")
     return db_question
+
+@router.delete("/{question_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_question(question_id: uuid.UUID, db: Session = Depends(get_db)):
+    """
+    Удалить вопрос по ID.
+    """
+    deleted = crud.delete_question(db, question_id=question_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Question not found")

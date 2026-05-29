@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 import uuid
 from datetime import datetime, timezone
-from app import schemas, crud
+from app import schemas, crud, models
 from app.db.database import get_db
 
 router = APIRouter()
@@ -96,3 +96,13 @@ def get_participants(session_id: uuid.UUID, db: Session = Depends(get_db)):
             total_questions=total_questions or 0
         ))
     return result
+
+@router.get("/{session_id}/leaderboard", response_model=List[schemas.LeaderboardEntry])
+def get_leaderboard(session_id: uuid.UUID, db: Session = Depends(get_db)):
+    """
+    Получить таблицу лидеров для сессии (отсортировано по баллам).
+    """
+    db_session = crud.get_session(db, session_id=session_id)
+    if not db_session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    return crud.get_session_leaderboard(db, session_id=session_id)

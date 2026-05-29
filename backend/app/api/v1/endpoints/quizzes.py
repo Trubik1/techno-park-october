@@ -47,4 +47,18 @@ def read_quiz(quiz_id: uuid.UUID, db: Session = Depends(get_db)):
     d['teacher_name'] = db_quiz.teacher.name if db_quiz.teacher else ""
     return schemas.QuizResponse(**d)
 
-# We'll add the import endpoint later
+@router.put("/{quiz_id}", response_model=schemas.QuizResponse)
+def update_quiz(quiz_id: uuid.UUID, quiz_update: schemas.QuizUpdate, db: Session = Depends(get_db)):
+    db_quiz = crud.update_quiz(db, quiz_id=quiz_id, quiz_update=quiz_update)
+    if db_quiz is None:
+        raise HTTPException(status_code=404, detail="Quiz not found")
+    d = {c.name: getattr(db_quiz, c.name) for c in db_quiz.__table__.columns}
+    d['question_count'] = len(db_quiz.questions) if hasattr(db_quiz, 'questions') else 0
+    d['teacher_name'] = db_quiz.teacher.name if db_quiz.teacher else ""
+    return schemas.QuizResponse(**d)
+
+@router.delete("/{quiz_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_quiz(quiz_id: uuid.UUID, db: Session = Depends(get_db)):
+    deleted = crud.delete_quiz(db, quiz_id=quiz_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Quiz not found")

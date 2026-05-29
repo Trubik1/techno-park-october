@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 from typing import List
 import uuid
+import json
 from app import schemas, crud, models
 from app.db.database import get_db
 
@@ -83,3 +84,49 @@ def get_student_results(student_id: uuid.UUID, skip: int = 0, limit: int = 100, 
         )
         for r in results
     ]
+
+@router.get("/{result_id}/review", response_model=schemas.AnswerReviewResponse)
+def get_result_review(result_id: uuid.UUID, db: Session = Depends(get_db)):
+    """
+    Получить детальный обзор ответов для конкретного результата.
+    Возвращает каждый вопрос, ответ ученика, правильный ответ и объяснение.
+    """
+    db_result = db.query(models.Result).options(
+        joinedload(models.Result.session).joinedload(models.Session.quiz)
+    ).filter(models.Result.id == result_id).first()
+    if not db_result:
+        raise HTTPException(status_code=404, detail="Result not found")
+
+    quiz = db_result.session.quiz
+    questions = crud.get_questions_by_quiz(db, quiz_id=quiz.id)
+    questions_map = {str(q.id): q for q in questions}
+
+    try:
+        answers_data = json.loads(db_result.answers_json)
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=500, detail="Failed to parse answers")
+
+    answer_items = []
+    for ans in answers_data:
+        q = questions_map.get(ans.get("question_id", ""))
+        if not q:
+            continue
+        student_ans = ans.get("answer", "")
+        answer_items.append(schemas.AnswerReviewItem(
+            question_text=q.text,
+            opt_a=q.opt_a,
+            opt_b=q.opt_b,
+            opt_c=q.opt_c,
+            opt_d=q.opt_d,
+            student_answer=student_ans,
+            correct_answer=q.correct,
+            is_correct=student_ans == q.correct,
+            explanation=q.explanation,
+        ))
+
+    return schemas.AnswerReviewResponse(
+        quiz_title=quiz.title,
+        answers=answer_items,
+        score=db_result.score,
+        total=db_result.total_questions or 0,
+    )
