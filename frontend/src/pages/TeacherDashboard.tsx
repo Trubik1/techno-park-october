@@ -9,16 +9,67 @@ interface Quiz {
   question_count: number; is_public: boolean;
 }
 
+interface QuizEditForm {
+  title: string; subject: string; grade: string;
+  is_public: boolean; time_limit_quiz: number; time_limit_question: number;
+}
+
+const QuizEditModal: React.FC<{ quiz: Quiz; onSave: () => void; onClose: () => void }> = ({ quiz, onSave, onClose }) => {
+  const [form, setForm] = useState<QuizEditForm>({
+    title: quiz.title, subject: quiz.subject, grade: quiz.grade,
+    is_public: quiz.is_public, time_limit_quiz: 2700, time_limit_question: 30,
+  });
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/quizzes/${quiz.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) { alert('Ошибка сохранения'); return; }
+      onSave();
+      onClose();
+    } catch { alert('Ошибка сохранения'); }
+    finally { setSaving(false); }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 animate-fadeIn" onClick={onClose}>
+      <div className="bg-surface rounded-2xl shadow-2xl p-6 max-w-lg w-full animate-scaleIn" onClick={e => e.stopPropagation()}>
+        <h2 className="text-xl font-bold text-text-primary mb-4">Редактировать тест</h2>
+        <div className="space-y-4">
+          <input className="input" placeholder="Название" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
+          <input className="input" placeholder="Предмет" value={form.subject} onChange={e => setForm(f => ({ ...f, subject: e.target.value }))} />
+          <input className="input" placeholder="Класс" value={form.grade} onChange={e => setForm(f => ({ ...f, grade: e.target.value }))} />
+          <label className="flex items-center gap-2 text-sm text-text-primary cursor-pointer">
+            <input type="checkbox" checked={form.is_public} onChange={e => setForm(f => ({ ...f, is_public: e.target.checked }))} className="rounded" />
+            Публичный тест
+          </label>
+        </div>
+        <div className="flex gap-3 mt-6">
+          <button onClick={onClose} className="btn-secondary flex-1">Отмена</button>
+          <button onClick={handleSave} disabled={saving} className="btn-primary flex-1">{saving ? 'Сохранение...' : 'Сохранить'}</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const TeacherDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [myQuizzes, setMyQuizzes] = useState<Quiz[]>([]);
   const [publicQuizzes, setPublicQuizzes] = useState<Quiz[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [startingId, setStartingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeSubject, setActiveSubject] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [tab, setTab] = useState<'my' | 'public'>('my');
+  const [editingQuiz, setEditingQuiz] = useState<Quiz | null>(null);
 
   const loadQuizzes = useCallback(async () => {
     try {
@@ -43,6 +94,17 @@ const TeacherDashboard: React.FC = () => {
       setError('Не удалось загрузить список тестов.');
     } finally { setIsLoading(false); }
   }, [navigate]);
+
+  const handleDeleteQuiz = async (quizId: string) => {
+    if (!window.confirm('Вы уверены, что хотите удалить этот тест? Это действие нельзя отменить.')) return;
+    setDeletingId(quizId);
+    try {
+      const res = await fetch(`/api/quizzes/${quizId}`, { method: 'DELETE' });
+      if (!res.ok) { alert('Ошибка удаления'); return; }
+      setMyQuizzes(prev => prev.filter(q => q.id !== quizId));
+    } catch { alert('Ошибка удаления'); }
+    finally { setDeletingId(null); }
+  };
 
   useEffect(() => { loadQuizzes(); }, [loadQuizzes]);
 
@@ -186,6 +248,22 @@ const TeacherDashboard: React.FC = () => {
                       </div>
                       <div className="flex gap-2 w-full sm:w-auto">
                         <button
+                          onClick={() => setEditingQuiz(quiz)}
+                          disabled={startingId !== null}
+                          className="btn-sm bg-primary/10 text-primary hover:bg-primary/20 disabled:opacity-50"
+                          title="Редактировать"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          onClick={() => handleDeleteQuiz(quiz.id)}
+                          disabled={deletingId === quiz.id || startingId !== null}
+                          className="btn-sm bg-error/10 text-error hover:bg-error/20 disabled:opacity-50"
+                          title="Удалить"
+                        >
+                          {deletingId === quiz.id ? '...' : '🗑️'}
+                        </button>
+                        <button
                           onClick={async () => {
                             setStartingId(quiz.id);
                             try {
@@ -214,6 +292,10 @@ const TeacherDashboard: React.FC = () => {
             </div>
           )}
           </div>
+        )}
+
+        {editingQuiz && (
+          <QuizEditModal quiz={editingQuiz} onSave={loadQuizzes} onClose={() => setEditingQuiz(null)} />
         )}
 
         {tab === 'public' && (
