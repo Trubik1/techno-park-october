@@ -178,11 +178,13 @@ def delete_question(db: Session, question_id: uuid.UUID):
     return True
 
 # Teacher CRUD (continued)
-def update_teacher_pin(db: Session, teacher_id: uuid.UUID, new_pin: str):
+def update_teacher_pin(db: Session, teacher_id: uuid.UUID, new_pin: str, name: str = None):
     db_teacher = db.query(models.Teacher).filter(models.Teacher.id == teacher_id).first()
     if not db_teacher:
         return None
     db_teacher.pin_hash = hash_pin(new_pin)
+    if name is not None:
+        db_teacher.name = name
     db.commit()
     db.refresh(db_teacher)
     return db_teacher
@@ -307,6 +309,19 @@ def get_participants_by_session(db: Session, session_id: uuid.UUID):
     ).filter(
         models.SessionParticipant.session_id == session_id
     ).all()
+
+def get_active_sessions_by_teacher(db: Session, teacher_id: uuid.UUID):
+    return db.query(
+        models.Session,
+        models.Quiz.title,
+        models.Quiz.subject,
+        models.Quiz.grade,
+    ).join(
+        models.Quiz, models.Session.quiz_id == models.Quiz.id
+    ).filter(
+        models.Quiz.teacher_id == teacher_id,
+        models.Session.status == "active",
+    ).order_by(models.Session.started_at.desc()).all()
 
 def get_session_leaderboard(db: Session, session_id: uuid.UUID):
     rows = db.query(

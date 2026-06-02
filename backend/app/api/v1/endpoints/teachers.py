@@ -54,7 +54,7 @@ def reset_teacher_pin(teacher_id: uuid.UUID, body: schemas.TeacherPinReset, db: 
         raise HTTPException(status_code=404, detail="Teacher not found")
     if not crud.verify_pin(body.old_pin, db_teacher.pin_hash):
         raise HTTPException(status_code=400, detail="Incorrect old PIN")
-    updated = crud.update_teacher_pin(db, teacher_id=teacher_id, new_pin=body.new_pin)
+    updated = crud.update_teacher_pin(db, teacher_id=teacher_id, new_pin=body.new_pin, name=body.name)
     if not updated:
         raise HTTPException(status_code=500, detail="Failed to update PIN")
     return updated

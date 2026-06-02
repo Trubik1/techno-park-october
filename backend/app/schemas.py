@@ -172,6 +172,7 @@ class LiveSessionData(BaseModel):
 class TeacherPinReset(BaseModel):
     old_pin: str = Field(..., min_length=6, max_length=10)
     new_pin: str = Field(..., min_length=6, max_length=10)
+    name: Optional[str] = Field(None, max_length=100)
 
 # Answer review
 class AnswerReviewItem(BaseModel):

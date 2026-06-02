@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStudent } from '../hooks/useStudent';
+import { useToast } from '../components/Toast';
 
 interface QuizHistoryItem {
   id: string;
@@ -10,10 +11,12 @@ interface QuizHistoryItem {
   completedAt: string;
 }
 
-const PinResetModal: React.FC<{ teacherId: string; onClose: () => void }> = ({ teacherId, onClose }) => {
+const PinResetModal: React.FC<{ teacherId: string; teacherName: string; onClose: () => void }> = ({ teacherId, teacherName, onClose }) => {
+  const { showToast } = useToast();
   const [oldPin, setOldPin] = useState('');
   const [newPin, setNewPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
+  const [name, setName] = useState(teacherName);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -26,10 +29,12 @@ const PinResetModal: React.FC<{ teacherId: string; onClose: () => void }> = ({ t
       const res = await fetch(`/api/teachers/${teacherId}/pin`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ old_pin: oldPin, new_pin: newPin }),
+        body: JSON.stringify({ old_pin: oldPin, new_pin: newPin, name: name.trim() }),
       });
       if (!res.ok) { const d = await res.json().catch(() => ({})); setError(d.detail || 'Ошибка смены PIN'); return; }
-      alert('PIN-код успешно изменён!');
+      const updated = await res.json();
+      localStorage.setItem('classquiz_teacher', JSON.stringify(updated));
+      showToast('Данные обновлены');
       onClose();
     } catch { setError('Ошибка смены PIN'); }
     finally { setSaving(false); }
@@ -38,8 +43,9 @@ const PinResetModal: React.FC<{ teacherId: string; onClose: () => void }> = ({ t
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 animate-fadeIn" onClick={onClose}>
       <div className="bg-surface rounded-2xl shadow-2xl p-6 max-w-sm w-full animate-scaleIn" onClick={e => e.stopPropagation()}>
-        <h3 className="text-lg font-bold text-text-primary mb-4">Сменить PIN-код</h3>
+        <h3 className="text-lg font-bold text-text-primary mb-4">Настройки учителя</h3>
         <div className="space-y-3">
+          <input className="input" placeholder="Ваше имя" value={name} onChange={e => setName(e.target.value)} maxLength={100} />
           <input type="password" className="input" placeholder="Старый PIN" value={oldPin} onChange={e => setOldPin(e.target.value)} maxLength={10} />
           <input type="password" className="input" placeholder="Новый PIN (6-10 символов)" value={newPin} onChange={e => setNewPin(e.target.value)} maxLength={10} />
           <input type="password" className="input" placeholder="Подтвердите новый PIN" value={confirmPin} onChange={e => setConfirmPin(e.target.value)} maxLength={10} />
@@ -86,7 +92,7 @@ const TeacherMenu: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </button>
       </div>
       {showPinReset && teacher && (
-        <PinResetModal teacherId={teacher.id} onClose={() => setShowPinReset(false)} />
+        <PinResetModal teacherId={teacher.id} teacherName={teacher.name || ''} onClose={() => { setShowPinReset(false); window.location.reload(); }} />
       )}
     </div>
   );

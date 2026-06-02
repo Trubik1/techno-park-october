@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-route
 import { StudentProvider } from './hooks/useStudent';
 import { ThemeContext } from './hooks/useTheme';
 import ThemeToggleButton from './components/ThemeToggleButton';
+import { ToastProvider } from './components/Toast';
 
 const TeacherLogin = React.lazy(() => import('./pages/TeacherLogin'));
 const TeacherDashboard = React.lazy(() => import('./pages/TeacherDashboard'));
@@ -63,6 +64,7 @@ function App() {
     <ThemeContext.Provider value={{ dark, toggle }}>
       <BrowserRouter>
         <StudentProvider>
+          <ToastProvider>
           <BgDecoration />
           <div className="fixed top-3 left-3 z-50 animate-fadeIn">
             <ThemeToggleButton />
@@ -83,6 +85,7 @@ function App() {
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </React.Suspense>
+          </ToastProvider>
         </StudentProvider>
       </BrowserRouter>
     </ThemeContext.Provider>

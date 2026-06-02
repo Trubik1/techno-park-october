@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserMenu from '../components/UserMenu';
 import BackButton from '../components/BackButton';
+import { useToast } from '../components/Toast';
 
 interface Quiz {
   id: string; title: string; subject: string; grade: string;
@@ -15,6 +16,7 @@ interface QuizEditForm {
 }
 
 const QuizEditModal: React.FC<{ quiz: Quiz; onSave: () => void; onClose: () => void }> = ({ quiz, onSave, onClose }) => {
+  const { showToast } = useToast();
   const [form, setForm] = useState<QuizEditForm>({
     title: quiz.title, subject: quiz.subject, grade: quiz.grade,
     is_public: quiz.is_public,
@@ -29,10 +31,11 @@ const QuizEditModal: React.FC<{ quiz: Quiz; onSave: () => void; onClose: () => v
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
-      if (!res.ok) { alert('Ошибка сохранения'); return; }
+      if (!res.ok) { showToast('Ошибка сохранения', 'error'); return; }
+      showToast('Тест сохранён');
       onSave();
       onClose();
-    } catch { alert('Ошибка сохранения'); }
+    } catch { showToast('Ошибка сохранения', 'error'); }
     finally { setSaving(false); }
   };
 
@@ -58,10 +61,17 @@ const QuizEditModal: React.FC<{ quiz: Quiz; onSave: () => void; onClose: () => v
   );
 };
 
+interface ActiveSession {
+  session_id: string; code: string; quiz_title: string;
+  subject: string; grade: string; started_at: string;
+}
+
 const TeacherDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [myQuizzes, setMyQuizzes] = useState<Quiz[]>([]);
   const [publicQuizzes, setPublicQuizzes] = useState<Quiz[]>([]);
+  const [activeSessions, setActiveSessions] = useState<ActiveSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [startingId, setStartingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -79,14 +89,16 @@ const TeacherDashboard: React.FC = () => {
       if (!teacherData) { navigate('/teacher/login'); return; }
       const teacher = JSON.parse(teacherData);
 
-      const [myRes, publicRes] = await Promise.all([
+      const [myRes, publicRes, activeRes] = await Promise.all([
         fetch(`/api/quizzes/?teacher_id=${teacher.id}`),
         fetch('/api/quizzes/?public=true'),
+        fetch(`/api/sessions/active/?teacher_id=${teacher.id}`),
       ]);
       if (!myRes.ok || !publicRes.ok) throw new Error('Ошибка загрузки');
 
       const myData: Quiz[] = await myRes.json();
       const publicData: Quiz[] = await publicRes.json();
+      if (activeRes.ok) setActiveSessions(await activeRes.json());
 
       setMyQuizzes(myData);
       setPublicQuizzes(publicData.filter(q => q.teacher_id !== teacher.id));
@@ -100,9 +112,10 @@ const TeacherDashboard: React.FC = () => {
     setDeletingId(quizId);
     try {
       const res = await fetch(`/api/quizzes/${quizId}`, { method: 'DELETE' });
-      if (!res.ok) { alert('Ошибка удаления'); return; }
+      if (!res.ok) { showToast('Ошибка удаления', 'error'); return; }
+      showToast('Тест удалён');
       setMyQuizzes(prev => prev.filter(q => q.id !== quizId));
-    } catch { alert('Ошибка удаления'); }
+    } catch { showToast('Ошибка удаления', 'error'); }
     finally { setDeletingId(null); }
   };
 
@@ -194,6 +207,28 @@ const TeacherDashboard: React.FC = () => {
             </button>
           </div>
         </div>
+
+        {activeSessions.length > 0 && (
+          <div className="px-6 pt-4 pb-2">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="w-2 h-2 rounded-full bg-success animate-pulse"></span>
+              <h3 className="text-sm font-semibold text-white/90">Активные сессии</h3>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {activeSessions.map(s => (
+                <button
+                  key={s.session_id}
+                  onClick={() => navigate(`/teacher/dashboard/session/${s.code}`)}
+                  className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium bg-white/15 hover:bg-white/25 text-white rounded-lg transition-colors"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-success"></span>
+                  {s.quiz_title.length > 25 ? s.quiz_title.slice(0, 25) + '…' : s.quiz_title}
+                  <span className="opacity-60 font-mono">{s.code}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {(tab === 'my') && (
           <div className="p-6">

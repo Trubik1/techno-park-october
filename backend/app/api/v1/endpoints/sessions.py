@@ -21,6 +21,24 @@ def create_session(session: schemas.SessionCreate, quiz_id: uuid.UUID, db: Sessi
         raise HTTPException(status_code=404, detail="Quiz not found")
     return crud.create_session(db=db, session=session, quiz_id=quiz_id)
 
+@router.get("/active/", response_model=List[dict])
+def get_active_sessions(teacher_id: uuid.UUID, db: Session = Depends(get_db)):
+    """
+    Получить активные сессии для конкретного учителя.
+    """
+    rows = crud.get_active_sessions_by_teacher(db, teacher_id=teacher_id)
+    return [
+        {
+            "session_id": str(s.id),
+            "code": s.code,
+            "quiz_title": title,
+            "subject": subject,
+            "grade": grade,
+            "started_at": s.started_at.isoformat() if s.started_at else None,
+        }
+        for s, title, subject, grade in rows
+    ]
+
 @router.get("/{code}", response_model=schemas.SessionResponse)
 def get_session_by_code(code: str, db: Session = Depends(get_db)):
     """

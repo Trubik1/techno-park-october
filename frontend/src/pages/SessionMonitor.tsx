@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { exportSessionResultsToCsv, downloadCsv } from '../utils/csvExport';
 import QRCode from 'qrcode';
+import { useToast } from '../components/Toast';
 
 function parseBackendDate(dateStr: string | null | undefined): Date {
   if (!dateStr) return new Date();
@@ -20,9 +21,27 @@ interface Participant {
   score: number | null; total_questions: number;
 }
 
+function playBeep() {
+  try {
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 660;
+    osc.type = 'sine';
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.15);
+  } catch { /* audio not available */ }
+}
+
 const SessionMonitor: React.FC = () => {
   const { code } = useParams<{ code: string }>();
   const navigate = useNavigate();
+  const { showToast } = useToast();
+  const prevCountRef = useRef(0);
   const [sessionData, setSessionData] = useState<SessionData | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -53,11 +72,17 @@ const SessionMonitor: React.FC = () => {
       const participantsResponse = await fetch(`/api/sessions/${sessionInfo.id}/participants`);
       if (!participantsResponse.ok) throw new Error('Не удалось загрузить участников');
       const participantsData = await participantsResponse.json();
-      setParticipants(participantsData.map((p: any) => ({
+      const mapped = participantsData.map((p: any) => ({
         student_id: p.student_id, display_name: p.display_name, class_name: p.class_name,
         joined_at: p.joined_at, completed_at: p.completed_at,
         score: p.score, total_questions: p.total_questions || 0
-      })));
+      }));
+      if (mapped.length > prevCountRef.current && prevCountRef.current > 0) {
+        playBeep();
+        showToast(`+1 участник: ${mapped[mapped.length - 1].display_name}`);
+      }
+      prevCountRef.current = mapped.length;
+      setParticipants(mapped);
 
       const lbRes = await fetch(`/api/sessions/${sessionInfo.id}/leaderboard`);
       if (lbRes.ok) setLeaderboard(await lbRes.json());
@@ -165,7 +190,7 @@ const SessionMonitor: React.FC = () => {
               <p className="text-sm text-white/80">{sessionData.subject} {sessionData.grade}</p>
               <div className="mt-3 inline-flex items-center gap-2 bg-white/15 rounded-xl px-4 py-2">
                 <span className="text-xs text-white/70">Код сессии:</span>
-                <span className="text-2xl font-bold tracking-[0.15em] font-mono text-white">{sessionData.code}</span>
+                <span className="text-2xl font-bold tracking-[0.15em] font-mono text-white cursor-pointer hover:opacity-80" onClick={async () => { try { await navigator.clipboard.writeText(sessionData.code); showToast('Код скопирован'); } catch { showToast('Ошибка копирования', 'error'); } }} title="Нажмите, чтобы скопировать">{sessionData.code}</span>
                 <button onClick={() => setQrModal(true)} className="ml-1 inline-flex items-center gap-1 text-xs bg-white/15 hover:bg-white/25 px-2 py-1 rounded-lg transition-colors" title="Показать QR-код">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
                   QR
@@ -313,7 +338,7 @@ const SessionMonitor: React.FC = () => {
         <div className="p-6 border-t border-gray-100 dark:border-gray-600">
           <button
             onClick={() => {
-              if (!sessionData || participants.length === 0) { alert('Нет данных для экспорта'); return; }
+              if (!sessionData || participants.length === 0) { showToast('Нет данных для экспорта', 'error'); return; }
               const exportData = participants.filter(p => p.completed_at).map(p => ({
                 student_name: p.display_name, class_name: p.class_name, score: p.score || 0,
                 total_questions: p.total_questions, completed_at: p.completed_at || '',
