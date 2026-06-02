@@ -72,8 +72,8 @@ class Session(Base):
     closed_at = Column(DateTime, nullable=True)
 
     quiz = relationship("Quiz", back_populates="sessions")
-    results = relationship("Result", back_populates="session")
-    participants = relationship("SessionParticipant", back_populates="session")
+    results = relationship("Result", back_populates="session", cascade="all, delete-orphan")
+    participants = relationship("SessionParticipant", back_populates="session", cascade="all, delete-orphan")
 
 class Result(Base):
     __tablename__ = "results"
