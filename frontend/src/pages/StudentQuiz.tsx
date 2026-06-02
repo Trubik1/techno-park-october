@@ -418,6 +418,14 @@ const StudentQuiz: React.FC = () => {
             </div>
           )}
 
+          {showExplanation && !isSubmitted && currentQuestionIndex < quizData.questions.length - 1 && (
+            <div className="mt-6 animate-slideDown">
+              <button onClick={() => { clearTimers(); moveToNext(); }} className="btn-primary w-full">
+                → Далее
+              </button>
+            </div>
+          )}
+
           {error && (
             <div className="mt-4 error-box animate-shake">
               <p className="error-text">{error}</p>

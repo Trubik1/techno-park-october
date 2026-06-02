@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from typing import List
 import uuid
 import pandas as pd
 import io
@@ -160,7 +159,9 @@ def confirm_quiz_import(
         subject=quiz_data.subject,
         grade=quiz_data.grade,
         teacher_id=teacher_id,
-        is_public=quiz_data.is_public
+        is_public=quiz_data.is_public,
+        time_limit_quiz=quiz_data.time_limit_quiz,
+        time_limit_question=quiz_data.time_limit_question,
     )
     db.add(db_quiz)
     db.flush()

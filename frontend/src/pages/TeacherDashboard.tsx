@@ -11,13 +11,13 @@ interface Quiz {
 
 interface QuizEditForm {
   title: string; subject: string; grade: string;
-  is_public: boolean; time_limit_quiz: number; time_limit_question: number;
+  is_public: boolean;
 }
 
 const QuizEditModal: React.FC<{ quiz: Quiz; onSave: () => void; onClose: () => void }> = ({ quiz, onSave, onClose }) => {
   const [form, setForm] = useState<QuizEditForm>({
     title: quiz.title, subject: quiz.subject, grade: quiz.grade,
-    is_public: quiz.is_public, time_limit_quiz: 2700, time_limit_question: 30,
+    is_public: quiz.is_public,
   });
   const [saving, setSaving] = useState(false);
 

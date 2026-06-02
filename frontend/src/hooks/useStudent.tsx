@@ -47,6 +47,9 @@ export const StudentProvider = ({ children }: { children: React.ReactNode }) => 
       if (!display_name.trim() || !class_name.trim()) {
         throw new Error('Имя и класс обязательны для заполнения');
       }
+      if (/^[0-9\s\-]+$/.test(display_name.trim())) {
+        throw new Error('Имя не может состоять только из цифр');
+      }
 
       const response = await fetch('/api/students/register', {
         method: 'POST',

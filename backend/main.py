@@ -93,16 +93,11 @@ with engine.connect() as conn:
     first_teacher = conn.execute(text("SELECT id FROM teachers ORDER BY created_at ASC LIMIT 1")).fetchone()
     if first_teacher:
         _seed_tid = str(first_teacher[0])
-        # Удаляем вопросы клонов
-        conn.execute(text(f"DELETE FROM questions WHERE quiz_id IN (SELECT id FROM quizzes WHERE title LIKE 'Билет %' AND teacher_id != '{_seed_tid}')"))
-        # Удаляем результаты клонов
-        conn.execute(text(f"DELETE FROM results WHERE session_id IN (SELECT id FROM sessions WHERE quiz_id IN (SELECT id FROM quizzes WHERE title LIKE 'Билет %' AND teacher_id != '{_seed_tid}'))"))
-        # Удаляем сессии клонов
-        conn.execute(text(f"DELETE FROM sessions WHERE quiz_id IN (SELECT id FROM quizzes WHERE title LIKE 'Билет %' AND teacher_id != '{_seed_tid}')"))
-        # Удаляем участников сессий клонов
-        conn.execute(text(f"DELETE FROM session_participants WHERE session_id IN (SELECT id FROM sessions WHERE quiz_id IN (SELECT id FROM quizzes WHERE title LIKE 'Билет %' AND teacher_id != '{_seed_tid}'))"))
-        # Удаляем сами клоны
-        conn.execute(text(f"DELETE FROM quizzes WHERE title LIKE 'Билет %' AND teacher_id != '{_seed_tid}'"))
+        conn.execute(text("DELETE FROM questions WHERE quiz_id IN (SELECT id FROM quizzes WHERE title LIKE 'Билет %' AND teacher_id != :tid)"), {"tid": _seed_tid})
+        conn.execute(text("DELETE FROM results WHERE session_id IN (SELECT id FROM sessions WHERE quiz_id IN (SELECT id FROM quizzes WHERE title LIKE 'Билет %' AND teacher_id != :tid))"), {"tid": _seed_tid})
+        conn.execute(text("DELETE FROM sessions WHERE quiz_id IN (SELECT id FROM quizzes WHERE title LIKE 'Билет %' AND teacher_id != :tid)"), {"tid": _seed_tid})
+        conn.execute(text("DELETE FROM session_participants WHERE session_id IN (SELECT id FROM sessions WHERE quiz_id IN (SELECT id FROM quizzes WHERE title LIKE 'Билет %' AND teacher_id != :tid))"), {"tid": _seed_tid})
+        conn.execute(text("DELETE FROM quizzes WHERE title LIKE 'Билет %' AND teacher_id != :tid"), {"tid": _seed_tid})
         conn.commit()
 
 # Включаем API роутер

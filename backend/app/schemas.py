@@ -1,12 +1,20 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List
 from datetime import datetime
 import uuid
+import re
 
 # Student schemas
 class StudentBase(BaseModel):
     display_name: str = Field(..., min_length=2, max_length=100, pattern=r'^[a-zA-Zа-яА-ЯёЁ0-9\s\-]+$')
     class_name: str = Field(..., min_length=1, max_length=50)
+
+    @field_validator('display_name')
+    @classmethod
+    def name_not_only_digits(cls, v: str) -> str:
+        if re.match(r'^[0-9\s\-]+$', v):
+            raise ValueError('Имя не может состоять только из цифр')
+        return v
 
 class StudentCreate(StudentBase):
     pass

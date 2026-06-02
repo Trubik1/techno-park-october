@@ -45,6 +45,10 @@ const StudentEntry: React.FC = () => {
         setError('Имя может содержать только буквы, цифры, пробелы и дефис');
         return;
       }
+      if (/^[0-9\s\-]+$/.test(name)) {
+        setError('Имя не может состоять только из цифр');
+        return;
+      }
       const fullClass = `${group} · ${typeLabels[userType].label}`;
       const student = await registerStudent(name, fullClass);
       if (student) {

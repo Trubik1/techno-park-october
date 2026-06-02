@@ -33,7 +33,6 @@ const QuizCreateForm: React.FC = () => {
   const [timeLimitQuiz, setTimeLimitQuiz] = useState(45);
   const [timeLimitQuestion, setTimeLimitQuestion] = useState(30);
   const [existingSubjects, setExistingSubjects] = useState<string[]>([]);
-  const [showSubjectDropdown, setShowSubjectDropdown] = useState(false);
 
   useEffect(() => {
     const teacherData = localStorage.getItem('classquiz_teacher');
@@ -216,8 +215,6 @@ const QuizCreateForm: React.FC = () => {
                       type="text"
                       value={subject}
                       onChange={e => { setSubject(e.target.value); setErrors(prev => ({ ...prev, subject: undefined })); }}
-                      onFocus={() => setShowSubjectDropdown(true)}
-                      onBlur={() => setTimeout(() => setShowSubjectDropdown(false), 200)}
                       placeholder="Например: История Беларуси"
                       className={`input ${errors.subject ? 'input-error' : ''}`}
                       list="subjects-list"
