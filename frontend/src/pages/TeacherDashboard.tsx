@@ -106,6 +106,31 @@ const TeacherDashboard: React.FC = () => {
   const [deleteConfirm, setDeleteConfirm] = useState<Quiz | null>(null);
   const [sortBy, setSortBy] = useState<'ticket' | 'date' | 'title'>('ticket');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const myGridRef = useRef<HTMLDivElement>(null);
+  const [myRevealed, setMyRevealed] = useState(false);
+  const pubGridRef = useRef<HTMLDivElement>(null);
+  const [pubRevealed, setPubRevealed] = useState(false);
+
+  useEffect(() => {
+    setMyRevealed(false);
+    setPubRevealed(false);
+  }, [tab]);
+
+  useEffect(() => {
+    const el = myGridRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setMyRevealed(true); obs.disconnect(); } }, { threshold: 0.1 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [tab]);
+
+  useEffect(() => {
+    const el = pubGridRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setPubRevealed(true); obs.disconnect(); } }, { threshold: 0.1 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [tab]);
 
   const loadQuizzes = useCallback(async () => {
     try {
@@ -312,9 +337,9 @@ const TeacherDashboard: React.FC = () => {
                 <p className="text-text-secondary">Тесты не найдены. Попробуйте изменить параметры поиска.</p>
               </div>
             ) : (
-              <div className="grid gap-3">
+              <div ref={myGridRef} className="grid gap-3">
                 {filteredMyQuizzes.map((quiz, index) => (
-                  <div key={quiz.id} className={`card-hover p-5 ${deletingId === quiz.id ? 'opacity-20 scale-95 pointer-events-none' : ''}`} style={{ animationDelay: `${index * 0.08}s` }}>
+                  <div key={quiz.id} className={`card-hover p-5 ${deletingId === quiz.id ? 'opacity-20 scale-95 pointer-events-none' : ''} ${myRevealed ? 'animate-rise' : 'opacity-0 translate-y-6'}`} style={{ animationDelay: `${index * 0.06}s` }}>
                     <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-3">
                       <div className="flex-1 min-w-0">
                         <h3 className="text-base font-semibold text-text-primary truncate">{quiz.title}</h3>
@@ -411,9 +436,9 @@ const TeacherDashboard: React.FC = () => {
                 <p className="text-text-secondary">Тесты не найдены. Попробуйте изменить параметры поиска.</p>
               </div>
             ) : (
-              <div className="grid gap-3">
+              <div ref={pubGridRef} className="grid gap-3">
                 {filteredPublicQuizzes.map((quiz, index) => (
-                  <div key={quiz.id} className="card-hover p-5" style={{ animationDelay: `${index * 0.08}s` }}>
+                  <div key={quiz.id} className={`card-hover p-5 ${pubRevealed ? 'animate-rise' : 'opacity-0 translate-y-6'}`} style={{ animationDelay: `${index * 0.06}s` }}>
                     <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-3">
                       <div className="flex-1 min-w-0">
                         <h3 className="text-base font-semibold text-text-primary truncate">{quiz.title}</h3>
