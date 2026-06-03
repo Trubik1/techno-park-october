@@ -46,10 +46,10 @@ const StudentHistory: React.FC = () => {
 
   if ((isLoading || isStudentLoading) && history.length === 0) {
     return (
-      <div className="page-container flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center animate-fadeIn">
-          <div className="spinner mx-auto mb-4"></div>
-          <p className="text-text-secondary">Загрузка профиля...</p>
+          <div className="spinner mx-auto mb-3"></div>
+          <p className="text-sm text-text-secondary">Загрузка профиля...</p>
         </div>
       </div>
     );
@@ -57,11 +57,10 @@ const StudentHistory: React.FC = () => {
 
   if (error) {
     return (
-      <div className="page-container flex items-center justify-center">
-        <div className="page-card animate-scaleIn">
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="card p-8 max-w-md mx-auto animate-scaleIn text-center">
           <div className="error-box mb-4">
-            <h3 className="font-bold text-text-primary mb-1">Ошибка</h3>
-            <p className="text-text-secondary text-sm">{error}</p>
+            <p className="text-sm text-error">{error}</p>
           </div>
           <button onClick={() => navigate('/student/entry')} className="btn-primary w-full">Вернуться к входу</button>
         </div>
@@ -78,62 +77,60 @@ const StudentHistory: React.FC = () => {
   const initials = student?.display_name?.charAt(0)?.toUpperCase() || '?';
 
   return (
-    <div className="page-container relative">
-      <div className="fixed top-14 left-3 z-40">
-        <BackButton to="/student/quiz-entry" />
-      </div>
-      <div className="absolute top-4 right-4 z-10">
-        <UserMenu role="student" />
-      </div>
-      <div className="max-w-4xl mx-auto space-y-6 animate-fadeIn">
-        <Breadcrumbs items={[
-          { label: 'Вход ученика', path: '/student/entry' },
-          { label: 'История тестов' },
-        ]} />
-        <div className="card">
-          <div className="gradient-header">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center text-white text-2xl font-bold shrink-0 shadow-lg">
-                {initials}
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold">{student?.display_name || 'Ученик'}</h1>
-                <p className="text-sm text-white/80">{student?.class_name || ''}</p>
-              </div>
+    <div className="min-h-screen bg-background animate-fadeIn">
+      <div className="max-w-4xl mx-auto px-4 md:px-6 py-6 md:py-8">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <BackButton to="/student/quiz-entry" />
+            <div>
+              <h1 className="text-2xl font-bold text-text-primary font-heading">Профиль</h1>
+              <Breadcrumbs items={[
+                { label: 'Вход ученика', path: '/student/entry' },
+                { label: 'История тестов' },
+              ]} />
+            </div>
+          </div>
+          <UserMenu role="student" />
+        </div>
+
+        <div className="card p-6 md:p-8 mb-6">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-white text-2xl font-bold font-heading shrink-0">
+              {initials}
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-text-primary font-heading">{student?.display_name || 'Ученик'}</h2>
+              <p className="text-sm text-text-secondary">{student?.class_name || ''}</p>
             </div>
           </div>
 
-          <div className="p-6">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="stat-card">
-                <p className="text-sm font-medium text-text-secondary">Всего тестов</p>
-                <p className="text-2xl font-bold text-text-primary">{history.length}</p>
-              </div>
-              <div className="stat-card">
-                <p className="text-sm font-medium text-text-secondary">Средний балл</p>
-                <p className="text-2xl font-bold text-text-primary">{averageScore}</p>
-              </div>
-              <div className="stat-card">
-                <p className="text-sm font-medium text-text-secondary">Лучший</p>
-                <p className="text-2xl font-bold text-success">{bestScore}%</p>
-              </div>
-              <div className="stat-card">
-                <p className="text-sm font-medium text-text-secondary">Худший</p>
-                <p className="text-2xl font-bold text-error">{worstScore}%</p>
-              </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="stat-card">
+              <p className="text-sm font-medium text-text-secondary">Всего тестов</p>
+              <p className="text-2xl font-bold text-text-primary font-heading">{history.length}</p>
+            </div>
+            <div className="stat-card">
+              <p className="text-sm font-medium text-text-secondary">Средний балл</p>
+              <p className="text-2xl font-bold text-text-primary font-heading">{averageScore}</p>
+            </div>
+            <div className="stat-card">
+              <p className="text-sm font-medium text-text-secondary">Лучший</p>
+              <p className="text-2xl font-bold text-success font-heading">{bestScore}%</p>
+            </div>
+            <div className="stat-card">
+              <p className="text-sm font-medium text-text-secondary">Худший</p>
+              <p className="text-2xl font-bold text-error font-heading">{worstScore}%</p>
             </div>
           </div>
 
           {history.length > 0 && (
-            <div className="px-6 pb-6">
-              <div className="p-4 rounded-lg bg-background/50">
-                <p className="text-sm font-medium text-text-secondary mb-2">Общая статистика</p>
-                <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm">
-                  <span className="text-text-primary">Ответов: <strong>{totalQuestions}</strong></span>
-                  <span className="text-text-primary">Верных: <strong className="text-success">{correctAnswers}</strong></span>
-                  <span className="text-text-primary">Ошибок: <strong className="text-error">{totalQuestions - correctAnswers}</strong></span>
-                  <span className="text-text-primary">Точность: <strong className={totalPercent >= 80 ? 'text-success' : totalPercent >= 60 ? 'text-warning' : 'text-error'}>{totalPercent}%</strong></span>
-                </div>
+            <div className="mt-6 p-4 rounded-xl bg-background">
+              <p className="text-sm font-medium text-text-secondary mb-2">Общая статистика</p>
+              <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm">
+                <span className="text-text-primary">Ответов: <strong>{totalQuestions}</strong></span>
+                <span className="text-text-primary">Верных: <strong className="text-success">{correctAnswers}</strong></span>
+                <span className="text-text-primary">Ошибок: <strong className="text-error">{totalQuestions - correctAnswers}</strong></span>
+                <span className="text-text-primary">Точность: <strong className={totalPercent >= 80 ? 'text-success' : totalPercent >= 60 ? 'text-warning' : 'text-error'}>{totalPercent}%</strong></span>
               </div>
             </div>
           )}
@@ -146,11 +143,11 @@ const StudentHistory: React.FC = () => {
             <button onClick={() => navigate('/student/quiz-entry')} className="btn-primary mt-6">Подключиться к тесту</button>
           </div>
         ) : (
-          <div className="card animate-slideUp">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-text-primary">История тестов</h2>
+          <div className="card">
+            <div className="p-6 border-b border-border">
+              <h2 className="text-lg font-bold text-text-primary font-heading">История тестов</h2>
             </div>
-            <div className="p-6 grid gap-4">
+            <div className="p-6 grid gap-3">
               {history.map((item, index) => {
                 const percentage = Math.round((item.score / item.totalQuestions) * 100);
                 const badgeClasses = percentage >= 80
@@ -158,21 +155,19 @@ const StudentHistory: React.FC = () => {
                   ? 'bg-warning/10 text-warning' : 'bg-error/10 text-error';
                 const barClasses = percentage >= 80 ? 'bg-success' : percentage >= 60 ? 'bg-warning' : 'bg-error';
                 return (
-                  <div key={item.id} className="card-hover border border-gray-100 animate-slideUp" style={{ animationDelay: `${index * 0.1}s` }}>
-                    <div className="p-5">
-                      <div className="flex flex-col sm:flex-row justify-between items-start gap-2 mb-3">
-                        <div>
-                          <h3 className="text-lg font-semibold text-text-primary">{item.title}</h3>
-                        </div>
-                        <span className={'px-3 py-1 text-xs font-bold rounded-full shrink-0 ' + badgeClasses}>{percentage}%</span>
+                  <div key={item.id} className="card-hover p-5" style={{ animationDelay: `${index * 0.08}s` }}>
+                    <div className="flex flex-col sm:flex-row justify-between items-start gap-2 mb-3">
+                      <div>
+                        <h3 className="text-base font-semibold text-text-primary">{item.title}</h3>
                       </div>
-                      <div className="h-2 bg-gray-100 rounded-full mb-3">
-                        <div className={'h-full rounded-full transition-all duration-500 ' + barClasses} style={{ width: percentage + '%' }}></div>
-                      </div>
-                      <div className="flex justify-between items-center text-sm text-text-secondary">
-                        <span>Балл: <strong>{item.score}/{item.totalQuestions}</strong></span>
-                        <span>{new Date(item.completedAt).toLocaleDateString('ru-RU', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
-                      </div>
+                      <span className={'px-3 py-1 text-xs font-bold rounded-full shrink-0 ' + badgeClasses}>{percentage}%</span>
+                    </div>
+                    <div className="h-2 bg-background rounded-full mb-3">
+                      <div className={'h-full rounded-full transition-all duration-500 ' + barClasses} style={{ width: percentage + '%' }}></div>
+                    </div>
+                    <div className="flex justify-between items-center text-sm text-text-secondary">
+                      <span>Балл: <strong>{item.score}/{item.totalQuestions}</strong></span>
+                      <span>{new Date(item.completedAt).toLocaleDateString('ru-RU', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
                     </div>
                   </div>
                 );
@@ -181,9 +176,9 @@ const StudentHistory: React.FC = () => {
           </div>
         )}
 
-        <div className="flex gap-3">
+        <div className="flex gap-3 mt-6">
           <button onClick={() => navigate('/student/quiz-entry')} className="btn-primary flex-1">Подключиться к тесту</button>
-          <button onClick={() => navigate('/student/entry')} className="btn-secondary flex-1">Сменить профиль</button>
+          <button onClick={() => navigate('/student/entry')} className="btn-outline flex-1">Сменить профиль</button>
         </div>
       </div>
     </div>

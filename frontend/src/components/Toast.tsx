@@ -41,7 +41,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           <div
             key={t.id}
             onClick={() => removeToast(t.id)}
-            className={`pointer-events-auto px-4 py-3 rounded-xl shadow-xl text-white text-sm font-medium animate-slideUp cursor-pointer transition-all hover:scale-105 ${
+            className={`pointer-events-auto px-4 py-3 rounded-xl shadow-lg text-white text-sm font-medium animate-slideUp cursor-pointer transition-all hover:scale-105 ${
               t.type === 'success' ? 'bg-success' : 'bg-error'
             }`}
           >

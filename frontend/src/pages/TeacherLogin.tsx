@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import BackButton from '../components/BackButton';
+import ThemeToggleButton from '../components/ThemeToggleButton';
 
 const TeacherLogin: React.FC = () => {
   const [isRegister, setIsRegister] = useState(false);
@@ -83,111 +83,135 @@ const TeacherLogin: React.FC = () => {
   };
 
   return (
-    <div className="page-container flex items-center justify-center relative">
-      <div className="fixed top-14 left-3 z-40">
-        <BackButton to="/" />
+    <div className="min-h-screen bg-background flex animate-fadeIn">
+      <div className="fixed top-4 right-4 z-50">
+        <ThemeToggleButton />
       </div>
-      <div className="page-card animate-slideUp">
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-secondary to-primary mb-4 shadow-lg shadow-secondary/25">
-            <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+
+      <div className="hidden lg:flex w-[45%] bg-primary relative items-center justify-center p-12">
+        <div className="text-center max-w-md">
+          <div className="w-20 h-20 rounded-2xl bg-white/15 flex items-center justify-center mx-auto mb-8">
+            <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-text-primary">{isRegister ? 'Создать класс' : 'Вход для учителя'}</h2>
-          <p className="text-text-secondary mt-1">
-            {isRegister
-              ? 'Зарегистрируйтесь, чтобы создавать тесты и управлять классом'
-              : 'Введите ваше имя и PIN-код для доступа к панели управления'}
+          <h1 className="text-white font-heading text-4xl font-bold mb-4" style={{ letterSpacing: '-0.02em' }}>ClassQuiz</h1>
+          <p className="text-white/70 text-lg leading-relaxed">
+            Создавайте тесты, проводите опросы и отслеживайте успеваемость вашего класса в реальном времени.
           </p>
-        </div>
-
-        <form onSubmit={isRegister ? handleRegister : handleLogin} className="space-y-4">
-          {isRegister && (
-            <div>
-              <label className="label">Ваше имя (необязательно)</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Например: Иван Иванов"
-                className="input"
-                autoFocus
-              />
+          <div className="mt-12 grid grid-cols-3 gap-4">
+            <div className="bg-white/10 rounded-xl p-4">
+              <p className="text-white text-2xl font-bold font-heading">25+</p>
+              <p className="text-white/60 text-sm mt-1">Готовых тестов</p>
             </div>
-          )}
-          <div>
-            <label className="label flex items-center gap-2">
-              <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v14m0 0l-4-4m4 4l4-4m-4-8a2 2 0 100-4 2 2 0 000 4z" />
-              </svg>
-              Ключ учителя
-            </label>
-            <div className="relative">
-              <input
-                type={showPin ? 'text' : 'password'}
-                value={pin}
-                onChange={(e) => setPin(e.target.value)}
-                placeholder="••••••"
-                maxLength={10}
-                className="input text-center tracking-widest font-bold pr-10"
-              />
-              <button type="button" onClick={() => setShowPin(!showPin)} className="absolute right-2 top-1/2 -translate-y-1/2 text-text-secondary/50 hover:text-text-secondary transition-colors text-lg">
-                {showPin ? '🙈' : '👁️'}
-              </button>
+            <div className="bg-white/10 rounded-xl p-4">
+              <p className="text-white text-2xl font-bold font-heading">1-11</p>
+              <p className="text-white/60 text-sm mt-1">Классы</p>
+            </div>
+            <div className="bg-white/10 rounded-xl p-4">
+              <p className="text-white text-2xl font-bold font-heading">100%</p>
+              <p className="text-white/60 text-sm mt-1">Бесплатно</p>
             </div>
           </div>
-          {isRegister && (
-            <div>
-              <label className="label flex items-center gap-2">
-                <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Подтвердите ключ учителя
-              </label>
-              <div className="relative">
-                <input
-                  type={showConfirmPin ? 'text' : 'password'}
-                  value={confirmPin}
-                  onChange={(e) => setConfirmPin(e.target.value)}
-                  placeholder="••••••"
-                  maxLength={10}
-                  className="input text-center tracking-widest font-bold pr-10"
-                />
-                <button type="button" onClick={() => setShowConfirmPin(!showConfirmPin)} className="absolute right-2 top-1/2 -translate-y-1/2 text-text-secondary/50 hover:text-text-secondary transition-colors text-lg">
-                  {showConfirmPin ? '🙈' : '👁️'}
-                </button>
+        </div>
+      </div>
+
+      <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
+        <div className="w-full max-w-md">
+          <div className="lg:hidden mb-8 text-center">
+            <h1 className="text-3xl font-bold text-text-primary font-heading">ClassQuiz</h1>
+            <p className="text-text-secondary mt-2">Панель управления учителя</p>
+          </div>
+
+          <div className="card p-8 md:p-10">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-bold text-text-primary font-heading">
+                {isRegister ? 'Создать класс' : 'Вход для учителя'}
+              </h2>
+              <p className="text-text-secondary mt-2 text-sm">
+                {isRegister
+                  ? 'Зарегистрируйтесь, чтобы создавать тесты'
+                  : 'Введите PIN-код для доступа к панели управления'}
+              </p>
+            </div>
+
+            <form onSubmit={isRegister ? handleRegister : handleLogin} className="space-y-5">
+              {isRegister && (
+                <div>
+                  <label className="label">Ваше имя</label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Иван Иванов"
+                    className="input"
+                    autoFocus
+                  />
+                </div>
+              )}
+              <div>
+                <label className="label">Ключ учителя</label>
+                <div className="relative">
+                  <input
+                    type={showPin ? 'text' : 'password'}
+                    value={pin}
+                    onChange={(e) => setPin(e.target.value)}
+                    placeholder="••••••"
+                    maxLength={10}
+                    className="input pr-12 text-center tracking-[0.25em] font-medium"
+                    autoFocus={!isRegister}
+                  />
+                  <button type="button" onClick={() => setShowPin(!showPin)} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary/50 hover:text-text-secondary transition-colors text-lg">
+                    {showPin ? '🙈' : '👁️'}
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
+              {isRegister && (
+                <div>
+                  <label className="label">Подтвердите ключ учителя</label>
+                  <div className="relative">
+                    <input
+                      type={showConfirmPin ? 'text' : 'password'}
+                      value={confirmPin}
+                      onChange={(e) => setConfirmPin(e.target.value)}
+                      placeholder="••••••"
+                      maxLength={10}
+                      className="input pr-12 text-center tracking-[0.25em] font-medium"
+                    />
+                    <button type="button" onClick={() => setShowConfirmPin(!showConfirmPin)} className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary/50 hover:text-text-secondary transition-colors text-lg">
+                      {showConfirmPin ? '🙈' : '👁️'}
+                    </button>
+                  </div>
+                </div>
+              )}
 
-          {error && (
-            <div className="error-box animate-shake">
-              <p className="error-text">{error}</p>
-            </div>
-          )}
+              {error && (
+                <div className="error-box">
+                  <p className="error-text">{error}</p>
+                </div>
+              )}
 
-          <button type="submit" disabled={isLoading} className="btn-primary w-full">
-            {isLoading ? (
-              <span className="flex items-center justify-center gap-2">
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                {isRegister ? 'Создание...' : 'Вход...'}
-              </span>
-            ) : isRegister ? 'Создать класс' : 'Войти'}
-          </button>
-        </form>
+              <button type="submit" disabled={isLoading} className="btn-primary w-full">
+                {isLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <div className="spinner !w-4 !h-4 !border-white/30 !border-t-white"></div>
+                    {isRegister ? 'Создание...' : 'Вход...'}
+                  </span>
+                ) : isRegister ? 'Создать класс' : 'Войти'}
+              </button>
+            </form>
 
-        <div className="mt-6 space-y-3">
-          {!isRegister && (
-            <div className="text-center">
+            <div className="mt-6 space-y-3 text-center">
               <button onClick={() => navigate('/student/entry')} className="text-sm text-text-secondary hover:text-primary transition-colors">
                 ← Войти как ученик
               </button>
+              <div>
+                <button onClick={() => { setIsRegister(!isRegister); setError(null); setName(''); setPin(''); setConfirmPin(''); }} className="text-sm text-primary hover:text-primary/80 transition-colors font-medium">
+                  {isRegister ? 'Уже есть аккаунт? Войти' : 'Создать новый класс'}
+                </button>
+              </div>
             </div>
-          )}
-          <button onClick={() => { setIsRegister(!isRegister); setError(null); setName(''); setPin(''); setConfirmPin(''); }} className="text-sm text-primary hover:text-primary/80 transition-colors w-full text-center">
-            {isRegister ? 'Уже есть аккаунт? Войти' : 'Создать новый класс'}
-          </button>
+          </div>
         </div>
       </div>
     </div>

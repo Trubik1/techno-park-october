@@ -53,9 +53,9 @@ const PinResetModal: React.FC<{ teacherId: string; teacherName: string; onClose:
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 animate-fadeIn" onClick={onClose}>
-      <div className="bg-surface rounded-2xl shadow-2xl p-6 max-w-sm w-full animate-scaleIn" onClick={e => e.stopPropagation()}>
-        <h3 className="text-lg font-bold text-text-primary mb-4">Настройки учителя</h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 animate-fadeIn" onClick={onClose}>
+      <div className="bg-surface rounded-2xl shadow-xl border border-border p-6 max-w-sm w-full animate-scaleIn" onClick={e => e.stopPropagation()}>
+        <h3 className="text-lg font-semibold text-text-primary mb-4 font-heading">Настройки учителя</h3>
         <div className="space-y-3">
           <input className="input" placeholder="Ваше имя" value={name} onChange={e => setName(e.target.value)} maxLength={100} />
           <PinInput value={oldPin} onChange={setOldPin} placeholder="Старый PIN" />
@@ -64,7 +64,7 @@ const PinResetModal: React.FC<{ teacherId: string; teacherName: string; onClose:
           {error && <p className="text-sm text-error">{error}</p>}
         </div>
         <div className="flex gap-3 mt-6">
-          <button onClick={onClose} className="btn-secondary flex-1">Отмена</button>
+          <button onClick={onClose} className="btn-outline flex-1">Отмена</button>
           <button onClick={handleReset} disabled={saving} className="btn-primary flex-1">{saving ? 'Сохранение...' : 'Сменить'}</button>
         </div>
       </div>
@@ -87,8 +87,8 @@ const TeacherMenu: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   };
 
   return (
-    <div className="absolute top-12 right-0 w-64 bg-surface rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden animate-scaleIn z-50">
-      <div className="p-4 bg-gradient-to-r from-primary/5 to-secondary/5 border-b border-gray-100 dark:border-gray-700">
+    <div className="absolute top-12 right-0 w-64 bg-surface rounded-xl shadow-lg border border-border overflow-hidden animate-scaleIn z-50">
+      <div className="p-4 border-b border-border">
         <p className="font-semibold text-text-primary">{teacher?.name || 'Учитель'}</p>
         <p className="text-xs text-text-secondary mt-0.5">Учитель</p>
       </div>
@@ -98,7 +98,7 @@ const TeacherMenu: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           Сменить PIN
         </button>
       </div>
-      <div className="p-2 border-t border-gray-100 dark:border-gray-700">
+      <div className="p-2 border-t border-border">
         <button onClick={handleLogout} className="w-full text-left px-3 py-2 rounded-lg text-sm text-error hover:bg-error/5 transition-colors">
           Выйти из аккаунта
         </button>
@@ -135,16 +135,16 @@ const EditProfileModal: React.FC<{ student: { id: string; display_name: string; 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 animate-fadeIn" onClick={onClose}>
-      <div className="bg-surface rounded-2xl shadow-2xl p-6 max-w-sm w-full animate-scaleIn" onClick={e => e.stopPropagation()}>
-        <h3 className="text-lg font-bold text-text-primary mb-4">Редактировать профиль</h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 animate-fadeIn" onClick={onClose}>
+      <div className="bg-surface rounded-2xl shadow-xl border border-border p-6 max-w-sm w-full animate-scaleIn" onClick={e => e.stopPropagation()}>
+        <h3 className="text-lg font-semibold text-text-primary mb-4 font-heading">Редактировать профиль</h3>
         <div className="space-y-3">
           <input className="input" placeholder="Ваше имя" value={name} onChange={e => setName(e.target.value)} maxLength={100} />
           <input className="input" placeholder="Класс" value={className} onChange={e => setClassName(e.target.value)} maxLength={50} />
           {error && <p className="text-sm text-error">{error}</p>}
         </div>
         <div className="flex gap-3 mt-6">
-          <button onClick={onClose} className="btn-secondary flex-1">Отмена</button>
+          <button onClick={onClose} className="btn-outline flex-1">Отмена</button>
           <button onClick={handleSave} disabled={saving} className="btn-primary flex-1">{saving ? 'Сохранение...' : 'Сохранить'}</button>
         </div>
       </div>
@@ -188,10 +188,10 @@ const StudentMenu: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const initials = student?.display_name?.charAt(0)?.toUpperCase() || '?';
 
   return (
-    <div className="absolute top-12 right-0 w-72 bg-surface rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden animate-scaleIn z-50">
-      <div className="p-4 bg-gradient-to-r from-primary/5 to-secondary/5 border-b border-gray-100 dark:border-gray-700">
+    <div className="absolute top-12 right-0 w-72 bg-surface rounded-xl shadow-lg border border-border overflow-hidden animate-scaleIn z-50">
+      <div className="p-4 border-b border-border">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold shrink-0">
+          <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm shrink-0">
             {initials}
           </div>
           <div className="min-w-0">
@@ -201,13 +201,13 @@ const StudentMenu: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </div>
       </div>
 
-      <div className="p-3 border-b border-gray-100 dark:border-gray-700">
+      <div className="p-3 border-b border-border">
         <div className="grid grid-cols-2 gap-2">
-          <div className="text-center p-2 rounded-lg bg-background/50">
+          <div className="text-center p-2 rounded-lg bg-background">
             <p className="text-lg font-bold text-text-primary">{totalTests}</p>
             <p className="text-xs text-text-secondary">Тестов</p>
           </div>
-          <div className="text-center p-2 rounded-lg bg-background/50">
+          <div className="text-center p-2 rounded-lg bg-background">
             <p className={`text-lg font-bold ${avgPercent >= 80 ? 'text-success' : avgPercent >= 60 ? 'text-warning' : 'text-error'}`}>
               {avgPercent}%
             </p>
@@ -216,7 +216,7 @@ const StudentMenu: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </div>
       </div>
 
-      <div className="p-2 border-b border-gray-100 dark:border-gray-700">
+      <div className="p-2 border-b border-border">
         <button onClick={() => { onClose(); navigate('/student/history'); }} className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-text-primary hover:bg-primary/5 transition-colors flex items-center gap-2">
           <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -237,7 +237,7 @@ const StudentMenu: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </button>
       </div>
 
-      <div className="p-2 border-t border-gray-100 dark:border-gray-700">
+      <div className="p-2">
         <button onClick={handleClearData} className="w-full text-left px-3 py-2 rounded-lg text-sm text-warning hover:bg-warning/5 transition-colors">
           Очистить данные
         </button>
@@ -284,7 +284,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ role }) => {
     <div ref={menuRef} className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-sm font-bold shadow-md hover:shadow-lg hover:shadow-primary/25 transition-all active:scale-95"
+        className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold shadow-sm hover:shadow-md hover:shadow-primary/20 transition-all active:scale-95"
       >
         {initials}
       </button>

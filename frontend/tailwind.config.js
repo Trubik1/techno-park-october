@@ -6,11 +6,21 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        heading: ['Manrope', 'system-ui', 'sans-serif'],
+        body: ['Inter', 'system-ui', 'sans-serif'],
+      },
+      fontSize: {
+        'h1': ['56px', { lineHeight: '1.2', fontWeight: '700', letterSpacing: '-0.02em' }],
+        'h2': ['36px', { lineHeight: '1.3', fontWeight: '700', letterSpacing: '-0.02em' }],
+        'h3': ['26px', { lineHeight: '1.4', fontWeight: '600', letterSpacing: '-0.01em' }],
+      },
       colors: {
         primary: 'rgb(var(--color-primary-rgb) / <alpha-value>)',
-        secondary: 'rgb(var(--color-secondary-rgb) / <alpha-value>)',
+        accent: 'rgb(var(--color-accent-rgb) / <alpha-value>)',
         background: 'rgb(var(--color-background-rgb) / <alpha-value>)',
         surface: 'rgb(var(--color-surface-rgb) / <alpha-value>)',
+        border: 'rgb(var(--color-border-rgb) / <alpha-value>)',
         'text-primary': 'rgb(var(--color-text-primary-rgb) / <alpha-value>)',
         'text-secondary': 'rgb(var(--color-text-secondary-rgb) / <alpha-value>)',
         success: 'rgb(var(--color-success-rgb) / <alpha-value>)',

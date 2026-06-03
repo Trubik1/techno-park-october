@@ -7,18 +7,18 @@ const ThemeToggleButton: React.FC = () => {
   return (
     <button
       onClick={toggle}
-      className="relative w-14 h-7 rounded-full transition-colors duration-300 focus:outline-none"
-      style={{ backgroundColor: dark ? '#4F46E5' : '#D1D5DB' }}
+      className="relative w-11 h-6 rounded-full transition-colors duration-300 focus:outline-none border border-border"
+      style={{ backgroundColor: dark ? '#1E293B' : '#E2E8F0' }}
       aria-label={dark ? 'Переключить на светлую тему' : 'Переключить на тёмную тему'}
     >
       <span
-        className={`absolute top-0.5 flex items-center justify-center w-6 h-6 bg-white rounded-full shadow-md transition-all duration-300 ${
-          dark ? 'left-[calc(100%-1.75rem)]' : 'left-0.5'
+        className={`absolute top-0.5 flex items-center justify-center w-5 h-5 bg-white rounded-full shadow-sm transition-all duration-300 ${
+          dark ? 'left-[calc(100%-1.25rem)]' : 'left-0.5'
         }`}
       >
         <svg
-          className={`w-3.5 h-3.5 transition-transform duration-500 ${
-            dark ? 'text-primary rotate-45' : 'text-amber-500 -rotate-45'
+          className={`w-3 h-3 transition-transform duration-500 ${
+            dark ? 'text-primary' : 'text-accent'
           }`}
           fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
         >

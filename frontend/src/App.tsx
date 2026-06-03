@@ -19,8 +19,8 @@ const StudentQuizReview = React.lazy(() => import('./pages/StudentQuizReview'));
 const PageLoader: React.FC = () => (
   <div className="min-h-screen bg-background flex items-center justify-center p-4 animate-fadeIn">
     <div className="text-center">
-      <div className="spinner mx-auto mb-4"></div>
-      <p className="text-text-secondary animate-pulse">Загрузка...</p>
+      <div className="spinner mx-auto mb-3"></div>
+      <p className="text-sm text-text-secondary animate-pulse" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>Загрузка...</p>
     </div>
   </div>
 );
@@ -30,8 +30,8 @@ const NotFoundPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 animate-fadeIn relative">
       <div className="page-card text-center">
-        <div className="text-8xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-4">404</div>
-        <h2 className="text-2xl font-bold text-text-primary mb-2">Страница не найдена</h2>
+        <div className="text-7xl font-bold text-primary mb-4 font-heading" style={{ letterSpacing: '-0.03em' }}>404</div>
+        <h2 className="text-2xl font-bold text-text-primary mb-2 font-heading">Страница не найдена</h2>
         <p className="text-text-secondary mb-6">Страница, которую вы ищете, не существует или была перемещена.</p>
         <button onClick={() => navigate('/')} className="btn-primary">На главную</button>
       </div>
@@ -40,10 +40,8 @@ const NotFoundPage: React.FC = () => {
 };
 
 const BgDecoration: React.FC = () => (
-  <div className="bg-decoration">
-    <div></div>
-    <div></div>
-    <div></div>
+  <div className="fixed inset-0 pointer-events-none overflow-hidden -z-0">
+    <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] opacity-[0.08] dark:opacity-[0.04] rounded-full" style={{ background: 'radial-gradient(circle, #2563EB, transparent 70%)' }}></div>
   </div>
 );
 
@@ -66,7 +64,7 @@ function App() {
         <StudentProvider>
           <ToastProvider>
           <BgDecoration />
-          <div className="fixed top-3 left-3 z-50 animate-fadeIn">
+          <div className="fixed top-4 right-4 z-50 animate-fadeIn">
             <ThemeToggleButton />
           </div>
           <React.Suspense fallback={<PageLoader />}>

@@ -49,10 +49,10 @@ const StudentQuizReview: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="page-container flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center animate-fadeIn">
-          <div className="spinner mx-auto mb-4"></div>
-          <p className="text-text-secondary">Загрузка результатов...</p>
+          <div className="spinner mx-auto mb-3"></div>
+          <p className="text-sm text-text-secondary">Загрузка результатов...</p>
         </div>
       </div>
     );
@@ -60,11 +60,10 @@ const StudentQuizReview: React.FC = () => {
 
   if (error || !review) {
     return (
-      <div className="page-container flex items-center justify-center">
-        <div className="page-card animate-scaleIn">
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="card p-8 max-w-md mx-auto animate-scaleIn text-center">
           <div className="error-box mb-4">
-            <h3 className="font-bold text-text-primary mb-1">Ошибка</h3>
-            <p className="text-text-secondary text-sm">{error || 'Данные не найдены'}</p>
+            <p className="text-sm text-error">{error || 'Данные не найдены'}</p>
           </div>
           <button onClick={() => navigate('/student/entry')} className="btn-primary w-full">Вернуться</button>
         </div>
@@ -76,78 +75,71 @@ const StudentQuizReview: React.FC = () => {
   if (!q) return null;
 
   return (
-    <div className="page-container relative">
-      <div className="fixed top-14 left-3 z-40">
-        <BackButton to="/student/entry" />
-      </div>
-      <div className="w-full max-w-2xl mx-auto">
-        <Breadcrumbs items={[
-          { label: 'Вход ученика', path: '/student/entry' },
-          { label: 'Просмотр ответов' },
-        ]} />
-        <div className="card animate-slideUp">
-        <div className="gradient-header">
-          <h1 className="text-xl font-bold">{review.quiz_title}</h1>
-          <p className="text-sm text-white/80 mt-1">Просмотр ответов — {review.score}/{review.total}</p>
+    <div className="min-h-screen bg-background animate-fadeIn">
+      <div className="max-w-2xl mx-auto px-4 md:px-6 py-6 md:py-8">
+        <div className="flex items-center gap-3 mb-6">
+          <BackButton to="/student/entry" />
+          <Breadcrumbs items={[
+            { label: 'Вход ученика', path: '/student/entry' },
+            { label: 'Просмотр ответов' },
+          ]} />
         </div>
 
-        <div className="h-2 bg-gray-100 dark:bg-gray-700">
-          <div className="h-full bg-gradient-to-r from-primary to-secondary transition-all duration-500" style={{ width: `${((currentQ + 1) / review.answers.length) * 100}%` }}></div>
-        </div>
-
-        <div className="p-6 animate-fadeIn" key={currentQ}>
-          <p className="text-xs text-text-secondary mb-1">Вопрос {currentQ + 1} из {review.answers.length}</p>
-          <h3 className="text-lg font-semibold text-text-primary mb-4">{q.question_text}</h3>
-
-          <div className="grid gap-2 mb-4">
-            {OPTION_KEYS.map((key) => {
-              const label = key.replace('opt_', '').toUpperCase();
-              const isStudentAnswer = q.student_answer === key.replace('opt_', '');
-              const isCorrectAnswer = q.correct_answer === key.replace('opt_', '');
-              let bg = 'bg-gray-50 dark:bg-gray-700';
-              if (isCorrectAnswer) bg = 'bg-success/20 border-success';
-              else if (isStudentAnswer && !q.is_correct) bg = 'bg-error/20 border-error';
-              return (
-                <div key={key} className={`p-3 rounded-xl border-2 ${bg} ${(isStudentAnswer || isCorrectAnswer) ? 'border' : 'border-transparent'}`}>
-                  <span className="font-bold text-sm">{label}.</span> {q[key]}
-                  {isStudentAnswer && <span className="ml-2 text-xs text-error font-medium">(твой ответ)</span>}
-                  {isCorrectAnswer && !isStudentAnswer && <span className="ml-2 text-xs text-success font-medium">(правильный)</span>}
-                </div>
-              );
-            })}
+        <div className="card">
+          <div className="p-6 bg-primary text-white rounded-t-2xl">
+            <h1 className="text-xl font-bold font-heading">{review.quiz_title}</h1>
+            <p className="text-white/80 mt-1">Просмотр ответов — {review.score}/{review.total}</p>
           </div>
 
-          <div className={`p-3 rounded-lg text-sm ${q.is_correct ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}`}>
-            {q.is_correct ? '✓ Верно' : '✗ Неверно'}
+          <div className="h-2 bg-background">
+            <div className="h-full bg-primary transition-all duration-500" style={{ width: `${((currentQ + 1) / review.answers.length) * 100}%` }}></div>
           </div>
 
-          {q.explanation && (
-            <div className="mt-4 p-4 rounded-lg bg-primary/5 text-text-secondary text-sm">
-              <p className="font-medium text-text-primary mb-1">Объяснение:</p>
-              {q.explanation}
+          <div className="p-6 animate-fadeIn" key={currentQ}>
+            <p className="text-xs text-text-secondary mb-1">Вопрос {currentQ + 1} из {review.answers.length}</p>
+            <h3 className="text-lg font-semibold text-text-primary mb-4">{q.question_text}</h3>
+
+            <div className="grid gap-2 mb-4">
+              {OPTION_KEYS.map((key) => {
+                const label = key.replace('opt_', '').toUpperCase();
+                const isStudentAnswer = q.student_answer === key.replace('opt_', '');
+                const isCorrectAnswer = q.correct_answer === key.replace('opt_', '');
+                let bg = 'bg-background';
+                if (isCorrectAnswer) bg = 'bg-success/10 border-success';
+                else if (isStudentAnswer && !q.is_correct) bg = 'bg-error/10 border-error';
+                return (
+                  <div key={key} className={`p-3 rounded-xl border-2 ${bg} ${(isStudentAnswer || isCorrectAnswer) ? 'border' : 'border-transparent'}`}>
+                    <span className="font-bold text-sm">{label}.</span> {q[key]}
+                    {isStudentAnswer && <span className="ml-2 text-xs text-error font-medium">(твой ответ)</span>}
+                    {isCorrectAnswer && !isStudentAnswer && <span className="ml-2 text-xs text-success font-medium">(правильный)</span>}
+                  </div>
+                );
+              })}
             </div>
-          )}
-        </div>
 
-        <div className="p-6 border-t border-gray-100 flex justify-between gap-3">
-          <button
-            onClick={() => setCurrentQ(p => Math.max(0, p - 1))}
-            disabled={currentQ === 0}
-            className="btn-secondary btn-sm disabled:opacity-30"
-          >
-            ← Назад
-          </button>
-          <span className="text-sm text-text-secondary self-center">{currentQ + 1}/{review.answers.length}</span>
-          <button
-            onClick={() => setCurrentQ(p => Math.min(review.answers.length - 1, p + 1))}
-            disabled={currentQ === review.answers.length - 1}
-            className="btn-primary btn-sm disabled:opacity-30"
-          >
-            Далее →
-          </button>
+            <div className={`p-3 rounded-lg text-sm font-medium ${q.is_correct ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}`}>
+              {q.is_correct ? '✓ Верно' : '✗ Неверно'}
+            </div>
+
+            {q.explanation && (
+              <div className="mt-4 p-4 rounded-xl bg-primary/5 text-text-secondary text-sm">
+                <p className="font-medium text-text-primary mb-1">Объяснение:</p>
+                {q.explanation}
+              </div>
+            )}
+          </div>
+
+          <div className="p-6 border-t border-border flex justify-between gap-3">
+            <button onClick={() => setCurrentQ(p => Math.max(0, p - 1))} disabled={currentQ === 0} className="btn-outline btn-sm disabled:opacity-30">
+              ← Назад
+            </button>
+            <span className="text-sm text-text-secondary self-center">{currentQ + 1}/{review.answers.length}</span>
+            <button onClick={() => setCurrentQ(p => Math.min(review.answers.length - 1, p + 1))} disabled={currentQ === review.answers.length - 1} className="btn-primary btn-sm disabled:opacity-30">
+              Далее →
+            </button>
+          </div>
         </div>
       </div>
-    </div>
     </div>
   );
 };

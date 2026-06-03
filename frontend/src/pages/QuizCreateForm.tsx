@@ -191,10 +191,10 @@ const QuizCreateForm: React.FC = () => {
         {steps.map((s, i) => (
           <React.Fragment key={s.key}>
             <div className={`flex items-center gap-1.5 text-sm ${i <= idx ? 'text-primary font-semibold' : 'text-text-secondary/40'}`}>
-              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${i <= idx ? 'bg-primary text-white' : 'bg-gray-100 text-gray-400'}`}>{i + 1}</span>
+              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${i <= idx ? 'bg-primary text-white' : 'bg-background border border-border text-text-secondary'}`}>{i + 1}</span>
               {s.label}
             </div>
-            {i < steps.length - 1 && <div className={`flex-1 h-px ${i < idx ? 'bg-primary' : 'bg-gray-200'}`} />}
+            {i < steps.length - 1 && <div className={`flex-1 h-px ${i < idx ? 'bg-primary' : 'bg-border'}`} />}
           </React.Fragment>
         ))}
       </div>
@@ -203,23 +203,20 @@ const QuizCreateForm: React.FC = () => {
 
   if (step === 'meta') {
     return (
-      <div className="page-container">
-        <div className="max-w-2xl mx-auto">
+      <div className="min-h-screen bg-background animate-fadeIn">
+        <div className="max-w-2xl mx-auto px-4 md:px-6 py-6 md:py-8">
           <Breadcrumbs items={[
             { label: 'Вход учителя', path: '/teacher/login' },
             { label: 'Панель управления', path: '/teacher/dashboard' },
             { label: 'Создание теста' },
           ]} />
-        <div className="card animate-slideUp">
-          <div className="gradient-header">
-            <div className="flex justify-between items-center">
-              <h1 className="text-2xl font-bold">Создание теста</h1>
-              <button onClick={() => navigate('/teacher/dashboard')} className="text-sm text-white/80 hover:text-white">Отмена</button>
+          <div className="card p-8 md:p-10">
+            <div className="flex items-center justify-between mb-6">
+              <h1 className="text-2xl font-bold text-text-primary font-heading">Создание теста</h1>
+              <button onClick={() => navigate('/teacher/dashboard')} className="btn-ghost btn-sm">Отмена</button>
             </div>
-          </div>
-          <div className="p-6 md:p-8">
             {stepBar('meta')}
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
                 <label className="label">Название теста</label>
                 <input type="text" value={title} onChange={e => { setTitle(e.target.value); setErrors(prev => ({ ...prev, title: undefined })); }} placeholder="Например: Математика: Дроби" className={`input ${errors.title ? 'input-error' : ''}`} autoFocus />
@@ -229,18 +226,9 @@ const QuizCreateForm: React.FC = () => {
                 <div>
                   <label className="label">Предмет (вкладка)</label>
                   <div className="relative">
-                    <input
-                      type="text"
-                      value={subject}
-                      onChange={e => { setSubject(e.target.value); setErrors(prev => ({ ...prev, subject: undefined })); }}
-                      placeholder="Например: История Беларуси"
-                      className={`input ${errors.subject ? 'input-error' : ''}`}
-                      list="subjects-list"
-                    />
+                    <input type="text" value={subject} onChange={e => { setSubject(e.target.value); setErrors(prev => ({ ...prev, subject: undefined })); }} placeholder="Например: История Беларуси" className={`input ${errors.subject ? 'input-error' : ''}`} list="subjects-list" />
                     <datalist id="subjects-list">
-                      {existingSubjects.filter(s => s !== subject).map(s => (
-                        <option key={s} value={s} />
-                      ))}
+                      {existingSubjects.filter(s => s !== subject).map(s => (<option key={s} value={s} />))}
                     </datalist>
                   </div>
                   {errors.subject && <p className="error-text mt-1">{errors.subject}</p>}
@@ -260,16 +248,16 @@ const QuizCreateForm: React.FC = () => {
                 <input type="number" value={questionCount} onChange={e => setQuestionCount(parseInt(e.target.value) || 10)} min={1} max={100} className="input" />
                 {errors.questionCount && <p className="error-text mt-1">{errors.questionCount}</p>}
               </div>
-              <div className="flex items-center gap-3">
-                <input type="checkbox" id="is-public" checked={isPublic} onChange={e => setIsPublic(e.target.checked)} className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary" />
-                <label htmlFor="is-public" className="text-sm text-text-secondary cursor-pointer select-none">Сделать тест публичным (доступен всем учителям)</label>
-              </div>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" checked={isPublic} onChange={e => setIsPublic(e.target.checked)} className="w-4 h-4 rounded border-border text-primary focus:ring-primary/30" />
+                <span className="text-sm text-text-secondary">Сделать тест публичным (доступен всем учителям)</span>
+              </label>
 
-              <div className="pt-2 border-t border-gray-100">
+              <div className="pt-4 border-t border-border">
                 <label className="label">Ограничение по времени</label>
                 <div className="flex gap-2 mb-3">
-                  <button type="button" onClick={() => setTimerMode('quiz')} className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${timerMode === 'quiz' ? 'bg-primary text-white shadow-md shadow-primary/30' : 'bg-gray-100 dark:bg-gray-700 text-text-secondary hover:bg-gray-200 dark:hover:bg-gray-600'}`}>На весь тест</button>
-                  <button type="button" onClick={() => setTimerMode('question')} className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${timerMode === 'question' ? 'bg-primary text-white shadow-md shadow-primary/30' : 'bg-gray-100 dark:bg-gray-700 text-text-secondary hover:bg-gray-200 dark:hover:bg-gray-600'}`}>На один вопрос</button>
+                  <button type="button" onClick={() => setTimerMode('quiz')} className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${timerMode === 'quiz' ? 'bg-primary text-white shadow-sm' : 'border border-border text-text-secondary hover:bg-surface'}`}>На весь тест</button>
+                  <button type="button" onClick={() => setTimerMode('question')} className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${timerMode === 'question' ? 'bg-primary text-white shadow-sm' : 'border border-border text-text-secondary hover:bg-surface'}`}>На один вопрос</button>
                 </div>
                 {timerMode === 'quiz' ? (
                   <div className="flex items-center gap-3">
@@ -284,35 +272,29 @@ const QuizCreateForm: React.FC = () => {
                 )}
               </div>
 
-              <div className="flex gap-3 pt-4">
-                <button onClick={handleStart} className="btn-primary flex-1">Заполнить вопросы ({questionCount} шт.)</button>
-              </div>
+              <button onClick={handleStart} className="btn-primary w-full">Заполнить вопросы ({questionCount} шт.)</button>
             </div>
           </div>
         </div>
       </div>
-    </div>
     );
   }
 
   if (step === 'done') {
     return (
-      <div className="page-container">
-        <div className="max-w-2xl mx-auto card animate-scaleIn">
-          <div className="gradient-header">
-            <h1 className="text-2xl font-bold">Тест создан</h1>
-          </div>
-          <div className="p-6 md:p-8 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-success/20 mb-4">
+      <div className="min-h-screen bg-background animate-fadeIn">
+        <div className="max-w-2xl mx-auto px-4 md:px-6 py-6 md:py-8">
+          <div className="card p-8 md:p-10 text-center animate-scaleIn">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-success/10 mb-4">
               <svg className="w-8 h-8 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-xl font-bold text-text-primary mb-2">"{title}"</h2>
+            <h2 className="text-xl font-bold text-text-primary mb-2 font-heading">«{title}»</h2>
             <p className="text-text-secondary mb-2">{subject} &bull; {grade} класс &bull; {questions.length} вопросов</p>
             <div className="flex gap-3 mt-6 justify-center">
               <button onClick={downloadFilled} className="btn-primary">Скачать CSV</button>
-              <button onClick={() => navigate('/teacher/dashboard')} className="btn-secondary">В дашборд</button>
+              <button onClick={() => navigate('/teacher/dashboard')} className="btn-outline">В дашборд</button>
             </div>
           </div>
         </div>
@@ -330,36 +312,33 @@ const QuizCreateForm: React.FC = () => {
   };
 
   return (
-    <div className="page-container">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-background animate-fadeIn">
+      <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-8">
         <Breadcrumbs items={[
           { label: 'Вход учителя', path: '/teacher/login' },
           { label: 'Панель управления', path: '/teacher/dashboard' },
           { label: 'Создание теста' },
         ]} />
-        <div className="animate-slideUp">
         {stepBar('questions')}
         <div className="card">
-          <div className="gradient-header">
-            <div className="flex justify-between items-center">
-              <h1 className="text-xl font-bold">{title}</h1>
-              <button onClick={() => setStep('meta')} className="text-sm text-white/80 hover:text-white">Изменить настройки</button>
-            </div>
+          <div className="p-6 border-b border-border flex justify-between items-center">
+            <h1 className="text-xl font-bold text-text-primary font-heading">{title}</h1>
+            <button onClick={() => setStep('meta')} className="btn-ghost btn-sm">Изменить настройки</button>
           </div>
           <div className="p-4 md:p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-text-primary">Вопросы ({questions.length})</h2>
+              <h2 className="text-lg font-bold text-text-primary font-heading">Вопросы ({questions.length})</h2>
               <div className="flex gap-2">
-                <button onClick={downloadTemplate} className="btn-secondary btn-sm">Шаблон CSV</button>
-                <button onClick={downloadFilled} className="btn-secondary btn-sm">Скачать CSV</button>
+                <button onClick={downloadTemplate} className="btn-outline btn-sm">Шаблон CSV</button>
+                <button onClick={downloadFilled} className="btn-outline btn-sm">Скачать CSV</button>
               </div>
             </div>
 
             {saveError && <div className="error-box mb-4 animate-shake"><p className="error-text">{saveError}</p></div>}
 
-            <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm">
-                <thead className="bg-gray-50 dark:bg-gray-800">
+            <div className="overflow-x-auto rounded-xl border border-border">
+              <table className="min-w-full divide-y divide-border text-sm">
+                <thead className="bg-background">
                   <tr>
                     <th className="px-2 py-2 w-8"></th>
                     <th className="px-2 py-2 w-8 text-xs font-medium text-text-secondary">#</th>
@@ -373,7 +352,7 @@ const QuizCreateForm: React.FC = () => {
                     <th className="px-2 py-2 w-10"></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900">
+                <tbody className="divide-y divide-border bg-surface">
                   {questions.map((q, i) => {
                     const qe = errors[`q_${q.id}`] as Record<string, string> | undefined;
                     return (
@@ -383,7 +362,7 @@ const QuizCreateForm: React.FC = () => {
                         onDragOver={(e) => { e.preventDefault(); }}
                         onDrop={() => { if (dragIdx.current !== null && dragIdx.current !== i) { moveQuestion(dragIdx.current, i); } dragIdx.current = null; }}
                         onDragEnd={() => { dragIdx.current = null; }}
-                        className={'hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors ' + (dragIdx.current === i ? 'opacity-30' : '')}
+                        className={'hover:bg-background transition-colors ' + (dragIdx.current === i ? 'opacity-30' : '')}
                       >
                         <td className="px-2 py-1.5">
                           <span className="cursor-grab active:cursor-grabbing text-text-secondary/30 hover:text-text-secondary/60 transition-colors block text-center">
@@ -424,27 +403,26 @@ const QuizCreateForm: React.FC = () => {
             </div>
 
             <div className="mt-3 flex justify-center">
-              <button onClick={addQuestion} className="btn-secondary btn-sm">
+              <button onClick={addQuestion} className="btn-outline btn-sm">
                 <svg className="w-4 h-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                 Добавить вопрос
               </button>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 mt-6 pt-6 border-t border-gray-100">
+            <div className="flex flex-col sm:flex-row gap-3 mt-6 pt-6 border-t border-border">
               <button onClick={saveToBackend} disabled={isSubmitting} className="btn-primary flex-1">
                 {isSubmitting ? (
                   <span className="flex items-center justify-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <div className="spinner !w-4 !h-4 !border-white/30 !border-t-white"></div>
                     Сохранение...
                   </span>
                 ) : 'Сохранить тест'}
               </button>
-              <button onClick={downloadFilled} className="btn-secondary flex-1">Скачать CSV</button>
+              <button onClick={downloadFilled} className="btn-outline flex-1">Скачать CSV</button>
             </div>
           </div>
         </div>
       </div>
-    </div>
     </div>
   );
 };
