@@ -113,7 +113,7 @@
   }
 
   .card {
-    @apply bg-surface backdrop-blur-sm bg-surface/90 rounded-2xl border border-border/80 shadow-sm;
+    @apply bg-surface rounded-2xl border border-border/80 shadow-sm;
   }
 
   .card-hover {
@@ -121,7 +121,10 @@
   }
 
   .card-glass {
-    @apply bg-surface/70 backdrop-blur-xl rounded-2xl border border-border/60 shadow-lg shadow-primary/5;
+    @apply rounded-2xl border border-border/60 shadow-lg shadow-primary/5;
+    background: rgba(var(--color-surface-rgb), 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 
   .input {
