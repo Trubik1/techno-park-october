@@ -182,7 +182,7 @@ const QuizImportForm: React.FC = () => {
               <div className="space-y-4">
                 <p className="text-sm text-text-secondary">Поддерживаемые форматы: CSV, XLS, XLSX. Колонки: вопрос, вариант a/b/c/d, правильный ответ (a/b/c/d), объяснение.</p>
 
-                <div className="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-800">
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden bg-surface">
                   <div className="p-3 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 text-xs font-medium text-text-secondary flex items-center gap-2">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                     Пример оформления таблицы
@@ -201,7 +201,7 @@ const QuizImportForm: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                        <tr className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <tr className="bg-surface hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                           <td className="px-3 py-2 text-text-primary">Сколько будет 2+2?</td>
                           <td className="px-3 py-2 text-text-primary">3</td>
                           <td className="px-3 py-2 text-text-primary">4</td>
@@ -210,7 +210,7 @@ const QuizImportForm: React.FC = () => {
                           <td className="px-3 py-2 font-bold text-success">b</td>
                           <td className="px-3 py-2 text-text-secondary">2+2=4</td>
                         </tr>
-                        <tr className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <tr className="bg-surface hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                           <td className="px-3 py-2 text-text-primary">Столица Франции?</td>
                           <td className="px-3 py-2 text-text-primary">Лондон</td>
                           <td className="px-3 py-2 text-text-primary">Берлин</td>
@@ -268,7 +268,7 @@ const QuizImportForm: React.FC = () => {
                         </thead>
                         <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                           {previewData.questions.map((q, i) => (
-                            <tr key={i} className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <tr key={i} className="bg-surface hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                               <td className="px-4 py-3 text-sm text-text-secondary whitespace-normal break-words">{i + 1}</td>
                               <td className="px-4 py-3 text-sm text-text-primary whitespace-normal break-words">{q.text}</td>
                               <td className="px-4 py-3 text-sm text-text-primary whitespace-normal break-words">{q.opt_a}</td>
