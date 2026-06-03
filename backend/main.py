@@ -39,6 +39,12 @@ with engine.connect() as conn:
         conn.execute(text("ALTER TABLE quizzes ADD COLUMN time_limit_quiz INTEGER DEFAULT 2700"))
         conn.execute(text("ALTER TABLE quizzes ADD COLUMN time_limit_question INTEGER DEFAULT 30"))
         conn.commit()
+    # Добавляем sort_order в questions, если нет
+    cursor4 = conn.execute(text("SELECT sql FROM sqlite_master WHERE type='table' AND name='questions'"))
+    row4 = cursor4.fetchone()
+    if row4 and 'sort_order' not in row4[0]:
+        conn.execute(text("ALTER TABLE questions ADD COLUMN sort_order INTEGER DEFAULT 0"))
+        conn.commit()
 
 # Авто-сидирование базового теста при пустой БД
 from app.db.database import SessionLocal
