@@ -29,7 +29,7 @@ const QuizCreateForm: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [isPublic, setIsPublic] = useState(false);
+  const [isPublic, setIsPublic] = useState(true);
   const [timerMode, setTimerMode] = useState<'quiz' | 'question'>('quiz');
   const [timeLimitQuiz, setTimeLimitQuiz] = useState(45);
   const [timeLimitQuestion, setTimeLimitQuestion] = useState(30);
@@ -249,7 +249,8 @@ const QuizCreateForm: React.FC = () => {
                   <label className="label">Класс</label>
                   <select value={grade} onChange={e => { setGrade(e.target.value); setErrors(prev => ({ ...prev, grade: undefined })); }} className={`input ${errors.grade ? 'input-error' : ''}`}>
                     <option value="">Выберите класс</option>
-                    {['5', '6', '7', '8', '9', '10', '11'].map(g => <option key={g} value={g}>{g} класс</option>)}
+                    {Array.from({length: 11}, (_, i) => String(i + 1)).map(g => <option key={g} value={g}>{g} класс</option>)}
+                    <option value="доп занятия">Доп. занятия</option>
                   </select>
                   {errors.grade && <p className="error-text mt-1">{errors.grade}</p>}
                 </div>

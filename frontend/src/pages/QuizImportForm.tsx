@@ -18,7 +18,7 @@ const QuizImportForm: React.FC = () => {
   const [quizTitle, setQuizTitle] = useState('');
   const [quizSubject, setQuizSubject] = useState('');
   const [quizGrade, setQuizGrade] = useState('');
-  const [isPublic, setIsPublic] = useState(false);
+  const [isPublic, setIsPublic] = useState(true);
   const [timerMode, setTimerMode] = useState<'quiz' | 'question'>('quiz');
   const [timeLimitQuiz, setTimeLimitQuiz] = useState(45);
   const [timeLimitQuestion, setTimeLimitQuestion] = useState(30);
@@ -40,17 +40,27 @@ const QuizImportForm: React.FC = () => {
     }).catch(() => {});
   }, []);
 
+  const validateMetaFields = (): boolean => {
+    if (!quizTitle.trim() || !quizSubject.trim() || !quizGrade.trim()) {
+      setUploadError('Неправильный формат');
+      return false;
+    }
+    return true;
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setSelectedFile(e.target.files[0]);
       setPreviewData(null);
       setUploadError(null);
+      // Валидация сразу при загрузке файла
+      setTimeout(() => validateMetaFields(), 0);
     }
   };
 
   const handlePreview = async () => {
     if (!selectedFile) { setUploadError('Пожалуйста, выберите файл для загрузки'); return; }
-    if (!quizTitle.trim() || !quizSubject.trim() || !quizGrade.trim()) { setUploadError('Пожалуйста, заполните все поля метаданных теста'); return; }
+    if (!validateMetaFields()) return;
     setIsUploading(true);
     setUploadError(null);
     try {
@@ -87,12 +97,16 @@ const QuizImportForm: React.FC = () => {
         quizPayload.time_limit_quiz = null;
         quizPayload.time_limit_question = timeLimitQuestion;
       }
-      const res = await fetch(`/api/quizzes/import/confirm/?teacher_id=${teacher.id}`, {
+      const res = await fetch(`/api/quizzes/import/confirm?teacher_id=${teacher.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ quiz_data: quizPayload, questions: previewData.questions }),
       });
-      if (!res.ok) { const err = await res.json(); throw new Error(err.detail || 'Ошибка импорта'); }
+      if (!res.ok) {
+        let errMsg = 'Ошибка импорта';
+        try { const err = await res.json(); errMsg = err.detail || errMsg; } catch {}
+        throw new Error(errMsg);
+      }
       setImportSuccess(true);
       navigateTimeoutRef.current = setTimeout(() => navigate('/teacher/dashboard'), 2000);
     } catch (err: any) {
@@ -139,7 +153,8 @@ const QuizImportForm: React.FC = () => {
                   <label className="label">Класс</label>
                   <select value={quizGrade} onChange={(e) => setQuizGrade(e.target.value)} className="input">
                     <option value="">Выберите класс</option>
-                    {['8', '9', '10', '11'].map(g => <option key={g} value={g}>{g} класс</option>)}
+                    {Array.from({length: 11}, (_, i) => String(i + 1)).map(g => <option key={g} value={g}>{g} класс</option>)}
+                    <option value="доп занятия">Доп. занятия</option>
                   </select>
                 </div>
               </div>

@@ -44,6 +44,7 @@ const PixelOtpInput: React.FC<PixelOtpInputProps> = ({ value, onChange, length =
         maxLength={length}
         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
         autoFocus
+        inputMode="text"
       />
       <div
         className="flex gap-2 justify-center select-none"

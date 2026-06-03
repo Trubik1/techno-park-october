@@ -98,10 +98,53 @@ const TeacherMenu: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   );
 };
 
+const EditProfileModal: React.FC<{ student: { id: string; display_name: string; class_name: string }; onClose: () => void }> = ({ student, onClose }) => {
+  const { showToast } = useToast();
+  const { updateStudent } = useStudent();
+  const [name, setName] = useState(student.display_name);
+  const [className, setClassName] = useState(student.class_name);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSave = async () => {
+    setError('');
+    if (!name.trim() || !className.trim()) { setError('Заполните все поля'); return; }
+    setSaving(true);
+    try {
+      const updated = await updateStudent(name.trim(), className.trim());
+      if (updated) {
+        showToast('Данные обновлены');
+        onClose();
+      } else {
+        setError('Ошибка обновления');
+      }
+    } catch { setError('Ошибка обновления'); }
+    finally { setSaving(false); }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 animate-fadeIn" onClick={onClose}>
+      <div className="bg-surface rounded-2xl shadow-2xl p-6 max-w-sm w-full animate-scaleIn" onClick={e => e.stopPropagation()}>
+        <h3 className="text-lg font-bold text-text-primary mb-4">Редактировать профиль</h3>
+        <div className="space-y-3">
+          <input className="input" placeholder="Ваше имя" value={name} onChange={e => setName(e.target.value)} maxLength={100} />
+          <input className="input" placeholder="Класс" value={className} onChange={e => setClassName(e.target.value)} maxLength={50} />
+          {error && <p className="text-sm text-error">{error}</p>}
+        </div>
+        <div className="flex gap-3 mt-6">
+          <button onClick={onClose} className="btn-secondary flex-1">Отмена</button>
+          <button onClick={handleSave} disabled={saving} className="btn-primary flex-1">{saving ? 'Сохранение...' : 'Сохранить'}</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const StudentMenu: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const navigate = useNavigate();
   const { student, clearStudent } = useStudent();
   const [history, setHistory] = useState<QuizHistoryItem[]>([]);
+  const [showEdit, setShowEdit] = useState(false);
 
   useEffect(() => {
     if (student) {
@@ -168,6 +211,12 @@ const StudentMenu: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           </svg>
           Профиль и статистика
         </button>
+        <button onClick={() => setShowEdit(true)} className="w-full text-left px-3 py-2 rounded-lg text-sm text-text-primary hover:bg-primary/5 transition-colors flex items-center gap-2">
+          <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          Сменить имя или класс
+        </button>
         <button onClick={() => { onClose(); navigate('/teacher/login'); }} className="w-full text-left px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-primary/5 transition-colors flex items-center gap-2">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
@@ -184,6 +233,9 @@ const StudentMenu: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           Выйти
         </button>
       </div>
+      {showEdit && student && (
+        <EditProfileModal student={{ id: student.id, display_name: student.display_name, class_name: student.class_name }} onClose={() => setShowEdit(false)} />
+      )}
     </div>
   );
 };

@@ -10,6 +10,7 @@ export interface Student {
 interface StudentContextType {
   student: Student | null;
   registerStudent: (display_name: string, class_name: string) => Promise<Student | null>;
+  updateStudent: (display_name: string, class_name: string) => Promise<Student | null>;
   loadStudent: () => Promise<void>;
   clearStudent: () => void;
   isRegistered: boolean;
@@ -80,6 +81,38 @@ export const StudentProvider = ({ children }: { children: React.ReactNode }) => 
     }
   }, []);
 
+  // Обновление данных студента
+  const updateStudent = useCallback(async (display_name: string, class_name: string): Promise<Student | null> => {
+    try {
+      if (!display_name.trim() || !class_name.trim()) {
+        throw new Error('Имя и класс обязательны для заполнения');
+      }
+
+      const studentData = localStorage.getItem('classquiz_student');
+      if (!studentData) throw new Error('Студент не найден');
+      const current = JSON.parse(studentData);
+
+      const response = await fetch(`/api/students/${current.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ display_name: display_name.trim(), class_name: class_name.trim() }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Ошибка обновления');
+      }
+
+      const updated: Student = await response.json();
+      localStorage.setItem('classquiz_student', JSON.stringify(updated));
+      setStudent(updated);
+      return updated;
+    } catch (error) {
+      console.error('Error updating student:', error);
+      return null;
+    }
+  }, []);
+
   // Очистка данных студента (выход из системы)
   const clearStudent = useCallback(() => {
     localStorage.removeItem('classquiz_student');
@@ -95,6 +128,7 @@ export const StudentProvider = ({ children }: { children: React.ReactNode }) => 
   const value: StudentContextType = {
     student,
     registerStudent,
+    updateStudent,
     loadStudent,
     clearStudent,
     isRegistered,
