@@ -390,8 +390,16 @@ const TeacherDashboard: React.FC = () => {
         {tab === 'public' && (
           <div className="p-6">
             <div className="flex flex-col gap-4 mb-4">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-2">
                 <h2 className="text-xl font-bold text-text-primary">Общие тесты</h2>
+                <div className="flex gap-0.5 bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5">
+                  {([['ticket', '№'], ['title', 'А-Я'], ['date', '📅']] as const).map(([key, label]) => (
+                    <button key={key} onClick={() => setSortBy(key)} className={`px-2 py-0.5 text-xs font-medium rounded-md transition-all ${sortBy === key ? 'bg-white dark:bg-gray-600 text-text-primary shadow-sm' : 'text-text-secondary/60 hover:text-text-secondary'}`}>{label}</button>
+                  ))}
+                  <button onClick={() => setSortOrder(o => o === 'asc' ? 'desc' : 'asc')} className="px-1.5 py-0.5 text-xs text-text-secondary/60 hover:text-text-secondary" title={sortOrder === 'asc' ? 'По возрастанию' : 'По убыванию'}>
+                    {sortOrder === 'asc' ? '↑' : '↓'}
+                  </button>
+                </div>
                 {publicSubjects.length > 0 && (
                   <div className="flex gap-1 flex-wrap">
                     <button onClick={() => setPublicSubject(null)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${publicSubject === null ? 'bg-primary text-white shadow-md shadow-primary/30' : 'bg-gray-100 dark:bg-gray-700 text-text-secondary hover:bg-gray-200 dark:hover:bg-gray-600'}`}>Все</button>
