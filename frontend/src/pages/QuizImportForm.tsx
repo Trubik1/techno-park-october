@@ -57,15 +57,11 @@ const QuizImportForm: React.FC = () => {
 
   const handlePreview = async () => {
     if (!selectedFile) { setUploadError('Пожалуйста, выберите файл для загрузки'); return; }
-    if (!quizTitle.trim() || !quizSubject.trim() || !quizGrade.trim()) { setUploadError('Пожалуйста, заполните все поля метаданных теста'); return; }
     setIsUploading(true);
     setUploadError(null);
     try {
       const formData = new FormData();
       formData.append('file', selectedFile);
-      formData.append('title', quizTitle.trim());
-      formData.append('subject', quizSubject.trim());
-      formData.append('grade', quizGrade.trim());
       const res = await fetch('/api/quizzes/import/preview', { method: 'POST', body: formData });
       if (!res.ok) { const err = await res.json(); throw new Error(err.detail || 'Ошибка предпросмотра'); }
       setPreviewData(await res.json());
@@ -77,6 +73,7 @@ const QuizImportForm: React.FC = () => {
   };
 
   const handleConfirmImport = async () => {
+    if (!quizTitle.trim() || !quizSubject.trim() || !quizGrade.trim()) { setUploadError('Заполните анкету до конца'); return; }
     if (!previewData || !previewData.success) { setUploadError('Невозможно импортировать тест без успешного предварительного просмотра'); return; }
     setIsImporting(true);
     setUploadError(null);
@@ -308,10 +305,9 @@ const QuizImportForm: React.FC = () => {
 
             {!previewData && (
               <div className="pt-6 border-t border-gray-100">
-                <button type="submit" disabled={isUploading || !selectedFile || !quizTitle.trim() || !quizSubject.trim() || !quizGrade.trim()} className="btn-primary w-full">
-                  {isUploading ? 'Загрузка...' : 'Выполнить предварительный просмотр'}
+                <button type="submit" disabled={isUploading || !selectedFile} className="btn-primary w-full">
+                  {isUploading ? 'Загрузка...' : 'Предпросмотр таблицы'}
                 </button>
-                <p className="mt-2 text-xs text-text-secondary/60">Все поля обязательны для заполнения</p>
               </div>
             )}
           </form>
