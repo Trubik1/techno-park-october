@@ -260,23 +260,30 @@ const QuizImportForm: React.FC = () => {
                   <>
                     <div className="success-box mb-4"><p className="success-text">{previewData.message}</p></div>
                     <div className="overflow-x-auto rounded-lg border border-gray-200">
-                      <table className="min-w-full divide-y divide-gray-200">
+                      <table className="min-w-full divide-y divide-gray-200 table-fixed">
                         <thead className="bg-gray-50">
                           <tr>
-                            {['#', 'Вопрос', 'A', 'B', 'C', 'D', 'Правильный', 'Объяснение'].map(h => <th key={h} className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">{h}</th>)}
+                            <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider w-12">#</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider" style={{minWidth: '260px'}}>Вопрос</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider" style={{minWidth: '160px'}}>A</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider" style={{minWidth: '160px'}}>B</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider" style={{minWidth: '160px'}}>C</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider" style={{minWidth: '160px'}}>D</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider w-24">Правильный</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider" style={{minWidth: '200px'}}>Объяснение</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
                           {previewData.questions.map((q, i) => (
                             <tr key={i} className="bg-white hover:bg-gray-50 transition-colors">
                               <td className="px-4 py-3 text-sm text-text-secondary">{i + 1}</td>
-                              <td className="px-4 py-3 text-sm text-text-primary">{q.text}</td>
-                              <td className="px-4 py-3 text-sm text-text-primary">{q.opt_a}</td>
-                              <td className="px-4 py-3 text-sm text-text-primary">{q.opt_b}</td>
-                              <td className="px-4 py-3 text-sm text-text-primary">{q.opt_c}</td>
-                              <td className="px-4 py-3 text-sm text-text-primary">{q.opt_d}</td>
+                              <td className="px-4 py-3 text-sm text-text-primary whitespace-normal break-words">{q.text}</td>
+                              <td className="px-4 py-3 text-sm text-text-primary whitespace-normal break-words">{q.opt_a}</td>
+                              <td className="px-4 py-3 text-sm text-text-primary whitespace-normal break-words">{q.opt_b}</td>
+                              <td className="px-4 py-3 text-sm text-text-primary whitespace-normal break-words">{q.opt_c}</td>
+                              <td className="px-4 py-3 text-sm text-text-primary whitespace-normal break-words">{q.opt_d}</td>
                               <td className={`px-4 py-3 text-sm font-bold ${q.correct === 'a' ? 'text-success' : q.correct === 'b' ? 'text-info' : q.correct === 'c' ? 'text-warning' : 'text-error'}`}>{q.correct.toUpperCase()}</td>
-                              <td className="px-4 py-3 text-sm text-text-secondary">{q.explanation?.substring(0, 40)}...</td>
+                              <td className="px-4 py-3 text-sm text-text-secondary whitespace-normal break-words">{q.explanation?.substring(0, 40)}{q.explanation && q.explanation.length > 40 ? '...' : ''}</td>
                             </tr>
                           ))}
                         </tbody>
