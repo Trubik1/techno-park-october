@@ -186,7 +186,7 @@ const QuizImportForm: React.FC = () => {
             <div>
               <h2 className="text-xl font-bold text-text-primary mb-4">Загрузка файла с вопросами</h2>
               <div className="space-y-4">
-                <p className="text-sm text-text-secondary">Поддерживаемые форматы: CSV, XLS, XLSX. Обязательные колонки: question, opt_a, opt_b, opt_c, opt_d, correct</p>
+                <p className="text-sm text-text-secondary">Поддерживаемые форматы: CSV, XLS, XLSX. Колонки: вопрос, вариант a/b/c/d, правильный ответ (a/b/c/d), объяснение.</p>
 
                 <div className="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-800">
                   <div className="p-3 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 text-xs font-medium text-text-secondary flex items-center gap-2">
@@ -197,13 +197,13 @@ const QuizImportForm: React.FC = () => {
                     <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-xs">
                       <thead>
                         <tr className="bg-gray-50 dark:bg-gray-900">
-                          <th className="px-3 py-2 text-left font-medium text-text-secondary">question</th>
-                          <th className="px-3 py-2 text-left font-medium text-text-secondary">opt_a</th>
-                          <th className="px-3 py-2 text-left font-medium text-text-secondary">opt_b</th>
-                          <th className="px-3 py-2 text-left font-medium text-text-secondary">opt_c</th>
-                          <th className="px-3 py-2 text-left font-medium text-text-secondary">opt_d</th>
-                          <th className="px-3 py-2 text-left font-medium text-text-secondary">correct</th>
-                          <th className="px-3 py-2 text-left font-medium text-text-secondary">explanation</th>
+                          <th className="px-3 py-2 text-left font-medium text-text-secondary">Вопрос<br/><span className="text-text-secondary/50">(question)</span></th>
+                          <th className="px-3 py-2 text-left font-medium text-text-secondary">Вариант A<br/><span className="text-text-secondary/50">(opt_a)</span></th>
+                          <th className="px-3 py-2 text-left font-medium text-text-secondary">Вариант B<br/><span className="text-text-secondary/50">(opt_b)</span></th>
+                          <th className="px-3 py-2 text-left font-medium text-text-secondary">Вариант C<br/><span className="text-text-secondary/50">(opt_c)</span></th>
+                          <th className="px-3 py-2 text-left font-medium text-text-secondary">Вариант D<br/><span className="text-text-secondary/50">(opt_d)</span></th>
+                          <th className="px-3 py-2 text-left font-medium text-text-secondary">Правильный<br/><span className="text-text-secondary/50">(correct)</span></th>
+                          <th className="px-3 py-2 text-left font-medium text-text-secondary">Пояснение<br/><span className="text-text-secondary/50">(explanation)</span></th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
