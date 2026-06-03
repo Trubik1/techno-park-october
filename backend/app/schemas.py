@@ -64,7 +64,7 @@ class QuizUpdate(BaseModel):
 
 class QuizResponse(QuizBase):
     id: uuid.UUID
-    teacher_id: uuid.UUID
+    teacher_id: Optional[uuid.UUID] = None
     question_count: int = 0
     created_at: datetime
     teacher_name: str = ""

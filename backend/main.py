@@ -92,6 +92,14 @@ _ensure_seed("Билет 23. Государственный суверените
 _ensure_seed("Билет 24. Внешняя политика РБ. Хозяйственная жизнь IX-XIII вв.", "seed_quiz_b24")
 _ensure_seed("Билет 25. Соцэкономразвитие РБ. Восточные славяне на территории Беларуси", "seed_quiz_b25")
 
+# Удаляем сидированного учителя (PIN 123456) и отвязываем тесты
+with engine.connect() as conn:
+    seed_teacher = conn.execute(text("SELECT id FROM teachers ORDER BY created_at ASC LIMIT 1")).fetchone()
+    if seed_teacher:
+        conn.execute(text("UPDATE quizzes SET teacher_id = NULL WHERE teacher_id = :tid"), {"tid": str(seed_teacher[0])})
+        conn.execute(text("DELETE FROM teachers WHERE id = :tid"), {"tid": str(seed_teacher[0])})
+        conn.commit()
+
 # Включаем API роутер
 app.include_router(api_router, prefix="/api")
 

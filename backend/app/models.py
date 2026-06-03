@@ -33,7 +33,7 @@ class Quiz(Base):
     subject = Column(String(100), nullable=False)
     grade = Column(String(50), nullable=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    teacher_id = Column(Uuid(as_uuid=True), ForeignKey("teachers.id"), nullable=False)
+    teacher_id = Column(Uuid(as_uuid=True), ForeignKey("teachers.id"), nullable=True)
     is_public = Column(Boolean, default=False)
     time_limit_quiz = Column(Integer, nullable=True, default=2700)
     time_limit_question = Column(Integer, nullable=True, default=30)
