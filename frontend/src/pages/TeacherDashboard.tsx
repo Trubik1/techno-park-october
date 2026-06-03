@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserMenu from '../components/UserMenu';
 import ThemeToggleButton from '../components/ThemeToggleButton';
