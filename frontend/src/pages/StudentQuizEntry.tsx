@@ -3,6 +3,7 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import { useStudent } from '../hooks/useStudent';
 import UserMenu from '../components/UserMenu';
 import BackButton from '../components/BackButton';
+import ThemeToggleButton from '../components/ThemeToggleButton';
 import PixelOtpInput from '../components/PixelOtpInput';
 
 const StudentQuizEntry: React.FC = () => {
@@ -58,10 +59,15 @@ const StudentQuizEntry: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background animate-fadeIn">
+      <div className="fixed top-4 left-4 z-50">
+        <ThemeToggleButton />
+      </div>
+      <div className="fixed top-4 right-4 z-50">
+        <UserMenu role="student" />
+      </div>
       <div className="max-w-lg mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-6">
           <BackButton to="/student/entry" />
-          <UserMenu role="student" />
         </div>
         <div className="card p-8 md:p-10">
           <div className="text-center mb-8">

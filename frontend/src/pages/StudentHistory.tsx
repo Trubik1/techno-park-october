@@ -78,19 +78,19 @@ const StudentHistory: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background animate-fadeIn">
+      <div className="fixed top-4 right-4 z-50">
+        <UserMenu role="student" />
+      </div>
       <div className="max-w-4xl mx-auto px-4 md:px-6 py-6 md:py-8">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <BackButton to="/student/quiz-entry" />
-            <div>
-              <h1 className="text-2xl font-bold text-text-primary font-heading">Профиль</h1>
-              <Breadcrumbs items={[
-                { label: 'Вход ученика', path: '/student/entry' },
-                { label: 'История тестов' },
-              ]} />
-            </div>
+        <div className="flex items-center gap-3 mb-6">
+          <BackButton to="/student/quiz-entry" />
+          <div>
+            <h1 className="text-2xl font-bold text-text-primary font-heading">Профиль</h1>
+            <Breadcrumbs items={[
+              { label: 'Вход ученика', path: '/student/entry' },
+              { label: 'История тестов' },
+            ]} />
           </div>
-          <UserMenu role="student" />
         </div>
 
         <div className="card p-6 md:p-8 mb-6">

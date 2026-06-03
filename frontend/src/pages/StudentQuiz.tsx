@@ -318,10 +318,12 @@ const StudentQuiz: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background animate-fadeIn">
+      <div className="fixed top-4 right-4 z-50">
+        <UserMenu role="student" />
+      </div>
       <div className="max-w-2xl mx-auto px-4 py-4">
-        <div className="flex items-center justify-between mb-4">
+        <div className="mb-4">
           <BackButton to="/student/quiz-entry" />
-          <UserMenu role="student" />
         </div>
         <Breadcrumbs items={[
           { label: 'Вход ученика', path: '/student/entry' },

@@ -211,19 +211,19 @@ const TeacherDashboard: React.FC = () => {
 
   return (
     <div className="page-container">
+      <div className="fixed top-4 right-4 z-50">
+        <UserMenu role="teacher" />
+      </div>
       <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-8">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <BackButton to="/teacher/login" />
-            <div>
-              <h1 className="text-2xl font-bold text-text-primary font-heading">Панель управления</h1>
-              <Breadcrumbs items={[
-                { label: 'Вход учителя', path: '/teacher/login' },
-                { label: 'Панель управления' },
-              ]} />
-            </div>
+        <div className="flex items-center gap-3 mb-6">
+          <BackButton to="/teacher/login" />
+          <div>
+            <h1 className="text-2xl font-bold text-text-primary font-heading">Панель управления</h1>
+            <Breadcrumbs items={[
+              { label: 'Вход учителя', path: '/teacher/login' },
+              { label: 'Панель управления' },
+            ]} />
           </div>
-          <UserMenu role="teacher" />
         </div>
 
         <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
