@@ -10,30 +10,54 @@ from app.db.database import get_db
 
 router = APIRouter()
 
+COLUMN_ALIASES = {
+    'question': ['question', 'вопрос', 'текст', 'text', 'вопросы'],
+    'opt_a': ['opt_a', 'a', 'вариант a', 'option a', 'вариант_а'],
+    'opt_b': ['opt_b', 'b', 'вариант b', 'option b', 'вариант_б'],
+    'opt_c': ['opt_c', 'c', 'вариант c', 'option c', 'вариант_в'],
+    'opt_d': ['opt_d', 'd', 'вариант d', 'option d', 'вариант_г'],
+    'correct': ['correct', 'правильный', 'ответ', 'правильный ответ', 'верный'],
+    'explanation': ['explanation', 'объяснение', 'пояснение', 'комментарий'],
+}
+
+def normalize_columns(df):
+    """
+    Переименовывает колонки DataFrame из русских/альтернативных названий в стандартные.
+    """
+    rename_map = {}
+    for standard, aliases in COLUMN_ALIASES.items():
+        for col in df.columns:
+            col_lower = col.strip().lower()
+            if col_lower in aliases:
+                rename_map[col] = standard
+                break
+    if rename_map:
+        df = df.rename(columns=rename_map)
+    return df
+
 def validate_quiz_import_data(df):
     """
     Валидация структуры импортированного файла.
     Ожидаемые колонки: question, opt_a, opt_b, opt_c, opt_d, correct, explanation (опционально)
     """
+    df = normalize_columns(df)
+    
     required_columns = ['question', 'opt_a', 'opt_b', 'opt_c', 'opt_d', 'correct']
     optional_columns = ['explanation']
     
-    # Проверяем наличие обязательных колонок
     missing_columns = [col for col in required_columns if col not in df.columns]
     if missing_columns:
-        return False, f"Missing required columns: {', '.join(missing_columns)}"
+        return False, f"Missing required columns: {', '.join(missing_columns)}", df
     
-    # Проверяем, что правильные ответы в формате a, b, c, d
     invalid_correct = df[~df['correct'].isin(['a', 'b', 'c', 'd'])]
     if not invalid_correct.empty:
-        return False, "Correct answers must be one of: a, b, c, d"
+        return False, "Correct answers must be one of: a, b, c, d", df
     
-    # Проверяем, что нет пустых вопросов или вариантов ответов
     for col in required_columns:
         if df[col].isnull().any() or (df[col] == '').any():
-            return False, f"Column '{col}' contains empty values"
+            return False, f"Column '{col}' contains empty values", df
     
-    return True, "Data is valid"
+    return True, "Data is valid", df
 
 @router.post("/preview", response_model=schemas.QuizImportPreview)
 def preview_quiz_import(
@@ -59,8 +83,11 @@ def preview_quiz_import(
         else:  # Excel files
             df = pd.read_excel(io.BytesIO(content))
         
+        # Нормализуем колонки (поддержка русских названий)
+        df = normalize_columns(df)
+        
         # Валидация данных
-        is_valid, message = validate_quiz_import_data(df)
+        is_valid, message, df = validate_quiz_import_data(df)
         
         if not is_valid:
             return schemas.QuizImportPreview(
@@ -87,7 +114,6 @@ def preview_quiz_import(
                     "explanation": str(row['explanation']).strip() if pd.notna(row.get('explanation')) and str(row['explanation']).strip() != '' else None
                 }
                 
-                # Дополнительная валидация на уровне строки
                 if not question_data["text"]:
                     errors.append(f"Row {index + 1}: Question text is empty")
                     continue
