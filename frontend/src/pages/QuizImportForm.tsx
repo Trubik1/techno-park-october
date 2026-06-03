@@ -40,27 +40,24 @@ const QuizImportForm: React.FC = () => {
     }).catch(() => {});
   }, []);
 
-  const validateMetaFields = (): boolean => {
-    if (!quizTitle.trim() || !quizSubject.trim() || !quizGrade.trim()) {
-      setUploadError('Неправильный формат');
-      return false;
-    }
-    return true;
-  };
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
+      const file = e.target.files[0];
+      const ext = file.name.split('.').pop()?.toLowerCase();
+      if (!['csv', 'xls', 'xlsx'].includes(ext || '')) {
+        setUploadError('Неправильный формат');
+        setSelectedFile(null);
+        return;
+      }
+      setSelectedFile(file);
       setPreviewData(null);
       setUploadError(null);
-      // Валидация сразу при загрузке файла
-      setTimeout(() => validateMetaFields(), 0);
     }
   };
 
   const handlePreview = async () => {
     if (!selectedFile) { setUploadError('Пожалуйста, выберите файл для загрузки'); return; }
-    if (!validateMetaFields()) return;
+    if (!quizTitle.trim() || !quizSubject.trim() || !quizGrade.trim()) { setUploadError('Пожалуйста, заполните все поля метаданных теста'); return; }
     setIsUploading(true);
     setUploadError(null);
     try {
