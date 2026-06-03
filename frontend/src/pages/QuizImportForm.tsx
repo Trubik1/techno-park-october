@@ -224,18 +224,18 @@ const QuizImportForm: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 cursor-pointer">
+                <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-8 text-center hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 cursor-pointer min-h-[180px] flex items-center justify-center">
                   <input type="file" id="file-input" accept=".csv,.xls,.xlsx" className="hidden" onChange={handleFileChange} />
-                  <label htmlFor="file-input" className="cursor-pointer">
-                    <div className="flex flex-col items-center gap-3">
-                      <svg className="w-10 h-10 text-text-secondary/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <label htmlFor="file-input" className="cursor-pointer w-full">
+                    <div className="flex flex-col items-center justify-center gap-3 w-full">
+                      <svg className="w-12 h-12 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16v4a2 2 0 002 2h6a2 2 0 002-2v-4M11 8h6a2 2 0 002-2V4a2 2 0 00-2-2h-6a2 2 0 00-2 2v2M7 20h10a2 2 0 002-2V8a2 2 0 00-2-2h-2m0 0l-3-3m3 3l-3 3" />
                       </svg>
                       <div>
                         <p className="font-medium text-text-primary">Перетащите файл сюда</p>
                         <p className="text-sm text-text-secondary">или нажмите чтобы выбрать файл</p>
                       </div>
-                      <p className="text-xs text-text-secondary/60">{selectedFile ? selectedFile.name : 'Файл не выбран'}</p>
+                      <p className="text-xs text-text-secondary/60 break-all max-w-full px-2">{selectedFile ? selectedFile.name : 'Файл не выбран'}</p>
                     </div>
                   </label>
                 </div>
