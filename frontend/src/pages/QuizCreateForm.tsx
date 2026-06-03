@@ -320,9 +320,18 @@ const QuizCreateForm: React.FC = () => {
     );
   }
 
+  const addQuestion = () => {
+    setQuestions(prev => [...prev, { id: genId(), text: '', opt_a: '', opt_b: '', opt_c: '', opt_d: '', correct: 'a', explanation: '' }]);
+  };
+
+  const removeQuestion = (id: number) => {
+    if (questions.length <= 1) return;
+    setQuestions(prev => prev.filter(q => q.id !== id));
+  };
+
   return (
     <div className="page-container">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <Breadcrumbs items={[
           { label: 'Вход учителя', path: '/teacher/login' },
           { label: 'Панель управления', path: '/teacher/dashboard' },
@@ -337,7 +346,7 @@ const QuizCreateForm: React.FC = () => {
               <button onClick={() => setStep('meta')} className="text-sm text-white/80 hover:text-white">Изменить настройки</button>
             </div>
           </div>
-          <div className="p-6">
+          <div className="p-4 md:p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-text-primary">Вопросы ({questions.length})</h2>
               <div className="flex gap-2">
@@ -348,54 +357,77 @@ const QuizCreateForm: React.FC = () => {
 
             {saveError && <div className="error-box mb-4 animate-shake"><p className="error-text">{saveError}</p></div>}
 
-            <div className="space-y-4">
-              {questions.map((q, i) => {
-                const qe = errors[`q_${q.id}`] as Record<string, string> | undefined;
-                return (
-                  <div key={q.id}
-                    draggable
-                    onDragStart={() => { dragIdx.current = i; }}
-                    onDragOver={(e) => { e.preventDefault(); }}
-                    onDrop={() => { if (dragIdx.current !== null && dragIdx.current !== i) { moveQuestion(dragIdx.current, i); } dragIdx.current = null; }}
-                    onDragEnd={() => { dragIdx.current = null; }}
-                    className={'card-hover border border-gray-100 p-5 animate-fadeIn ' + (dragIdx.current === i ? 'opacity-30' : '')}
-                  >
-                    <div className="flex items-center gap-3 mb-3">
-                      <span className="cursor-grab active:cursor-grabbing text-text-secondary/30 hover:text-text-secondary/60 transition-colors" title="Перетащите для изменения порядка">
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" /></svg>
-                      </span>
-                      <h3 className="text-lg font-semibold text-text-primary">Вопрос {i + 1}</h3>
-                    </div>
-                    <div className="space-y-3">
-                      <textarea value={q.text} onChange={e => handleQuestionChange(q.id, 'text', e.target.value)} placeholder="Текст вопроса..." rows={2} className={`input ${qe?.text ? 'input-error' : ''}`} />
-                      {qe?.text && <p className="error-text text-xs">{qe.text}</p>}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm">
+                <thead className="bg-gray-50 dark:bg-gray-800">
+                  <tr>
+                    <th className="px-2 py-2 w-8"></th>
+                    <th className="px-2 py-2 w-8 text-xs font-medium text-text-secondary">#</th>
+                    <th className="px-2 py-2 text-xs font-medium text-text-secondary min-w-[200px]">Текст вопроса</th>
+                    <th className="px-2 py-2 text-xs font-medium text-text-secondary min-w-[120px]">A</th>
+                    <th className="px-2 py-2 text-xs font-medium text-text-secondary min-w-[120px]">B</th>
+                    <th className="px-2 py-2 text-xs font-medium text-text-secondary min-w-[120px]">C</th>
+                    <th className="px-2 py-2 text-xs font-medium text-text-secondary min-w-[120px]">D</th>
+                    <th className="px-2 py-2 text-xs font-medium text-text-secondary w-16">✓</th>
+                    <th className="px-2 py-2 text-xs font-medium text-text-secondary min-w-[100px]">Пояснение</th>
+                    <th className="px-2 py-2 w-10"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900">
+                  {questions.map((q, i) => {
+                    const qe = errors[`q_${q.id}`] as Record<string, string> | undefined;
+                    return (
+                      <tr key={q.id}
+                        draggable
+                        onDragStart={() => { dragIdx.current = i; }}
+                        onDragOver={(e) => { e.preventDefault(); }}
+                        onDrop={() => { if (dragIdx.current !== null && dragIdx.current !== i) { moveQuestion(dragIdx.current, i); } dragIdx.current = null; }}
+                        onDragEnd={() => { dragIdx.current = null; }}
+                        className={'hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors ' + (dragIdx.current === i ? 'opacity-30' : '')}
+                      >
+                        <td className="px-2 py-1.5">
+                          <span className="cursor-grab active:cursor-grabbing text-text-secondary/30 hover:text-text-secondary/60 transition-colors block text-center">
+                            <svg className="w-4 h-4 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" /></svg>
+                          </span>
+                        </td>
+                        <td className="px-2 py-1.5 text-xs text-text-secondary text-center font-mono">{i + 1}</td>
+                        <td className="px-2 py-1.5">
+                          <textarea value={q.text} onChange={e => handleQuestionChange(q.id, 'text', e.target.value)} placeholder="Текст вопроса..." rows={2} className={`input !text-sm !py-1 !px-2 resize-none ${qe?.text ? 'input-error' : ''}`} />
+                          {qe?.text && <p className="error-text text-xs mt-0.5">{qe.text}</p>}
+                        </td>
                         {(['a', 'b', 'c', 'd'] as const).map(letter => (
-                          <div key={letter}>
-                            <label className="label">{letter.toUpperCase()}</label>
-                            <input type="text" value={q[`opt_${letter}`]} onChange={e => handleQuestionChange(q.id, `opt_${letter}`, e.target.value)} placeholder={`Вариант ${letter.toUpperCase()}`} className={`input ${qe?.[`opt_${letter}`] ? 'input-error' : ''}`} />
-                            {qe?.[`opt_${letter}`] && <p className="error-text text-xs">{qe[`opt_${letter}`]}</p>}
-                          </div>
+                          <td key={letter} className="px-2 py-1.5">
+                            <input type="text" value={q[`opt_${letter}`]} onChange={e => handleQuestionChange(q.id, `opt_${letter}`, e.target.value)} placeholder={`Вар. ${letter.toUpperCase()}`} className={`input !text-sm !py-1 !px-2 ${qe?.[`opt_${letter}`] ? 'input-error' : ''}`} />
+                            {qe?.[`opt_${letter}`] && <p className="error-text text-xs mt-0.5">{qe[`opt_${letter}`]}</p>}
+                          </td>
                         ))}
-                      </div>
-                      <div>
-                        <label className="label">Правильный ответ</label>
-                        <div className="flex gap-3">
-                          {(['a', 'b', 'c', 'd'] as const).map(letter => (
-                            <label key={letter} className="flex items-center gap-2 cursor-pointer">
-                              <input type="radio" value={letter} checked={q.correct === letter} onChange={e => handleQuestionChange(q.id, 'correct', e.target.value)} className="h-4 w-4 text-primary" />
-                              <span className="text-sm font-medium text-text-primary">{letter.toUpperCase()}</span>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                      <div>
-                        <input type="text" value={q.explanation} onChange={e => handleQuestionChange(q.id, 'explanation', e.target.value)} placeholder="Объяснение (необязательно)" className="input" />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+                        <td className="px-2 py-1.5">
+                          <select value={q.correct} onChange={e => handleQuestionChange(q.id, 'correct', e.target.value)} className="input !text-sm !py-1 !px-2 !w-14 text-center font-bold">
+                            {(['a', 'b', 'c', 'd'] as const).map(letter => (
+                              <option key={letter} value={letter}>{letter.toUpperCase()}</option>
+                            ))}
+                          </select>
+                        </td>
+                        <td className="px-2 py-1.5">
+                          <input type="text" value={q.explanation} onChange={e => handleQuestionChange(q.id, 'explanation', e.target.value)} placeholder="Пояснение" className="input !text-sm !py-1 !px-2" />
+                        </td>
+                        <td className="px-2 py-1.5 text-center">
+                          <button onClick={() => removeQuestion(q.id)} disabled={questions.length <= 1} className="text-text-secondary/40 hover:text-error transition-colors disabled:opacity-20" title="Удалить вопрос">
+                            <svg className="w-4 h-4 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="mt-3 flex justify-center">
+              <button onClick={addQuestion} className="btn-secondary btn-sm">
+                <svg className="w-4 h-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                Добавить вопрос
+              </button>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 mt-6 pt-6 border-t border-gray-100">

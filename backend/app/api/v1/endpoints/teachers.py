@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 import uuid
-from app import schemas, crud
+from app import schemas, crud, models
 from app.db.database import get_db
 
 router = APIRouter()
@@ -45,10 +45,6 @@ def read_teachers(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
 
 @router.put("/{teacher_id}/pin", response_model=schemas.TeacherResponse)
 def reset_teacher_pin(teacher_id: uuid.UUID, body: schemas.TeacherPinReset, db: Session = Depends(get_db)):
-    """
-    Смена PIN-кода учителя.
-    Требует старый PIN для подтверждения.
-    """
     db_teacher = crud.get_teacher(db, teacher_id=teacher_id)
     if not db_teacher:
         raise HTTPException(status_code=404, detail="Teacher not found")
@@ -58,3 +54,12 @@ def reset_teacher_pin(teacher_id: uuid.UUID, body: schemas.TeacherPinReset, db: 
     if not updated:
         raise HTTPException(status_code=500, detail="Failed to update PIN")
     return updated
+
+@router.delete("/{teacher_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_teacher(teacher_id: uuid.UUID, db: Session = Depends(get_db)):
+    db_teacher = crud.get_teacher(db, teacher_id=teacher_id)
+    if not db_teacher:
+        raise HTTPException(status_code=404, detail="Teacher not found")
+    db.query(models.Quiz).filter(models.Quiz.teacher_id == teacher_id).delete()
+    db.delete(db_teacher)
+    db.commit()
