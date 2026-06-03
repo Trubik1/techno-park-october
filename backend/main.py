@@ -94,11 +94,13 @@ _ensure_seed("Билет 25. Соцэкономразвитие РБ. Восто
 
 # Удаляем сидированного учителя (PIN 123456) и отвязываем тесты
 with engine.connect() as conn:
-    seed_teacher = conn.execute(text("SELECT id FROM teachers ORDER BY created_at ASC LIMIT 1")).fetchone()
-    if seed_teacher:
-        conn.execute(text("UPDATE quizzes SET teacher_id = NULL WHERE teacher_id = :tid"), {"tid": str(seed_teacher[0])})
-        conn.execute(text("DELETE FROM teachers WHERE id = :tid"), {"tid": str(seed_teacher[0])})
-        conn.commit()
+    from app.crud import verify_pin
+    seed_teachers = conn.execute(text("SELECT id, name, pin_hash FROM teachers")).fetchall()
+    for row in seed_teachers:
+        if row[1] == "Учитель истории" or (row[2] and verify_pin("123456", row[2])):
+            conn.execute(text("UPDATE quizzes SET teacher_id = NULL WHERE teacher_id = :tid"), {"tid": str(row[0])})
+            conn.execute(text("DELETE FROM teachers WHERE id = :tid"), {"tid": str(row[0])})
+            conn.commit()
 
 # Включаем API роутер
 app.include_router(api_router, prefix="/api")

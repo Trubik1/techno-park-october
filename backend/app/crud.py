@@ -57,7 +57,7 @@ def get_teachers(db: Session, skip: int = 0, limit: int = 100):
 def create_teacher(db: Session, teacher: schemas.TeacherCreate):
     hashed_pin = hash_pin(teacher.pin)
     db_teacher = models.Teacher(
-        name=teacher.name or "Учитель",
+        name=teacher.name.strip() or "Учитель",
         pin_hash=hashed_pin
     )
     db.add(db_teacher)
