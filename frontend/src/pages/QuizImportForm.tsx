@@ -271,10 +271,10 @@ const QuizImportForm: React.FC = () => {
                             <tr key={i} className="bg-white hover:bg-gray-50 transition-colors">
                               <td className="px-4 py-3 text-sm text-text-secondary">{i + 1}</td>
                               <td className="px-4 py-3 text-sm text-text-primary">{q.text}</td>
-                              <td className="px-4 py-3 text-sm">{q.opt_a}</td>
-                              <td className="px-4 py-3 text-sm">{q.opt_b}</td>
-                              <td className="px-4 py-3 text-sm">{q.opt_c}</td>
-                              <td className="px-4 py-3 text-sm">{q.opt_d}</td>
+                              <td className="px-4 py-3 text-sm text-text-primary">{q.opt_a}</td>
+                              <td className="px-4 py-3 text-sm text-text-primary">{q.opt_b}</td>
+                              <td className="px-4 py-3 text-sm text-text-primary">{q.opt_c}</td>
+                              <td className="px-4 py-3 text-sm text-text-primary">{q.opt_d}</td>
                               <td className={`px-4 py-3 text-sm font-bold ${q.correct === 'a' ? 'text-success' : q.correct === 'b' ? 'text-info' : q.correct === 'c' ? 'text-warning' : 'text-error'}`}>{q.correct.toUpperCase()}</td>
                               <td className="px-4 py-3 text-sm text-text-secondary">{q.explanation?.substring(0, 40)}...</td>
                             </tr>
