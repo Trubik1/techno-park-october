@@ -46,42 +46,51 @@ with engine.connect() as conn:
         conn.execute(text("ALTER TABLE questions ADD COLUMN sort_order INTEGER DEFAULT 0"))
         conn.commit()
 
-# Авто-сидирование временно отключено для чистой БД
-# from app.db.database import SessionLocal
-# from app.crud import BASE_QUIZ_TITLE
-# from app import models
+# Авто-сидирование общих тестов по истории (is_public=True)
+from app.db.database import SessionLocal
+from app.crud import BASE_QUIZ_TITLE
+from app import models
 
-# def _ensure_seed(title, module_name):
-#     _db = SessionLocal()
-#     try:
-#         exists = _db.query(models.Quiz).filter(models.Quiz.title == title).first()
-#         if not exists:
-#             import importlib
-#             mod = importlib.import_module(module_name)
-#             mod.seed()
-#             print(f"Quiz auto-seeded on startup: {title}")
-#         else:
-#             qc = _db.query(models.Question).filter(models.Question.quiz_id == exists.id).count()
-#             print(f"Quiz already present: {title} ({qc} questions)")
-#     finally:
-#         _db.close()
+def _ensure_seed(title, module_name):
+    _db = SessionLocal()
+    try:
+        exists = _db.query(models.Quiz).filter(models.Quiz.title == title).first()
+        if not exists:
+            import importlib
+            mod = importlib.import_module(module_name)
+            mod.seed()
+            print(f"Quiz auto-seeded on startup: {title}")
+        else:
+            qc = _db.query(models.Question).filter(models.Question.quiz_id == exists.id).count()
+            print(f"Quiz already present: {title} ({qc} questions)")
+    finally:
+        _db.close()
 
-# _ensure_seed(BASE_QUIZ_TITLE, "seed_quiz_b1v1")
-# _ensure_seed("Билет 2. Полоцкое и Туровское княжества", "seed_quiz_b2")
-# ... (остальные сиды отключены)
-
-# # Удаляем клоны сидированных тестов
-# with engine.connect() as conn:
-#     from app.crud import verify_pin
-#     first_teacher = conn.execute(text("SELECT id FROM teachers ORDER BY created_at ASC LIMIT 1")).fetchone()
-#     if first_teacher:
-#         _seed_tid = str(first_teacher[0])
-#         conn.execute(text("DELETE FROM questions WHERE quiz_id IN (SELECT id FROM quizzes WHERE title LIKE 'Билет %' AND teacher_id != :tid)"), {"tid": _seed_tid})
-#         conn.execute(text("DELETE FROM results WHERE session_id IN (SELECT id FROM sessions WHERE quiz_id IN (SELECT id FROM quizzes WHERE title LIKE 'Билет %' AND teacher_id != :tid))"), {"tid": _seed_tid})
-#         conn.execute(text("DELETE FROM sessions WHERE quiz_id IN (SELECT id FROM quizzes WHERE title LIKE 'Билет %' AND teacher_id != :tid)"), {"tid": _seed_tid})
-#         conn.execute(text("DELETE FROM session_participants WHERE session_id IN (SELECT id FROM sessions WHERE quiz_id IN (SELECT id FROM quizzes WHERE title LIKE 'Билет %' AND teacher_id != :tid))"), {"tid": _seed_tid})
-#         conn.execute(text("DELETE FROM quizzes WHERE title LIKE 'Билет %' AND teacher_id != :tid"), {"tid": _seed_tid})
-#         conn.commit()
+_ensure_seed(BASE_QUIZ_TITLE, "seed_quiz_b1v1")
+_ensure_seed("Билет 2. Полоцкое и Туровское княжества", "seed_quiz_b2")
+_ensure_seed("Билет 3. Христианизация белорусских земель. Внешняя политика Республики Беларусь", "seed_quiz_b3")
+_ensure_seed("Билет 4. Образование ВКЛ. Наука, образование, культура и спорт в РБ", "seed_quiz_b4")
+_ensure_seed("Билет 5. Борьба с крестоносцами. Культура БССР 1940-1980-е", "seed_quiz_b5")
+_ensure_seed("Билет 6. Франциск Скорина. Общественно-политическая жизнь в БССР", "seed_quiz_b6")
+_ensure_seed("Билет 7. Отечественная война 1812 г. Социально-экономическое развитие БССР", "seed_quiz_b7")
+_ensure_seed("Билет 8. Люблинская уния. Наш край в годы ВОВ (г. Гомель)", "seed_quiz_b8")
+_ensure_seed("Билет 9. Формирование белорусской народности. Вклад в победу над нацизмом", "seed_quiz_b9")
+_ensure_seed("Билет 10. Аграрные реформы XIX-XX вв. ВОВ в памяти народа", "seed_quiz_b10")
+_ensure_seed("Билет 11. Революции 1905-1907 и 1917 гг. Освобождение Беларуси", "seed_quiz_b11")
+_ensure_seed("Билет 12. Беларусь в годы Первой мировой войны. Воссоединение Западной Беларуси с БССР", "seed_quiz_b12")
+_ensure_seed("Билет 13. Октябрьская революция 1917 г. Партизанское движение в годы ВОВ", "seed_quiz_b13")
+_ensure_seed("Билет 14. Создание ССРБ. Германский оккупационный режим 1941-1944", "seed_quiz_b14")
+_ensure_seed("Билет 15. Польско-советская война 1919-1921. НЭП в БССР", "seed_quiz_b15")
+_ensure_seed("Билет 16. Политика белорусизации. Начало Великой Отечественной войны", "seed_quiz_b16")
+_ensure_seed("Билет 17. Индустриализация и коллективизация в БССР. Становление национальной государственности", "seed_quiz_b17")
+_ensure_seed("Билет 18. Западная Беларусь в составе Польши. Культура Беларуси XIX — начала XX в.", "seed_quiz_b18")
+_ensure_seed("Билет 19. Подвиг народа в ВОВ. Наш край в XIII-XVIII вв.", "seed_quiz_b19")
+_ensure_seed("Билет 20. Геноцид населения Беларуси в ВОВ. Культура XIV-XVIII вв.", "seed_quiz_b20")
+_ensure_seed("Билет 21. БССР 1940-1980-е: соцэкономразвитие. Разделы Речи Посполитой", "seed_quiz_b21")
+_ensure_seed("Билет 22. БССР 1940-1980-е: образование, наука, культура. Хозяйство XIX - нач. XX в.", "seed_quiz_b22")
+_ensure_seed("Билет 23. Государственный суверенитет РБ. Хозяйство XIV-XVIII вв.", "seed_quiz_b23")
+_ensure_seed("Билет 24. Внешняя политика РБ. Хозяйственная жизнь IX-XIII вв.", "seed_quiz_b24")
+_ensure_seed("Билет 25. Соцэкономразвитие РБ. Восточные славяне на территории Беларуси", "seed_quiz_b25")
 
 # Включаем API роутер
 app.include_router(api_router, prefix="/api")
