@@ -259,9 +259,9 @@ const QuizImportForm: React.FC = () => {
                 {previewData.success ? (
                   <>
                     <div className="success-box mb-4"><p className="success-text">{previewData.message}</p></div>
-                    <div className="overflow-x-auto rounded-lg border border-gray-200">
-                      <table className="min-w-full divide-y divide-gray-200 table-fixed">
-                        <thead className="bg-gray-50">
+                    <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+                      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 table-fixed">
+                        <thead className="bg-gray-50 dark:bg-gray-900">
                           <tr>
                             <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider w-12">#</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider" style={{minWidth: '260px'}}>Вопрос</th>
@@ -273,16 +273,16 @@ const QuizImportForm: React.FC = () => {
                             <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider" style={{minWidth: '200px'}}>Объяснение</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-200">
+                        <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                           {previewData.questions.map((q, i) => (
-                            <tr key={i} className="bg-white hover:bg-gray-50 transition-colors">
-                              <td className="px-4 py-3 text-sm text-text-secondary">{i + 1}</td>
+                            <tr key={i} className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                              <td className="px-4 py-3 text-sm text-text-secondary whitespace-normal break-words">{i + 1}</td>
                               <td className="px-4 py-3 text-sm text-text-primary whitespace-normal break-words">{q.text}</td>
                               <td className="px-4 py-3 text-sm text-text-primary whitespace-normal break-words">{q.opt_a}</td>
                               <td className="px-4 py-3 text-sm text-text-primary whitespace-normal break-words">{q.opt_b}</td>
                               <td className="px-4 py-3 text-sm text-text-primary whitespace-normal break-words">{q.opt_c}</td>
                               <td className="px-4 py-3 text-sm text-text-primary whitespace-normal break-words">{q.opt_d}</td>
-                              <td className={`px-4 py-3 text-sm font-bold ${q.correct === 'a' ? 'text-success' : q.correct === 'b' ? 'text-info' : q.correct === 'c' ? 'text-warning' : 'text-error'}`}>{q.correct.toUpperCase()}</td>
+                              <td className={`px-4 py-3 text-sm font-bold whitespace-normal break-words ${q.correct === 'a' ? 'text-success' : q.correct === 'b' ? 'text-info' : q.correct === 'c' ? 'text-warning' : 'text-error'}`}>{q.correct.toUpperCase()}</td>
                               <td className="px-4 py-3 text-sm text-text-secondary whitespace-normal break-words">{q.explanation?.substring(0, 40)}{q.explanation && q.explanation.length > 40 ? '...' : ''}</td>
                             </tr>
                           ))}
