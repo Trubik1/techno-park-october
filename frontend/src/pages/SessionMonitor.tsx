@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { exportSessionResultsToCsv, downloadCsv } from '../utils/csvExport';
 import QRCode from 'qrcode';
 import { useToast } from '../components/Toast';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 function parseBackendDate(dateStr: string | null | undefined): Date {
   if (!dateStr) return new Date();
@@ -182,7 +183,13 @@ const SessionMonitor: React.FC = () => {
 
   return (
     <div className="page-container">
-      <div className="max-w-6xl mx-auto card animate-slideUp">
+      <div className="max-w-6xl mx-auto">
+        <Breadcrumbs items={[
+          { label: 'Вход учителя', path: '/teacher/login' },
+          { label: 'Панель управления', path: '/teacher/dashboard' },
+          { label: 'Монитор сессии' },
+        ]} />
+        <div className="card animate-slideUp">
         <div className="gradient-header">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
             <div>
@@ -379,6 +386,7 @@ const SessionMonitor: React.FC = () => {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 };

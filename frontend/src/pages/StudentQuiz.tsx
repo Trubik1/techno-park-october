@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useStudent } from '../hooks/useStudent';
 import UserMenu from '../components/UserMenu';
 import BackButton from '../components/BackButton';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 interface Question {
   id: string;
@@ -304,6 +305,10 @@ const StudentQuiz: React.FC = () => {
     );
   }
 
+  const totalTime = quizData.time_limit_quiz || (quizData.time_limit_question || 30) * quizData.questions.length;
+  const timePercent = timeLeft !== null && totalTime > 0 ? (timeLeft / totalTime) * 100 : 100;
+  const timerColor = timePercent > 50 ? '#22c55e' : timePercent > 20 ? '#eab308' : '#ef4444';
+
   const currentQuestion = quizData.questions[currentQuestionIndex];
   const progress = ((currentQuestionIndex + 1) / quizData.questions.length) * 100;
   const correctCount = quizData.questions.filter(q => answers[q.id] === q.correct).length;
@@ -313,14 +318,20 @@ const StudentQuiz: React.FC = () => {
   }));
 
   return (
-    <div className="page-container flex items-center justify-center relative">
+    <div className="page-container relative">
       <div className="fixed top-14 left-3 z-40">
         <BackButton to="/student/quiz-entry" />
       </div>
       <div className="absolute top-4 right-4 z-10">
         <UserMenu role="student" />
       </div>
-      <div className="w-full max-w-2xl mx-auto card animate-slideUp">
+      <div className="w-full max-w-2xl mx-auto pt-16">
+        <Breadcrumbs items={[
+          { label: 'Вход ученика', path: '/student/entry' },
+          { label: 'Выбор теста', path: '/student/quiz-entry' },
+          { label: quizData?.title || 'Тест' },
+        ]} />
+        <div className="card animate-slideUp">
         <div className="gradient-header">
           <div className="flex justify-between items-start">
             <div>
@@ -328,12 +339,20 @@ const StudentQuiz: React.FC = () => {
               <p className="mt-1 text-sm text-white/80">Вопрос {currentQuestionIndex + 1} из {quizData.questions.length}</p>
             </div>
             {timeLeft !== null && !isSubmitted && (
-              <div className={'text-2xl font-bold tabular-nums ' + (timeLeft <= 30 && timeLeft > 0 ? 'text-error animate-pulse' : 'text-white')}>
-                {timeLeft > 0 ? (
-                  quizData.time_limit_quiz
-                    ? Math.floor(timeLeft / 60) + ':' + String(timeLeft % 60).padStart(2, '0')
-                    : timeLeft + 'с'
-                ) : '0с'}
+              <div className="flex items-center gap-2">
+                <svg className="w-10 h-10 -rotate-90" viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="15.5" fill="none" stroke="currentColor" strokeWidth="2" className="text-white/20" />
+                  <circle cx="18" cy="18" r="15.5" fill="none" stroke={timerColor} strokeWidth="2.5" strokeLinecap="round"
+                    strokeDasharray={`${(timePercent / 100) * 97.4} 97.4`}
+                    className="transition-all duration-1000 ease-linear" />
+                </svg>
+                <div className={'text-2xl font-bold tabular-nums leading-none ' + (timePercent <= 20 && timeLeft > 0 ? 'text-error animate-pulse' : 'text-white')}>
+                  {timeLeft > 0 ? (
+                    quizData.time_limit_quiz
+                      ? Math.floor(timeLeft / 60) + ':' + String(timeLeft % 60).padStart(2, '0')
+                      : timeLeft + 'с'
+                  ) : '0с'}
+                </div>
               </div>
             )}
           </div>
@@ -475,6 +494,7 @@ const StudentQuiz: React.FC = () => {
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 };

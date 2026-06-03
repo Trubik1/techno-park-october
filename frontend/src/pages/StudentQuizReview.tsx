@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import BackButton from '../components/BackButton';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 interface ReviewItem {
   question_text: string;
@@ -79,7 +80,12 @@ const StudentQuizReview: React.FC = () => {
       <div className="fixed top-14 left-3 z-40">
         <BackButton to="/student/entry" />
       </div>
-      <div className="w-full max-w-2xl mx-auto card animate-slideUp">
+      <div className="w-full max-w-2xl mx-auto">
+        <Breadcrumbs items={[
+          { label: 'Вход ученика', path: '/student/entry' },
+          { label: 'Просмотр ответов' },
+        ]} />
+        <div className="card animate-slideUp">
         <div className="gradient-header">
           <h1 className="text-xl font-bold">{review.quiz_title}</h1>
           <p className="text-sm text-white/80 mt-1">Просмотр ответов — {review.score}/{review.total}</p>
@@ -141,6 +147,7 @@ const StudentQuizReview: React.FC = () => {
           </button>
         </div>
       </div>
+    </div>
     </div>
   );
 };

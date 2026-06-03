@@ -151,9 +151,10 @@ def get_question(db: Session, question_id: uuid.UUID):
     return db.query(models.Question).filter(models.Question.id == question_id).first()
 
 def get_questions_by_quiz(db: Session, quiz_id: uuid.UUID, skip: int = 0, limit: int = 100):
-    return db.query(models.Question).filter(models.Question.quiz_id == quiz_id).offset(skip).limit(limit).all()
+    return db.query(models.Question).filter(models.Question.quiz_id == quiz_id).order_by(models.Question.sort_order).offset(skip).limit(limit).all()
 
 def create_question(db: Session, question: schemas.QuestionCreate, quiz_id: uuid.UUID):
+    max_order = db.query(func.max(models.Question.sort_order)).filter(models.Question.quiz_id == quiz_id).scalar() or -1
     db_question = models.Question(
         text=question.text,
         opt_a=question.opt_a,
@@ -162,7 +163,8 @@ def create_question(db: Session, question: schemas.QuestionCreate, quiz_id: uuid
         opt_d=question.opt_d,
         correct=question.correct,
         explanation=question.explanation,
-        quiz_id=quiz_id
+        quiz_id=quiz_id,
+        sort_order=max_order + 1
     )
     db.add(db_question)
     db.commit()

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 import uuid
-from app import schemas, crud
+from app import schemas, crud, models
 from app.db.database import get_db
 
 router = APIRouter()
@@ -40,6 +40,13 @@ def read_question(question_id: uuid.UUID, db: Session = Depends(get_db)):
     if db_question is None:
         raise HTTPException(status_code=404, detail="Question not found")
     return db_question
+
+@router.patch("/reorder", status_code=status.HTTP_200_OK)
+def reorder_questions(orders: List[schemas.QuestionOrderUpdate], db: Session = Depends(get_db)):
+    for o in orders:
+        db.query(models.Question).filter(models.Question.id == o.question_id).update({"sort_order": o.sort_order})
+    db.commit()
+    return {"ok": True}
 
 @router.delete("/{question_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_question(question_id: uuid.UUID, db: Session = Depends(get_db)):

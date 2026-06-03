@@ -54,6 +54,7 @@ class Question(Base):
     opt_d = Column(String(500), nullable=False)
     correct = Column(String(1), nullable=False)  # 'a', 'b', 'c', or 'd'
     explanation = Column(Text, nullable=True)
+    sort_order = Column(Integer, nullable=False, default=0)
 
     __table_args__ = (
         CheckConstraint(correct.in_(['a', 'b', 'c', 'd']), name='correct_check'),

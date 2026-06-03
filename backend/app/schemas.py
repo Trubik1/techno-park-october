@@ -154,6 +154,10 @@ class ParticipantResponse(BaseModel):
         from_attributes = True
 
 # Import schemas
+class QuestionOrderUpdate(BaseModel):
+    question_id: uuid.UUID
+    sort_order: int
+
 class QuizImportPreview(BaseModel):
     success: bool
     message: str

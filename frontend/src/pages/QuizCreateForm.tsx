@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Breadcrumbs from '../components/Breadcrumbs';
 import { downloadCsv } from '../utils/csvExport';
 
 interface QuestionForm {
@@ -65,8 +66,19 @@ const QuizCreateForm: React.FC = () => {
     setStep('questions');
   };
 
+  const dragIdx = useRef<number | null>(null);
+
   const handleQuestionChange = (id: number, field: string, value: string) => {
     setQuestions(prev => prev.map(q => q.id === id ? { ...q, [field]: value } : q));
+  };
+
+  const moveQuestion = (from: number, to: number) => {
+    setQuestions(prev => {
+      const next = [...prev];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
   };
 
   const validateQuestions = () => {
@@ -192,7 +204,13 @@ const QuizCreateForm: React.FC = () => {
   if (step === 'meta') {
     return (
       <div className="page-container">
-        <div className="max-w-2xl mx-auto card animate-slideUp">
+        <div className="max-w-2xl mx-auto">
+          <Breadcrumbs items={[
+            { label: 'Вход учителя', path: '/teacher/login' },
+            { label: 'Панель управления', path: '/teacher/dashboard' },
+            { label: 'Создание теста' },
+          ]} />
+        <div className="card animate-slideUp">
           <div className="gradient-header">
             <div className="flex justify-between items-center">
               <h1 className="text-2xl font-bold">Создание теста</h1>
@@ -272,6 +290,7 @@ const QuizCreateForm: React.FC = () => {
           </div>
         </div>
       </div>
+    </div>
     );
   }
 
@@ -302,7 +321,13 @@ const QuizCreateForm: React.FC = () => {
 
   return (
     <div className="page-container">
-      <div className="max-w-4xl mx-auto animate-slideUp">
+      <div className="max-w-4xl mx-auto">
+        <Breadcrumbs items={[
+          { label: 'Вход учителя', path: '/teacher/login' },
+          { label: 'Панель управления', path: '/teacher/dashboard' },
+          { label: 'Создание теста' },
+        ]} />
+        <div className="animate-slideUp">
         {stepBar('questions')}
         <div className="card">
           <div className="gradient-header">
@@ -326,8 +351,20 @@ const QuizCreateForm: React.FC = () => {
               {questions.map((q, i) => {
                 const qe = errors[`q_${q.id}`] as Record<string, string> | undefined;
                 return (
-                  <div key={q.id} className="card-hover border border-gray-100 p-5 animate-fadeIn">
-                    <h3 className="text-lg font-semibold text-text-primary mb-3">Вопрос {i + 1}</h3>
+                  <div key={q.id}
+                    draggable
+                    onDragStart={() => { dragIdx.current = i; }}
+                    onDragOver={(e) => { e.preventDefault(); }}
+                    onDrop={() => { if (dragIdx.current !== null && dragIdx.current !== i) { moveQuestion(dragIdx.current, i); } dragIdx.current = null; }}
+                    onDragEnd={() => { dragIdx.current = null; }}
+                    className={'card-hover border border-gray-100 p-5 animate-fadeIn ' + (dragIdx.current === i ? 'opacity-30' : '')}
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="cursor-grab active:cursor-grabbing text-text-secondary/30 hover:text-text-secondary/60 transition-colors" title="Перетащите для изменения порядка">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" /></svg>
+                      </span>
+                      <h3 className="text-lg font-semibold text-text-primary">Вопрос {i + 1}</h3>
+                    </div>
                     <div className="space-y-3">
                       <textarea value={q.text} onChange={e => handleQuestionChange(q.id, 'text', e.target.value)} placeholder="Текст вопроса..." rows={2} className={`input ${qe?.text ? 'input-error' : ''}`} />
                       {qe?.text && <p className="error-text text-xs">{qe.text}</p>}
@@ -374,6 +411,7 @@ const QuizCreateForm: React.FC = () => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useStudent } from '../hooks/useStudent';
 import UserMenu from '../components/UserMenu';
 import BackButton from '../components/BackButton';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 interface QuizHistoryItem {
   id: string;
@@ -85,6 +86,10 @@ const StudentHistory: React.FC = () => {
         <UserMenu role="student" />
       </div>
       <div className="max-w-4xl mx-auto space-y-6 animate-fadeIn">
+        <Breadcrumbs items={[
+          { label: 'Вход ученика', path: '/student/entry' },
+          { label: 'История тестов' },
+        ]} />
         <div className="card">
           <div className="gradient-header">
             <div className="flex items-center gap-4">

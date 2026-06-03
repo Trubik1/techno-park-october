@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 interface QuestionPreview {
   text: string; opt_a: string; opt_b: string; opt_c: string; opt_d: string; correct: string; explanation: string | null;
@@ -103,7 +104,13 @@ const QuizImportForm: React.FC = () => {
 
   return (
     <div className="page-container">
-      <div className="max-w-4xl mx-auto card animate-slideUp">
+      <div className="max-w-4xl mx-auto">
+        <Breadcrumbs items={[
+          { label: 'Вход учителя', path: '/teacher/login' },
+          { label: 'Панель управления', path: '/teacher/dashboard' },
+          { label: 'Импорт теста' },
+        ]} />
+        <div className="card animate-slideUp">
         <div className="gradient-header">
           <div className="flex justify-between items-center">
             <h1 className="text-2xl font-bold">Импорт теста из файла</h1>
@@ -298,6 +305,7 @@ const QuizImportForm: React.FC = () => {
           </form>
         </div>
       </div>
+    </div>
     </div>
   );
 };

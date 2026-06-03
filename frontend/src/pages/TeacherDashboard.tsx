@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserMenu from '../components/UserMenu';
 import BackButton from '../components/BackButton';
+import Breadcrumbs from '../components/Breadcrumbs';
 import { useToast } from '../components/Toast';
 
 interface Quiz {
@@ -14,6 +15,27 @@ interface QuizEditForm {
   title: string; subject: string; grade: string;
   is_public: boolean;
 }
+
+const DeleteConfirmModal: React.FC<{ quizTitle: string; onConfirm: () => void; onClose: () => void }> = ({ quizTitle, onConfirm, onClose }) => {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 animate-fadeIn" onClick={onClose}>
+      <div className="bg-surface rounded-2xl shadow-2xl p-6 max-w-sm w-full animate-scaleIn" onClick={e => e.stopPropagation()}>
+        <div className="text-center mb-4">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-error/20 mb-3">
+            <svg className="w-6 h-6 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+          </div>
+          <h3 className="text-lg font-bold text-text-primary">Удалить тест?</h3>
+          <p className="text-sm text-text-secondary mt-1">«{quizTitle.length > 50 ? quizTitle.slice(0, 50) + '…' : quizTitle}»</p>
+          <p className="text-xs text-text-secondary/60 mt-2">Это действие нельзя отменить. Все вопросы, сессии и результаты будут удалены.</p>
+        </div>
+        <div className="flex gap-3">
+          <button onClick={onClose} className="btn-secondary flex-1">Отмена</button>
+          <button onClick={onConfirm} className="btn-error flex-1">Удалить</button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const QuizEditModal: React.FC<{ quiz: Quiz; onSave: () => void; onClose: () => void }> = ({ quiz, onSave, onClose }) => {
   const { showToast } = useToast();
@@ -80,6 +102,9 @@ const TeacherDashboard: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [tab, setTab] = useState<'my' | 'public'>('my');
   const [editingQuiz, setEditingQuiz] = useState<Quiz | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<Quiz | null>(null);
+  const [sortBy, setSortBy] = useState<'ticket' | 'date' | 'title'>('ticket');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   const loadQuizzes = useCallback(async () => {
     try {
@@ -108,15 +133,17 @@ const TeacherDashboard: React.FC = () => {
   }, [navigate]);
 
   const handleDeleteQuiz = async (quizId: string) => {
-    if (!window.confirm('Вы уверены, что хотите удалить этот тест? Это действие нельзя отменить.')) return;
     setDeletingId(quizId);
-    try {
-      const res = await fetch(`/api/quizzes/${quizId}`, { method: 'DELETE' });
-      if (!res.ok) { showToast('Ошибка удаления', 'error'); return; }
-      showToast('Тест удалён');
-      setMyQuizzes(prev => prev.filter(q => q.id !== quizId));
-    } catch { showToast('Ошибка удаления', 'error'); }
-    finally { setDeletingId(null); }
+    setDeleteConfirm(null);
+    setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/quizzes/${quizId}`, { method: 'DELETE' });
+        if (!res.ok) { showToast('Ошибка удаления', 'error'); setDeletingId(null); return; }
+        showToast('Тест удалён');
+        setMyQuizzes(prev => prev.filter(q => q.id !== quizId));
+      } catch { showToast('Ошибка удаления', 'error'); }
+      finally { setDeletingId(null); }
+    }, 300);
   };
 
   useEffect(() => { loadQuizzes(); }, [loadQuizzes]);
@@ -125,19 +152,27 @@ const TeacherDashboard: React.FC = () => {
     return [...new Set(myQuizzes.map(q => q.subject))].sort();
   }, [myQuizzes]);
 
-  const sortByTicket = (a: Quiz, b: Quiz) => {
-    const ma = a.title.match(/Билет\s+(\d+)/);
-    const mb = b.title.match(/Билет\s+(\d+)/);
-    if (ma && mb) return parseInt(ma[1]) - parseInt(mb[1]);
-    if (ma) return -1;
-    if (mb) return 1;
-    return a.title.localeCompare(b.title);
+  const sortQuizzes = (a: Quiz, b: Quiz) => {
+    let cmp = 0;
+    if (sortBy === 'ticket') {
+      const ma = a.title.match(/Билет\s+(\d+)/);
+      const mb = b.title.match(/Билет\s+(\d+)/);
+      if (ma && mb) cmp = parseInt(ma[1]) - parseInt(mb[1]);
+      else if (ma) cmp = -1;
+      else if (mb) cmp = 1;
+      else cmp = a.title.localeCompare(b.title);
+    } else if (sortBy === 'title') {
+      cmp = a.title.localeCompare(b.title);
+    } else {
+      cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+    }
+    return sortOrder === 'asc' ? cmp : -cmp;
   };
 
   const filteredMyQuizzes = (activeSubject
     ? myQuizzes.filter(q => q.subject === activeSubject)
     : myQuizzes
-  ).filter(q => q.title.toLowerCase().includes(searchQuery.toLowerCase())).sort(sortByTicket);
+  ).filter(q => q.title.toLowerCase().includes(searchQuery.toLowerCase())).sort(sortQuizzes);
 
   const publicSubjects = useMemo(() => {
     return [...new Set(publicQuizzes.map(q => q.subject))].sort();
@@ -148,7 +183,7 @@ const TeacherDashboard: React.FC = () => {
   const filteredPublicQuizzes = (publicSubject
     ? publicQuizzes.filter(q => q.subject === publicSubject)
     : publicQuizzes
-  ).filter(q => q.title.toLowerCase().includes(searchQuery.toLowerCase())).sort(sortByTicket);
+  ).filter(q => q.title.toLowerCase().includes(searchQuery.toLowerCase())).sort(sortQuizzes);
 
   if (isLoading && myQuizzes.length === 0 && publicQuizzes.length === 0) {
     return (
@@ -179,6 +214,12 @@ const TeacherDashboard: React.FC = () => {
     <div className="page-container relative">
       <div className="fixed top-14 left-3 z-40">
         <BackButton to="/teacher/login" />
+      </div>
+      <div className="max-w-4xl mx-auto mb-2 px-1">
+        <Breadcrumbs items={[
+          { label: 'Вход учителя', path: '/teacher/login' },
+          { label: 'Панель управления' },
+        ]} />
       </div>
       <div className="absolute top-4 right-4 z-10">
         <UserMenu role="teacher" />
@@ -233,8 +274,18 @@ const TeacherDashboard: React.FC = () => {
         {(tab === 'my') && (
           <div className="p-6">
             <div className="flex flex-col gap-4 mb-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold text-text-primary">Мои тесты</h2>
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-bold text-text-primary">Мои тесты</h2>
+                  <div className="flex gap-0.5 bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5">
+                    {([['ticket', '№'], ['title', 'А-Я'], ['date', '📅']] as const).map(([key, label]) => (
+                      <button key={key} onClick={() => setSortBy(key)} className={`px-2 py-0.5 text-xs font-medium rounded-md transition-all ${sortBy === key ? 'bg-white dark:bg-gray-600 text-text-primary shadow-sm' : 'text-text-secondary/60 hover:text-text-secondary'}`}>{label}</button>
+                    ))}
+                    <button onClick={() => setSortOrder(o => o === 'asc' ? 'desc' : 'asc')} className="px-1.5 py-0.5 text-xs text-text-secondary/60 hover:text-text-secondary" title={sortOrder === 'asc' ? 'По возрастанию' : 'По убыванию'}>
+                      {sortOrder === 'asc' ? '↑' : '↓'}
+                    </button>
+                  </div>
+                </div>
                 {subjects.length > 0 && (
                   <div className="flex gap-1 flex-wrap">
                     <button onClick={() => setActiveSubject(null)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${activeSubject === null ? 'bg-primary text-white shadow-md shadow-primary/30' : 'bg-gray-100 dark:bg-gray-700 text-text-secondary hover:bg-gray-200 dark:hover:bg-gray-600'}`}>Все</button>
@@ -267,7 +318,7 @@ const TeacherDashboard: React.FC = () => {
             ) : (
             <div className="grid gap-4">
               {filteredMyQuizzes.map((quiz, index) => (
-                <div key={quiz.id} className="card-hover border border-gray-100 animate-slideUp hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300" style={{ animationDelay: `${index * 0.1}s` }}>
+                <div key={quiz.id} className={`card-hover border border-gray-100 animate-slideUp hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 ${deletingId === quiz.id ? 'opacity-20 scale-95 pointer-events-none' : ''}`} style={{ animationDelay: `${index * 0.1}s` }}>
                   <div className="p-5">
                     <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-3">
                       <div className="flex-1 min-w-0">
@@ -291,12 +342,12 @@ const TeacherDashboard: React.FC = () => {
                           ✏️
                         </button>
                         <button
-                          onClick={() => handleDeleteQuiz(quiz.id)}
-                          disabled={deletingId === quiz.id || startingId !== null}
+                          onClick={() => setDeleteConfirm(quiz)}
+                          disabled={deletingId !== null || startingId !== null}
                           className="btn-sm bg-error/10 text-error hover:bg-error/20 disabled:opacity-50"
                           title="Удалить"
                         >
-                          {deletingId === quiz.id ? '...' : '🗑️'}
+                          🗑️
                         </button>
                         <button
                           onClick={async () => {
@@ -329,6 +380,9 @@ const TeacherDashboard: React.FC = () => {
           </div>
         )}
 
+        {deleteConfirm && (
+          <DeleteConfirmModal quizTitle={deleteConfirm.title} onConfirm={() => handleDeleteQuiz(deleteConfirm.id)} onClose={() => setDeleteConfirm(null)} />
+        )}
         {editingQuiz && (
           <QuizEditModal quiz={editingQuiz} onSave={loadQuizzes} onClose={() => setEditingQuiz(null)} />
         )}
