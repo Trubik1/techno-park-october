@@ -201,7 +201,7 @@ const QuizImportForm: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                        <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                        <tr className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                           <td className="px-3 py-2 text-text-primary">Сколько будет 2+2?</td>
                           <td className="px-3 py-2 text-text-primary">3</td>
                           <td className="px-3 py-2 text-text-primary">4</td>
@@ -210,7 +210,7 @@ const QuizImportForm: React.FC = () => {
                           <td className="px-3 py-2 font-bold text-success">b</td>
                           <td className="px-3 py-2 text-text-secondary">2+2=4</td>
                         </tr>
-                        <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                        <tr className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                           <td className="px-3 py-2 text-text-primary">Столица Франции?</td>
                           <td className="px-3 py-2 text-text-primary">Лондон</td>
                           <td className="px-3 py-2 text-text-primary">Берлин</td>
