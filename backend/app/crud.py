@@ -113,7 +113,13 @@ def clone_public_quizzes_for_teacher(db: Session, teacher_id: uuid.UUID):
             ))
     db.commit()
 
+def get_quiz_by_title_and_teacher(db: Session, title: str, teacher_id: uuid.UUID):
+    return db.query(models.Quiz).filter(models.Quiz.title == title, models.Quiz.teacher_id == teacher_id).first()
+
 def create_quiz(db: Session, quiz: schemas.QuizCreate, teacher_id: uuid.UUID):
+    existing = get_quiz_by_title_and_teacher(db, quiz.title, teacher_id)
+    if existing:
+        raise ValueError(f"Тест с названием «{quiz.title}» уже существует")
     db_quiz = models.Quiz(
         title=quiz.title,
         subject=quiz.subject,
@@ -133,6 +139,10 @@ def update_quiz(db: Session, quiz_id: uuid.UUID, quiz_update: schemas.QuizUpdate
     if not db_quiz:
         return None
     update_data = quiz_update.model_dump(exclude_unset=True)
+    if 'title' in update_data and update_data['title'] != db_quiz.title and db_quiz.teacher_id:
+        existing = get_quiz_by_title_and_teacher(db, update_data['title'], db_quiz.teacher_id)
+        if existing and existing.id != quiz_id:
+            raise ValueError(f"Тест с названием «{update_data['title']}» уже существует")
     for key, value in update_data.items():
         setattr(db_quiz, key, value)
     db.commit()

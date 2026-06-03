@@ -9,7 +9,10 @@ router = APIRouter()
 
 @router.post("/", response_model=schemas.QuizResponse)
 def create_quiz(quiz: schemas.QuizCreate, teacher_id: uuid.UUID, db: Session = Depends(get_db)):
-    db_quiz = crud.create_quiz(db=db, quiz=quiz, teacher_id=teacher_id)
+    try:
+        db_quiz = crud.create_quiz(db=db, quiz=quiz, teacher_id=teacher_id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     d = {c.name: getattr(db_quiz, c.name) for c in db_quiz.__table__.columns}
     d['question_count'] = 0
     d['teacher_name'] = db_quiz.teacher.name if db_quiz.teacher else ""
@@ -49,7 +52,10 @@ def read_quiz(quiz_id: uuid.UUID, db: Session = Depends(get_db)):
 
 @router.put("/{quiz_id}", response_model=schemas.QuizResponse)
 def update_quiz(quiz_id: uuid.UUID, quiz_update: schemas.QuizUpdate, db: Session = Depends(get_db)):
-    db_quiz = crud.update_quiz(db, quiz_id=quiz_id, quiz_update=quiz_update)
+    try:
+        db_quiz = crud.update_quiz(db, quiz_id=quiz_id, quiz_update=quiz_update)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     if db_quiz is None:
         raise HTTPException(status_code=404, detail="Quiz not found")
     d = {c.name: getattr(db_quiz, c.name) for c in db_quiz.__table__.columns}
