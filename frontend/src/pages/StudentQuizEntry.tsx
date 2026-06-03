@@ -14,7 +14,7 @@ const StudentQuizEntry: React.FC = () => {
   const navigate = useNavigate();
 
   if (isLoading) {
-    return <div className="min-h-screen bg-background flex items-center justify-center"><div className="spinner"></div></div>;
+    return <div className="min-h-screen bg-background flex items-center justify-center"><div className="spinner-dots"><span></span><span></span><span></span></div></div>;
   }
   if (!isRegistered || !student) {
     return <Navigate to="/student/entry" replace />;

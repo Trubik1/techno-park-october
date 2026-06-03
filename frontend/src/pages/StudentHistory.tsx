@@ -49,7 +49,7 @@ const StudentHistory: React.FC = () => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center animate-fadeIn">
-          <div className="spinner mx-auto mb-3"></div>
+          <div className="flex justify-center mb-3"><div className="spinner-dots"><span></span><span></span><span></span></div></div>
           <p className="text-sm text-text-secondary">Загрузка профиля...</p>
         </div>
       </div>
@@ -140,6 +140,9 @@ const StudentHistory: React.FC = () => {
 
         {history.length === 0 ? (
           <div className="card p-8 text-center animate-fadeIn">
+            <svg className="w-12 h-12 text-text-secondary/30 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+            </svg>
             <p className="text-text-secondary">У вас пока нет пройденных тестов.</p>
             <p className="mt-2 text-sm text-text-secondary/60">Пройдите тест, чтобы увидеть результаты здесь.</p>
             <button onClick={() => navigate('/student/quiz-entry')} className="btn-primary mt-6">Подключиться к тесту</button>

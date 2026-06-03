@@ -52,7 +52,7 @@ const StudentQuizReview: React.FC = () => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center animate-fadeIn">
-          <div className="spinner mx-auto mb-3"></div>
+          <div className="flex justify-center mb-3"><div className="spinner-dots"><span></span><span></span><span></span></div></div>
           <p className="text-sm text-text-secondary">Загрузка результатов...</p>
         </div>
       </div>

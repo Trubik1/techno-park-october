@@ -19,7 +19,7 @@ const StudentQuizReview = React.lazy(() => import('./pages/StudentQuizReview'));
 const PageLoader: React.FC = () => (
   <div className="min-h-screen bg-background flex items-center justify-center p-4 animate-fadeIn">
     <div className="text-center">
-      <div className="spinner mx-auto mb-3"></div>
+      <div className="flex justify-center mb-3"><div className="spinner-dots"><span></span><span></span><span></span></div></div>
       <p className="text-sm text-text-secondary animate-pulse" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>Загрузка...</p>
     </div>
   </div>

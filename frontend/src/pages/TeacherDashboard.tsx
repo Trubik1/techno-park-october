@@ -20,10 +20,10 @@ interface QuizEditForm {
 const DeleteConfirmModal: React.FC<{ quizTitle: string; onConfirm: () => void; onClose: () => void }> = ({ quizTitle, onConfirm, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 animate-fadeIn" onClick={onClose}>
-      <div className="bg-surface rounded-2xl shadow-xl border border-border p-6 max-w-sm w-full animate-scaleIn" onClick={e => e.stopPropagation()}>
+      <div className="bg-surface rounded-2xl shadow-xl border border-error/30 p-6 max-w-sm w-full animate-scaleIn" onClick={e => e.stopPropagation()}>
         <div className="text-center mb-4">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-error/10 mb-3">
-            <svg className="w-6 h-6 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-error/10 mb-4">
+            <svg className="w-7 h-7 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
           </div>
           <h3 className="text-lg font-semibold text-text-primary font-heading">Удалить тест?</h3>
           <p className="text-sm text-text-secondary mt-2">«{quizTitle.length > 50 ? quizTitle.slice(0, 50) + '…' : quizTitle}»</p>
@@ -31,7 +31,7 @@ const DeleteConfirmModal: React.FC<{ quizTitle: string; onConfirm: () => void; o
         </div>
         <div className="flex gap-3">
           <button onClick={onClose} className="btn-outline flex-1">Отмена</button>
-          <button onClick={onConfirm} className="btn-primary flex-1 !bg-error hover:!bg-error/90">Удалить</button>
+          <button onClick={onConfirm} className="btn-danger flex-1">Удалить</button>
         </div>
       </div>
     </div>
@@ -190,7 +190,7 @@ const TeacherDashboard: React.FC = () => {
     return (
       <div className="page-container flex items-center justify-center">
         <div className="text-center animate-fadeIn">
-          <div className="spinner mx-auto mb-3"></div>
+          <div className="flex justify-center mb-3"><div className="spinner-dots"><span></span><span></span><span></span></div></div>
           <p className="text-sm text-text-secondary animate-pulse">Загрузка тестов...</p>
         </div>
       </div>
@@ -298,11 +298,17 @@ const TeacherDashboard: React.FC = () => {
 
             {myQuizzes.length === 0 ? (
               <div className="card p-8 text-center animate-fadeIn">
+                <svg className="w-12 h-12 text-text-secondary/30 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
                 <p className="text-text-secondary">У вас пока нет созданных тестов.</p>
                 <p className="mt-2 text-sm text-text-secondary/60">Нажмите «Создать» или «Импорт», чтобы добавить первый тест.</p>
               </div>
             ) : filteredMyQuizzes.length === 0 ? (
               <div className="card p-8 text-center animate-fadeIn">
+                <svg className="w-12 h-12 text-text-secondary/30 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
                 <p className="text-text-secondary">Тесты не найдены. Попробуйте изменить параметры поиска.</p>
               </div>
             ) : (
@@ -391,11 +397,17 @@ const TeacherDashboard: React.FC = () => {
 
             {publicQuizzes.length === 0 ? (
               <div className="card p-8 text-center animate-fadeIn">
+                <svg className="w-12 h-12 text-text-secondary/30 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
                 <p className="text-text-secondary">Публичных тестов от других учителей пока нет.</p>
                 <p className="mt-2 text-sm text-text-secondary/60">Создайте тест и сделайте его публичным.</p>
               </div>
             ) : filteredPublicQuizzes.length === 0 ? (
               <div className="card p-8 text-center animate-fadeIn">
+                <svg className="w-12 h-12 text-text-secondary/30 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
                 <p className="text-text-secondary">Тесты не найдены. Попробуйте изменить параметры поиска.</p>
               </div>
             ) : (
