@@ -41,7 +41,7 @@ const NotFoundPage: React.FC = () => {
 
 const BgDecoration: React.FC = () => (
   <div className="fixed inset-0 pointer-events-none overflow-hidden -z-0" aria-hidden="true">
-    <svg className="w-full h-full opacity-[0.06] dark:opacity-[0.04]" viewBox="0 0 1440 900" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg className="w-full h-full opacity-[0.25] dark:opacity-[0.15]" viewBox="0 0 1440 900" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M-100 200 C 200 50, 400 400, 700 250 S 1100 500, 1540 300" stroke="#2563EB" strokeWidth="2" fill="none" />
       <path d="M-100 500 C 300 700, 500 200, 800 450 S 1200 300, 1540 600" stroke="#2563EB" strokeWidth="1.5" fill="none" />
       <path d="M-100 750 C 250 900, 600 600, 900 800 S 1300 650, 1540 800" stroke="#2563EB" strokeWidth="1" fill="none" />
