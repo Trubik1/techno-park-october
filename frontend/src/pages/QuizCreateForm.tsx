@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ThemeToggleButton from '../components/ThemeToggleButton';
 import Breadcrumbs from '../components/Breadcrumbs';
 import { downloadCsv } from '../utils/csvExport';
 
@@ -204,6 +205,9 @@ const QuizCreateForm: React.FC = () => {
   if (step === 'meta') {
     return (
       <div className="min-h-screen bg-background animate-fadeIn">
+        <div className="fixed top-4 left-4 z-50">
+          <ThemeToggleButton />
+        </div>
         <div className="max-w-2xl mx-auto px-4 md:px-6 py-6 md:py-8">
           <Breadcrumbs items={[
             { label: 'Вход учителя', path: '/teacher/login' },
@@ -283,6 +287,9 @@ const QuizCreateForm: React.FC = () => {
   if (step === 'done') {
     return (
       <div className="min-h-screen bg-background animate-fadeIn">
+        <div className="fixed top-4 left-4 z-50">
+          <ThemeToggleButton />
+        </div>
         <div className="max-w-2xl mx-auto px-4 md:px-6 py-6 md:py-8">
           <div className="card p-8 md:p-10 text-center animate-scaleIn">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-success/10 mb-4">
@@ -313,6 +320,9 @@ const QuizCreateForm: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background animate-fadeIn">
+      <div className="fixed top-4 left-4 z-50">
+        <ThemeToggleButton />
+      </div>
       <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-8">
         <Breadcrumbs items={[
           { label: 'Вход учителя', path: '/teacher/login' },

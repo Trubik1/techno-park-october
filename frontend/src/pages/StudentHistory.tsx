@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStudent } from '../hooks/useStudent';
 import UserMenu from '../components/UserMenu';
+import ThemeToggleButton from '../components/ThemeToggleButton';
 import BackButton from '../components/BackButton';
 import Breadcrumbs from '../components/Breadcrumbs';
 
@@ -82,7 +83,8 @@ const StudentHistory: React.FC = () => {
         <UserMenu role="student" />
       </div>
       <div className="max-w-4xl mx-auto px-4 md:px-6 py-6 md:py-8">
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center gap-2 mb-6">
+          <ThemeToggleButton />
           <BackButton to="/student/quiz-entry" />
           <div>
             <h1 className="text-2xl font-bold text-text-primary font-heading">Профиль</h1>

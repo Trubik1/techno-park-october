@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ThemeToggleButton from '../components/ThemeToggleButton';
 import Breadcrumbs from '../components/Breadcrumbs';
 
 interface QuestionPreview {
@@ -112,6 +113,9 @@ const QuizImportForm: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background animate-fadeIn">
+      <div className="fixed top-4 left-4 z-50">
+        <ThemeToggleButton />
+      </div>
       <div className="max-w-4xl mx-auto px-4 md:px-6 py-6 md:py-8">
         <Breadcrumbs items={[
           { label: 'Вход учителя', path: '/teacher/login' },

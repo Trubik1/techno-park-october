@@ -64,9 +64,7 @@ function App() {
         <StudentProvider>
           <ToastProvider>
           <BgDecoration />
-          <div className="fixed top-4 left-4 z-50 animate-fadeIn">
-            <ThemeToggleButton />
-          </div>
+          
           <React.Suspense fallback={<PageLoader />}>
             <Routes>
               <Route path="/teacher/login" element={<TeacherLogin />} />

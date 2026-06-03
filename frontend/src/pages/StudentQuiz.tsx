@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useStudent } from '../hooks/useStudent';
 import UserMenu from '../components/UserMenu';
+import ThemeToggleButton from '../components/ThemeToggleButton';
 import BackButton from '../components/BackButton';
 import Breadcrumbs from '../components/Breadcrumbs';
 
@@ -322,7 +323,8 @@ const StudentQuiz: React.FC = () => {
         <UserMenu role="student" />
       </div>
       <div className="max-w-2xl mx-auto px-4 py-4">
-        <div className="mb-4">
+        <div className="flex items-center gap-2 mb-4">
+          <ThemeToggleButton />
           <BackButton to="/student/quiz-entry" />
         </div>
         <Breadcrumbs items={[

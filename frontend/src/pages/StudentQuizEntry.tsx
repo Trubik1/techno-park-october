@@ -59,14 +59,12 @@ const StudentQuizEntry: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background animate-fadeIn">
-      <div className="fixed top-4 left-4 z-50">
-        <ThemeToggleButton />
-      </div>
       <div className="fixed top-4 right-4 z-50">
         <UserMenu role="student" />
       </div>
       <div className="max-w-lg mx-auto px-4 py-8">
-        <div className="mb-6">
+        <div className="flex items-center gap-2 mb-6">
+          <ThemeToggleButton />
           <BackButton to="/student/entry" />
         </div>
         <div className="card p-8 md:p-10">

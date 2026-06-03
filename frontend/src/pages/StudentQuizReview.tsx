@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import ThemeToggleButton from '../components/ThemeToggleButton';
 import BackButton from '../components/BackButton';
 import Breadcrumbs from '../components/Breadcrumbs';
 
@@ -77,7 +78,8 @@ const StudentQuizReview: React.FC = () => {
   return (
     <div className="min-h-screen bg-background animate-fadeIn">
       <div className="max-w-2xl mx-auto px-4 md:px-6 py-6 md:py-8">
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center gap-2 mb-6">
+          <ThemeToggleButton />
           <BackButton to="/student/entry" />
           <Breadcrumbs items={[
             { label: 'Вход ученика', path: '/student/entry' },

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserMenu from '../components/UserMenu';
+import ThemeToggleButton from '../components/ThemeToggleButton';
 import BackButton from '../components/BackButton';
 import Breadcrumbs from '../components/Breadcrumbs';
 import { useToast } from '../components/Toast';
@@ -215,7 +216,8 @@ const TeacherDashboard: React.FC = () => {
         <UserMenu role="teacher" />
       </div>
       <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-8">
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center gap-2 mb-6">
+          <ThemeToggleButton />
           <BackButton to="/teacher/login" />
           <div>
             <h1 className="text-2xl font-bold text-text-primary font-heading">Панель управления</h1>
