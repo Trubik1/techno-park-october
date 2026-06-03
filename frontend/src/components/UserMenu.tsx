@@ -11,6 +11,18 @@ interface QuizHistoryItem {
   completedAt: string;
 }
 
+const PinInput: React.FC<{ value: string; onChange: (v: string) => void; placeholder: string }> = ({ value, onChange, placeholder }) => {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative">
+      <input type={show ? 'text' : 'password'} className="input pr-10" placeholder={placeholder} value={value} onChange={e => onChange(e.target.value)} maxLength={10} />
+      <button type="button" onClick={() => setShow(!show)} className="absolute right-2 top-1/2 -translate-y-1/2 text-text-secondary/50 hover:text-text-secondary transition-colors text-lg">
+        {show ? '🙈' : '👁️'}
+      </button>
+    </div>
+  );
+};
+
 const PinResetModal: React.FC<{ teacherId: string; teacherName: string; onClose: () => void }> = ({ teacherId, teacherName, onClose }) => {
   const { showToast } = useToast();
   const [oldPin, setOldPin] = useState('');
@@ -46,9 +58,9 @@ const PinResetModal: React.FC<{ teacherId: string; teacherName: string; onClose:
         <h3 className="text-lg font-bold text-text-primary mb-4">Настройки учителя</h3>
         <div className="space-y-3">
           <input className="input" placeholder="Ваше имя" value={name} onChange={e => setName(e.target.value)} maxLength={100} />
-          <input type="password" className="input" placeholder="Старый PIN" value={oldPin} onChange={e => setOldPin(e.target.value)} maxLength={10} />
-          <input type="password" className="input" placeholder="Новый PIN (6-10 символов)" value={newPin} onChange={e => setNewPin(e.target.value)} maxLength={10} />
-          <input type="password" className="input" placeholder="Подтвердите новый PIN" value={confirmPin} onChange={e => setConfirmPin(e.target.value)} maxLength={10} />
+          <PinInput value={oldPin} onChange={setOldPin} placeholder="Старый PIN" />
+          <PinInput value={newPin} onChange={setNewPin} placeholder="Новый PIN (6-10 символов)" />
+          <PinInput value={confirmPin} onChange={setConfirmPin} placeholder="Подтвердите новый PIN" />
           {error && <p className="text-sm text-error">{error}</p>}
         </div>
         <div className="flex gap-3 mt-6">

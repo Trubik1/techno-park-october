@@ -7,6 +7,8 @@ const TeacherLogin: React.FC = () => {
   const [name, setName] = useState('');
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
+  const [showPin, setShowPin] = useState(false);
+  const [showConfirmPin, setShowConfirmPin] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -121,14 +123,19 @@ const TeacherLogin: React.FC = () => {
               </svg>
               Ключ учителя
             </label>
-            <input
-              type="password"
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-              placeholder="••••••"
-              maxLength={10}
-              className="input text-center tracking-widest font-bold"
-            />
+            <div className="relative">
+              <input
+                type={showPin ? 'text' : 'password'}
+                value={pin}
+                onChange={(e) => setPin(e.target.value)}
+                placeholder="••••••"
+                maxLength={10}
+                className="input text-center tracking-widest font-bold pr-10"
+              />
+              <button type="button" onClick={() => setShowPin(!showPin)} className="absolute right-2 top-1/2 -translate-y-1/2 text-text-secondary/50 hover:text-text-secondary transition-colors text-lg">
+                {showPin ? '🙈' : '👁️'}
+              </button>
+            </div>
           </div>
           {isRegister && (
             <div>
@@ -138,14 +145,19 @@ const TeacherLogin: React.FC = () => {
                 </svg>
                 Подтвердите ключ учителя
               </label>
-              <input
-                type="password"
-                value={confirmPin}
-                onChange={(e) => setConfirmPin(e.target.value)}
-                placeholder="••••••"
-                maxLength={10}
-                className="input text-center tracking-widest font-bold"
-              />
+              <div className="relative">
+                <input
+                  type={showConfirmPin ? 'text' : 'password'}
+                  value={confirmPin}
+                  onChange={(e) => setConfirmPin(e.target.value)}
+                  placeholder="••••••"
+                  maxLength={10}
+                  className="input text-center tracking-widest font-bold pr-10"
+                />
+                <button type="button" onClick={() => setShowConfirmPin(!showConfirmPin)} className="absolute right-2 top-1/2 -translate-y-1/2 text-text-secondary/50 hover:text-text-secondary transition-colors text-lg">
+                  {showConfirmPin ? '🙈' : '👁️'}
+                </button>
+              </div>
             </div>
           )}
 
