@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useEffect } from 'react';
 
 interface PixelOtpInputProps {
   value: string;
@@ -10,8 +10,17 @@ const PixelOtpInput: React.FC<PixelOtpInputProps> = ({ value, onChange, length =
   const inputRef = useRef<HTMLInputElement>(null);
   const slots = Array.from({ length }, (_, i) => value[i] || '');
 
+  useEffect(() => {
+    const t = setTimeout(() => inputRef.current?.focus(), 300);
+    return () => clearTimeout(t);
+  }, []);
+
   const handleContainerClick = () => {
     inputRef.current?.focus();
+    if (inputRef.current) {
+      inputRef.current.selectionStart = inputRef.current.value.length;
+      inputRef.current.selectionEnd = inputRef.current.value.length;
+    }
   };
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
@@ -42,8 +51,10 @@ const PixelOtpInput: React.FC<PixelOtpInputProps> = ({ value, onChange, length =
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
         maxLength={length}
-        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        className="absolute inset-0 w-full h-full opacity-0 cursor-text"
         autoFocus
+        autoCapitalize="characters"
+        autoComplete="off"
         inputMode="text"
       />
       <div
