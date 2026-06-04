@@ -75,8 +75,6 @@ const StudentQuiz: React.FC = () => {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [resultId, setResultId] = useState<string | null>(null);
 
-  const loadingCodeRef = useRef<string | null>(null);
-
   const clearTimers = () => {
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
     if (timeoutRef.current) { clearTimeout(timeoutRef.current); timeoutRef.current = null; }
@@ -84,10 +82,7 @@ const StudentQuiz: React.FC = () => {
 
   useEffect(() => {
     if (!code) { navigate('/student/entry'); return; }
-    if (!student) return;
-    if (loadingCodeRef.current === code) return;
-    loadingCodeRef.current = code;
-    studentIdRef.current = student.id;
+    if (!student) { setIsLoading(false); return; }
     let cancelled = false;
 
     (async () => {
