@@ -55,7 +55,7 @@ function shuffleArray<T>(arr: T[]): T[] {
 const StudentQuiz: React.FC = () => {
   const { code } = useParams<{ code: string }>();
   const navigate = useNavigate();
-  const { student } = useStudent();
+  const { student, isLoading: studentLoading } = useStudent();
 
   const studentIdRef = useRef<string | null>(null);
   const submitQuizRef = useRef<() => void>(() => {});
@@ -66,7 +66,7 @@ const StudentQuiz: React.FC = () => {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [showExplanation, setShowExplanation] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -92,6 +92,7 @@ const StudentQuiz: React.FC = () => {
 
     (async () => {
       try {
+        setIsLoading(true);
         const sessionRes = await fetch('/api/sessions/' + code);
         if (!sessionRes.ok) throw new Error('Session not found');
         const sData = await sessionRes.json();
@@ -269,6 +270,17 @@ const StudentQuiz: React.FC = () => {
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, [quizData, isSubmitted, showExplanation, currentQuestionIndex, shuffleOrder, selectedOption]);
+
+  if (studentLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center animate-fadeIn">
+          <div className="flex justify-center mb-3"><div className="spinner-dots"><span></span><span></span><span></span></div></div>
+          <p className="text-sm text-text-secondary animate-pulse">Загрузка...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading && !quizData) {
     return (
