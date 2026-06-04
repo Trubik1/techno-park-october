@@ -112,8 +112,8 @@ const StudentQuizEntry: React.FC = () => {
           </form>
 
           <div className="mt-6 text-center">
-            <button onClick={() => navigate('/student/entry')} className="text-sm text-text-secondary hover:text-primary transition-colors">
-              ← Сменить имя или класс
+            <button onClick={() => { localStorage.removeItem('classquiz_student'); navigate('/student/entry'); }} className="text-sm text-text-secondary hover:text-error transition-colors">
+              Выйти
             </button>
           </div>
         </div>
