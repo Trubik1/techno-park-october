@@ -91,8 +91,8 @@
   --color-error-muted-rgb: 75 40 40;
   --color-warning-rgb: 211 180 105;
   --color-info-rgb: 130 148 179;
-  --color-border-rgb: 61 56 50;
-  --color-border-strong-rgb: 85 78 70;
+  --color-border-rgb: 90 82 72;
+  --color-border-strong-rgb: 110 100 88;
   --color-overlay-rgb: 0 0 0;
   --shadow-inset-highlight: rgba(0, 0, 0, 0.2);
   --shadow-inset-highlight-subtle: rgba(0, 0, 0, 0.1);
@@ -237,7 +237,7 @@
   .input {
     @apply w-full px-4 py-3 text-sm
            bg-surface text-text-primary
-           placeholder:text-text-tertiary/40
+            placeholder:text-text-tertiary/50
            rounded-[0.4rem_1.25rem_0.4rem_1.25rem]
            outline-none
            transition-all duration-200 ease-out;
@@ -249,6 +249,12 @@
   .input:focus {
     border-color: rgb(var(--color-primary-rgb));
     box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1), 0 1px 2px rgba(0,0,0,0.03);
+  }
+  .dark .input {
+    border-color: rgba(var(--color-text-tertiary-rgb), 0.5);
+  }
+  .dark .input:hover:not(:focus):not(:disabled):not([readonly]) {
+    border-color: rgba(var(--color-text-tertiary-rgb), 0.65);
   }
   .input:disabled {
     opacity: 0.5;
