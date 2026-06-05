@@ -20,9 +20,18 @@ const StudentPracticeQuiz = React.lazy(() => import('./pages/StudentPracticeQuiz
 
 const PageLoader: React.FC = () => (
     <div className="min-h-[100dvh] bg-background flex items-center justify-center p-4 animate-fadeIn">
-      <div className="text-center">
-        <div className="flex justify-center mb-3"><div className="spinner-dots"><span></span><span></span><span></span></div></div>
-        <p className="text-sm text-text-secondary animate-pulse">Загрузка...</p>
+      <div className="text-center space-y-4">
+        <div className="flex justify-center">
+          <div className="w-12 h-12 rounded-[0.5rem_1.5rem_0.5rem_1.5rem] bg-primary/10 border border-primary/20 flex items-center justify-center animate-breathe">
+            <svg className="w-6 h-6 text-primary/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+        </div>
+        <div className="space-y-2">
+          <div className="skeleton-text mx-auto max-w-[120px]" />
+          <div className="skeleton-text mx-auto max-w-[80px] !w-[80px]" />
+        </div>
       </div>
     </div>
 );
@@ -32,9 +41,10 @@ const NotFoundPage: React.FC = () => {
   return (
     <div className="min-h-[100dvh] bg-background flex items-center justify-center p-4 animate-fadeIn relative">
       <div className="page-card text-center">
-        <div className="text-7xl font-bold text-primary mb-4 font-heading">404</div>
-        <h2 className="text-2xl font-bold text-text-primary mb-2 font-heading">Страница не найдена</h2>
-        <p className="text-text-secondary mb-6">Страница, которую вы ищете, не существует или была перемещена.</p>
+        <div className="text-8xl font-bold text-primary/20 mb-2 font-heading leading-none">404</div>
+        <div className="w-16 h-0.5 bg-primary/20 mx-auto mb-6 rounded-full" />
+        <h2 className="text-2xl font-semibold text-text-primary mb-2 font-heading">Страница не найдена</h2>
+        <p className="text-text-secondary mb-8 text-caption">Страница, которую вы ищете, не существует или была перемещена.</p>
         <button onClick={() => navigate('/')} className="btn-primary">На главную</button>
       </div>
     </div>

@@ -75,22 +75,27 @@ const StudentEntry: React.FC = () => {
         </div>
       )}
 
-      <div className="relative px-6 pt-12 pb-8 md:pt-20 md:pb-12 text-center overflow-hidden">
+      <div className="relative px-6 pt-16 pb-12 md:pt-24 md:pb-16 text-center overflow-hidden">
         <div className="absolute inset-0 mesh-gradient" />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent/40 to-background" />
         <div className="max-w-2xl mx-auto relative z-10">
-          <h1 className="text-text-primary font-heading text-3xl md:text-4xl font-semibold">ClassQuiz</h1>
-          <p className="text-text-secondary text-sm md:text-base leading-relaxed max-w-md mx-auto mt-2">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-studio-sm bg-primary/10 border border-primary/20 mb-5">
+            <svg className="w-7 h-7 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h1 className="text-text-primary font-heading text-display">ClassQuiz</h1>
+          <p className="text-text-secondary text-body-lg max-w-md mx-auto mt-3">
             Проходите тесты и отслеживайте результаты
           </p>
         </div>
       </div>
 
-      <div className="max-w-md mx-auto px-4 -mt-8 relative z-10 pb-8">
+      <div className="max-w-md mx-auto px-4 -mt-10 relative z-10 pb-8">
         <div className="card p-6 md:p-8">
           <div className="text-center mb-6">
-            <h2 className="text-xl font-semibold text-text-primary font-heading">Добро пожаловать!</h2>
-            <p className="text-text-secondary mt-1 text-sm">Введите данные для начала работы</p>
+            <h2 className="text-2xl font-semibold text-text-primary font-heading">Добро пожаловать!</h2>
+            <p className="text-text-secondary mt-1.5 text-caption">Введите данные для начала работы</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -113,10 +118,10 @@ const StudentEntry: React.FC = () => {
                     key={t}
                     type="button"
                     onClick={() => { setUserType(t); setClassName(''); }}
-                    className={`py-2.5 px-3 text-sm font-medium border transition-all duration-200
-                      rounded-[0.4rem_1rem_0.4rem_1rem]
+                    className={`py-2.5 px-3 text-sm font-medium border transition-all duration-200 ease-out
+                      rounded-studio-xs active:scale-[0.97]
                       ${userType === t
-                        ? 'border-primary bg-primary/8 text-primary'
+                        ? 'border-primary bg-primary/8 text-primary shadow-studio-glow'
                         : 'border-border/80 text-text-secondary hover:border-primary/30 hover:text-primary'}`}
                   >
                     {t === 'school' ? 'Школа' : t === 'club' ? 'Кружок' : 'Другое'}
@@ -136,7 +141,7 @@ const StudentEntry: React.FC = () => {
             </div>
 
             {error && (
-              <div className="error-box">
+              <div className="error-box animate-shake">
                 <p className="error-text">{error}</p>
               </div>
             )}
@@ -150,20 +155,20 @@ const StudentEntry: React.FC = () => {
               ) : 'Начать работу'}
             </button>
 
-            <p className="text-xs text-text-secondary/50 text-center">
+            <p className="text-xs text-text-tertiary text-center">
               Ваши данные будут сохранены только в этом браузере.
             </p>
           </form>
 
-          <div className="mt-5 text-center space-y-2">
+          <div className="mt-6 pt-5 border-t border-border/60 text-center space-y-2.5">
             <div>
-              <button onClick={() => navigate('/student/practice')} className="text-sm text-primary hover:text-primary/80 transition-colors font-medium">
-                Подготовка к билетам &rarr;
+              <button onClick={() => navigate('/student/practice')} className="text-sm text-primary hover:text-primary/80 transition-colors font-medium group">
+                Подготовка к билетам <span className="inline-block transition-transform duration-200 group-hover:translate-x-0.5">&rarr;</span>
               </button>
             </div>
             <div>
-              <button onClick={() => navigate('/teacher/login')} className="text-sm text-primary hover:text-primary/80 transition-colors font-medium">
-                Войти как учитель &rarr;
+              <button onClick={() => navigate('/teacher/login')} className="text-sm text-primary hover:text-primary/80 transition-colors font-medium group">
+                Войти как учитель <span className="inline-block transition-transform duration-200 group-hover:translate-x-0.5">&rarr;</span>
               </button>
             </div>
           </div>
