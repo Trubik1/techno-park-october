@@ -123,6 +123,8 @@
     @apply bg-background text-text-primary antialiased;
     font-size: 15px;
     line-height: 1.65;
+    background-image: linear-gradient(160deg, transparent 0%, rgba(var(--color-surface-subtle-rgb), 0.35) 50%, transparent 100%);
+    background-attachment: fixed;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Playfair Display', Georgia, serif;
@@ -209,7 +211,7 @@
     background: rgba(var(--color-surface-rgb), 0.55);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(var(--color-border-strong-rgb), 0.7);
+    border: 1px solid rgba(var(--color-border-strong-rgb), 1);
     isolation: isolate;
   }
 
@@ -220,18 +222,18 @@
   .card-hover:hover {
     background: rgba(var(--color-surface-rgb), 0.78);
     box-shadow: 0 12px 40px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03), inset 0 1px 0 var(--shadow-inset-highlight);
-    border-color: rgba(var(--color-primary-rgb), 0.35);
+    border-color: rgba(var(--color-primary-rgb), 0.5);
     transform: translateY(-0.1875rem);
   }
 
   .card-solid {
     background: rgb(var(--color-surface-rgb));
-    border: 1px solid rgba(var(--color-border-strong-rgb), 0.7);
+    border: 1px solid rgba(var(--color-border-strong-rgb), 1);
   }
 
   .card-glass {
     @apply rounded-[0.75rem_2rem_0.75rem_2rem] shadow-studio-lg;
-    border: 1px solid rgba(var(--color-border-strong-rgb), 0.5);
+    border: 1px solid rgba(var(--color-border-strong-rgb), 0.7);
     background: rgba(var(--color-surface-rgb), 0.45);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -242,7 +244,7 @@
     background: rgba(var(--color-surface-rgb), 0.55);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(var(--color-border-strong-rgb), 0.7);
+    border: 1px solid rgba(var(--color-border-strong-rgb), 1);
     isolation: isolate;
   }
 
