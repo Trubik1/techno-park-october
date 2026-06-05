@@ -24,6 +24,8 @@ def read_quizzes(
     limit: int = 100,
     teacher_id: Optional[uuid.UUID] = None,
     public: Optional[bool] = None,
+    subject: Optional[str] = None,
+    grade: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
     query = db.query(models.Quiz)
@@ -31,6 +33,10 @@ def read_quizzes(
         query = query.filter(models.Quiz.teacher_id == teacher_id)
     if public is True:
         query = query.filter(models.Quiz.is_public == True)
+    if subject:
+        query = query.filter(models.Quiz.subject == subject)
+    if grade:
+        query = query.filter(models.Quiz.grade == grade)
     quizzes = query.offset(skip).limit(limit).all()
     result = []
     for q in quizzes:

@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
 from typing import List
 import uuid
@@ -354,6 +354,51 @@ def get_active_sessions_by_teacher(db: Session, teacher_id: uuid.UUID):
         models.Quiz.teacher_id == teacher_id,
         models.Session.status == "active",
     ).order_by(models.Session.started_at.desc()).all()
+
+# Practice / Self-study CRUD
+def create_practice_result(db: Session, result: schemas.PracticeResultCreate, student_id: uuid.UUID):
+    answers_json = json.dumps([answer.model_dump() for answer in result.answers])
+    db_result = models.Result(
+        student_id=student_id,
+        quiz_id=result.quiz_id,
+        score=result.score,
+        total_questions=result.total_questions if result.total_questions is not None else len(result.answers),
+        answers_json=answers_json,
+        mode=result.mode,
+    )
+    db.add(db_result)
+    db.commit()
+    db.refresh(db_result)
+    return db_result
+
+def get_practice_results_by_student(db: Session, student_id: uuid.UUID, quiz_id: uuid.UUID = None):
+    query = db.query(models.Result).options(
+        joinedload(models.Result.quiz)
+    ).filter(
+        models.Result.student_id == student_id,
+        models.Result.mode == "practice"
+    )
+    if quiz_id:
+        query = query.filter(models.Result.quiz_id == quiz_id)
+    return query.order_by(models.Result.completed_at.desc()).all()
+
+def get_practice_summary(db: Session, student_id: uuid.UUID):
+    results = db.query(models.Result).filter(
+        models.Result.student_id == student_id,
+        models.Result.mode == "practice"
+    ).all()
+    summary = {}
+    for r in results:
+        qid = str(r.quiz_id)
+        if qid not in summary:
+            quiz_title = r.quiz.title if r.quiz else ""
+            total_q = r.total_questions or 0
+            summary[qid] = {"quiz_id": r.quiz_id, "quiz_title": quiz_title, "total_questions": total_q, "last_score": None, "last_completed_at": None, "attempts": 0}
+        summary[qid]["attempts"] += 1
+        if summary[qid]["last_completed_at"] is None or r.completed_at > summary[qid]["last_completed_at"]:
+            summary[qid]["last_score"] = r.score
+            summary[qid]["last_completed_at"] = r.completed_at
+    return list(summary.values())
 
 def get_session_leaderboard(db: Session, session_id: uuid.UUID):
     rows = db.query(

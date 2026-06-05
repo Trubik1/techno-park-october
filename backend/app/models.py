@@ -41,6 +41,7 @@ class Quiz(Base):
     teacher = relationship("Teacher", back_populates="quizzes")
     questions = relationship("Question", back_populates="quiz", cascade="all, delete-orphan")
     sessions = relationship("Session", back_populates="quiz", cascade="all, delete-orphan")
+    results = relationship("Result", back_populates="quiz")
 
 class Question(Base):
     __tablename__ = "questions"
@@ -80,15 +81,18 @@ class Result(Base):
     __tablename__ = "results"
 
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    session_id = Column(Uuid(as_uuid=True), ForeignKey("sessions.id"), nullable=False)
+    session_id = Column(Uuid(as_uuid=True), ForeignKey("sessions.id"), nullable=True)
     student_id = Column(Uuid(as_uuid=True), ForeignKey("students.id"), nullable=False)
+    quiz_id = Column(Uuid(as_uuid=True), ForeignKey("quizzes.id"), nullable=True)
     score = Column(Integer, nullable=False)
     total_questions = Column(Integer, nullable=False, default=0)
     answers_json = Column(Text, nullable=False)
     completed_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    mode = Column(String, default="session")  # "session" or "practice"
 
     session = relationship("Session", back_populates="results")
     student = relationship("Student", back_populates="results")
+    quiz = relationship("Quiz", back_populates="results")
 
 
 class SessionParticipant(Base):

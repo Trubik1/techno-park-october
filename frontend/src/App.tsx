@@ -15,22 +15,24 @@ const QuizCreateForm = React.lazy(() => import('./pages/QuizCreateForm'));
 const QuizImportForm = React.lazy(() => import('./pages/QuizImportForm'));
 const SessionMonitor = React.lazy(() => import('./pages/SessionMonitor'));
 const StudentQuizReview = React.lazy(() => import('./pages/StudentQuizReview'));
+const StudentPractice = React.lazy(() => import('./pages/StudentPractice'));
+const StudentPracticeQuiz = React.lazy(() => import('./pages/StudentPracticeQuiz'));
 
 const PageLoader: React.FC = () => (
-  <div className="min-h-screen bg-background flex items-center justify-center p-4 animate-fadeIn">
-    <div className="text-center">
-      <div className="flex justify-center mb-3"><div className="spinner-dots"><span></span><span></span><span></span></div></div>
-      <p className="text-sm text-text-secondary animate-pulse" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>Загрузка...</p>
+    <div className="min-h-[100dvh] bg-background flex items-center justify-center p-4 animate-fadeIn">
+      <div className="text-center">
+        <div className="flex justify-center mb-3"><div className="spinner-dots"><span></span><span></span><span></span></div></div>
+        <p className="text-sm text-text-secondary animate-pulse">Загрузка...</p>
+      </div>
     </div>
-  </div>
 );
 
 const NotFoundPage: React.FC = () => {
   const navigate = useNavigate();
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4 animate-fadeIn relative">
+    <div className="min-h-[100dvh] bg-background flex items-center justify-center p-4 animate-fadeIn relative">
       <div className="page-card text-center">
-        <div className="text-7xl font-bold text-primary mb-4 font-heading" style={{ letterSpacing: '-0.03em' }}>404</div>
+        <div className="text-7xl font-bold text-primary mb-4 font-heading">404</div>
         <h2 className="text-2xl font-bold text-text-primary mb-2 font-heading">Страница не найдена</h2>
         <p className="text-text-secondary mb-6">Страница, которую вы ищете, не существует или была перемещена.</p>
         <button onClick={() => navigate('/')} className="btn-primary">На главную</button>
@@ -39,16 +41,19 @@ const NotFoundPage: React.FC = () => {
   );
 };
 
+const Blob = ({ className }: { className: string }) => (
+  <div className={`absolute rounded-full blur-[100px] will-change-transform animate-float pointer-events-none ${className}`} />
+);
+
 const BgDecoration: React.FC = () => (
-  <div className="fixed inset-0 pointer-events-none overflow-hidden -z-0" aria-hidden="true">
-    <svg className="w-full h-full opacity-[0.25] dark:opacity-[0.15]" viewBox="0 0 1440 900" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M-100 200 C 200 50, 400 400, 700 250 S 1100 500, 1540 300" stroke="#2563EB" strokeWidth="2" fill="none" />
-      <path d="M-100 500 C 300 700, 500 200, 800 450 S 1200 300, 1540 600" stroke="#2563EB" strokeWidth="1.5" fill="none" />
-      <path d="M-100 750 C 250 900, 600 600, 900 800 S 1300 650, 1540 800" stroke="#2563EB" strokeWidth="1" fill="none" />
-      <path d="M200 -50 C 400 200, 300 500, 600 600 S 1000 400, 1200 950" stroke="#2563EB" strokeWidth="2" fill="none" />
-      <path d="M600 -50 C 800 150, 700 400, 1000 500 S 1400 300, 1540 100" stroke="#2563EB" strokeWidth="1.5" fill="none" />
-    </svg>
-  </div>
+  <>
+    <div className="noise-overlay" />
+    <div className="fixed inset-0 pointer-events-none overflow-hidden -z-0" aria-hidden="true">
+      <Blob className="w-[500px] h-[500px] bg-primary/8 -top-32 -left-32" />
+      <Blob className="w-[400px] h-[400px] bg-accent/6 top-1/3 -right-24" style={{ animationDelay: '-3s', animationDuration: '10s' }} />
+      <Blob className="w-[350px] h-[350px] bg-success/6 bottom-0 left-1/4" style={{ animationDelay: '-6s', animationDuration: '12s' }} />
+    </div>
+  </>
 );
 
 function App() {
@@ -83,6 +88,8 @@ function App() {
               <Route path="/student/quiz/:code" element={<StudentQuiz />} />
               <Route path="/student/history" element={<StudentHistory />} />
               <Route path="/student/review/:resultId" element={<StudentQuizReview />} />
+              <Route path="/student/practice" element={<StudentPractice />} />
+              <Route path="/student/practice/quiz/:quizId" element={<StudentPracticeQuiz />} />
               <Route path="/" element={<Navigate replace to="/student/entry" />} />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>

@@ -52,6 +52,30 @@ with engine.connect() as conn:
         conn.execute(text("ALTER TABLE session_participants ADD COLUMN current_question INTEGER DEFAULT NULL"))
         conn.execute(text("ALTER TABLE session_participants ADD COLUMN answers_json TEXT DEFAULT NULL"))
         conn.commit()
+    # Миграция results: добавляем quiz_id, mode, делаем session_id nullable
+    cursor6 = conn.execute(text("SELECT sql FROM sqlite_master WHERE type='table' AND name='results'"))
+    row6 = cursor6.fetchone()
+    if row6 and 'quiz_id' not in row6[0]:
+        conn.execute(text("""
+            CREATE TABLE results_new (
+                id UUID NOT NULL PRIMARY KEY,
+                session_id UUID REFERENCES sessions(id),
+                student_id UUID NOT NULL REFERENCES students(id),
+                quiz_id UUID REFERENCES quizzes(id),
+                score INTEGER NOT NULL,
+                total_questions INTEGER DEFAULT 0,
+                answers_json TEXT NOT NULL,
+                completed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                mode VARCHAR DEFAULT 'session'
+            )
+        """))
+        conn.execute(text("""
+            INSERT INTO results_new (id, session_id, student_id, score, total_questions, answers_json, completed_at, mode)
+            SELECT id, session_id, student_id, score, IFNULL(total_questions, 0), answers_json, completed_at, 'session' FROM results
+        """))
+        conn.execute(text("DROP TABLE results"))
+        conn.execute(text("ALTER TABLE results_new RENAME TO results"))
+        conn.commit()
 
 # Авто-сидирование общих тестов по истории (is_public=True)
 from app.db.database import SessionLocal

@@ -32,16 +32,12 @@ interface SessionData {
   status: string;
 }
 
-const OPTION_COLORS = [
-  { bg: 'bg-green-500', border: 'border-green-500', hover: 'hover:bg-green-600', ring: 'ring-green-300', label: '1' },
-  { bg: 'bg-red-500', border: 'border-red-500', hover: 'hover:bg-red-600', ring: 'ring-red-300', label: '2' },
-  { bg: 'bg-blue-500', border: 'border-blue-500', hover: 'hover:bg-blue-600', ring: 'ring-blue-300', label: '3' },
-  { bg: 'bg-yellow-500', border: 'border-yellow-500', hover: 'hover:bg-yellow-600', ring: 'ring-yellow-300', label: '4' },
+const OPTION_STYLES = [
+  { label: '1', ring: 'ring-primary/30' },
+  { label: '2', ring: 'ring-accent/30' },
+  { label: '3', ring: 'ring-info/30' },
+  { label: '4', ring: 'ring-success/30' },
 ];
-
-const CORRECT_COLOR = 'bg-green-500';
-const WRONG_SELECTED_COLOR = 'bg-red-700';
-const WRONG_OTHER_COLOR = 'bg-red-400';
 
 function shuffleArray<T>(arr: T[]): T[] {
   const shuffled = [...arr];
@@ -215,7 +211,6 @@ const StudentQuiz: React.FC = () => {
           }),
         });
       } catch {
-        /* progress tracking is not critical */
       }
     }, 500);
   }, [sessionData, student, quizData, answers, currentQuestionIndex]);
@@ -303,7 +298,7 @@ const StudentQuiz: React.FC = () => {
 
   if (studentLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-[100dvh] bg-background flex items-center justify-center">
         <div className="text-center animate-fadeIn">
           <div className="flex justify-center mb-3"><div className="spinner-dots"><span></span><span></span><span></span></div></div>
           <p className="text-sm text-text-secondary animate-pulse">Загрузка...</p>
@@ -314,7 +309,7 @@ const StudentQuiz: React.FC = () => {
 
   if (isLoading && !quizData) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-[100dvh] bg-background flex items-center justify-center">
         <div className="text-center animate-fadeIn">
           <div className="flex justify-center mb-3"><div className="spinner-dots"><span></span><span></span><span></span></div></div>
           <p className="text-sm text-text-secondary animate-pulse">Загрузка теста...</p>
@@ -325,8 +320,8 @@ const StudentQuiz: React.FC = () => {
 
   if (error && !quizData) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="card p-8 max-w-md mx-auto animate-scaleIn text-center">
+      <div className="min-h-[100dvh] bg-background flex items-center justify-center">
+        <div className="card-sharp p-8 max-w-md mx-auto animate-scaleIn text-center">
           <div className="error-box mb-4">
             <p className="text-sm text-error">{error}</p>
           </div>
@@ -338,8 +333,8 @@ const StudentQuiz: React.FC = () => {
 
   if (!quizData) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="card p-8 max-w-md text-center animate-fadeIn">
+      <div className="min-h-[100dvh] bg-background flex items-center justify-center">
+        <div className="card-sharp p-8 max-w-md text-center animate-fadeIn">
           <p className="text-text-secondary mb-4">Тест не найден</p>
           <button onClick={() => navigate('/student/entry')} className="btn-primary">Вернуться к входу</button>
         </div>
@@ -349,7 +344,7 @@ const StudentQuiz: React.FC = () => {
 
   const totalTime = quizData.time_limit_quiz || (quizData.time_limit_question || 30) * quizData.questions.length;
   const timePercent = timeLeft !== null && totalTime > 0 ? (timeLeft / totalTime) * 100 : 100;
-  const timerColor = timePercent > 50 ? '#22c55e' : timePercent > 20 ? '#eab308' : '#ef4444';
+  const timerColor = timePercent > 50 ? '#7d9b6a' : timePercent > 20 ? '#c49a4a' : '#c45353';
 
   const currentQuestion = quizData.questions[currentQuestionIndex];
   const progress = ((currentQuestionIndex + 1) / quizData.questions.length) * 100;
@@ -360,7 +355,7 @@ const StudentQuiz: React.FC = () => {
   }));
 
   return (
-    <div className="min-h-screen bg-background animate-fadeIn">
+    <div className="min-h-[100dvh] bg-background animate-fadeIn">
       <div className="fixed top-4 right-4 z-50">
         <UserMenu role="student" />
       </div>
@@ -374,12 +369,16 @@ const StudentQuiz: React.FC = () => {
           { label: 'Выбор теста', path: '/student/quiz-entry' },
           { label: quizData?.title || 'Тест' },
         ]} />
-        <div className="card">
-          <div className="p-6 bg-primary text-white rounded-t-2xl">
-            <div className="flex justify-between items-start">
+        <div className="card overflow-hidden">
+          <div className="p-6 bg-primary text-white relative overflow-hidden">
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute -top-20 -right-20 w-60 h-60 rounded-full bg-white blur-3xl" />
+              <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-white/60 blur-2xl" />
+            </div>
+            <div className="relative z-10 flex justify-between items-start">
               <div>
-                <h1 className="text-xl font-bold font-heading">{quizData.title}</h1>
-                <p className="mt-1 text-sm text-white/80">Вопрос {currentQuestionIndex + 1} из {quizData.questions.length}</p>
+                <h1 className="text-xl font-semibold font-heading text-white">{quizData.title}</h1>
+                <p className="mt-1 text-sm text-white/70">Вопрос {currentQuestionIndex + 1} из {quizData.questions.length}</p>
               </div>
               {timeLeft !== null && !isSubmitted && (
                 <div className="flex items-center gap-2">
@@ -389,7 +388,7 @@ const StudentQuiz: React.FC = () => {
                       strokeDasharray={`${(timePercent / 100) * 97.4} 97.4`}
                       className="transition-all duration-1000 ease-linear" />
                   </svg>
-                  <div className={'text-2xl font-bold tabular-nums leading-none ' + (timePercent <= 20 && timeLeft > 0 ? 'text-accent animate-pulse' : 'text-white')}>
+                  <div className={`text-2xl font-bold tabular-nums leading-none ${timePercent <= 20 && timeLeft > 0 ? 'text-accent animate-pulse' : 'text-white'}`}>
                     {timeLeft > 0 ? (
                       quizData.time_limit_quiz
                         ? Math.floor(timeLeft / 60) + ':' + String(timeLeft % 60).padStart(2, '0')
@@ -401,15 +400,15 @@ const StudentQuiz: React.FC = () => {
             </div>
           </div>
 
-          <div className="h-2 bg-background">
-            <div className="h-full bg-primary transition-all duration-500 ease-out rounded-r-full" style={{ width: progress + '%' }}></div>
+          <div className="h-1.5 bg-background">
+            <div className="h-full bg-primary/60 transition-all duration-500 ease-out" style={{ width: progress + '%' }}></div>
           </div>
 
           <div className="p-6 md:p-8 animate-fadeIn" key={currentQuestionIndex}>
             <div className="mb-6">
-              <h3 className="text-xl font-semibold text-text-primary">{currentQuestion.text}</h3>
+              <h3 className="text-xl font-medium text-text-primary font-heading leading-snug">{currentQuestion.text}</h3>
               {!showExplanation && !isSubmitted && (
-                <p className="mt-2 text-xs text-text-secondary/50">Клавиши: 1-4 для выбранных цветов или A-D для вариантов</p>
+                <p className="mt-2 text-xs text-text-secondary/40">Клавиши: 1-4 для выбранных цветов или A-D для вариантов</p>
               )}
             </div>
 
@@ -418,46 +417,47 @@ const StudentQuiz: React.FC = () => {
                 const isSelected = (showExplanation ? answers[currentQuestion.id] : selectedOption) === opt.originalKey;
                 const isCorrect = opt.originalKey === currentQuestion.correct;
                 const showResult = showExplanation;
-                const color = OPTION_COLORS[idx];
+                const style = OPTION_STYLES[idx];
 
-                let bgClass: string;
-                let badgeClass = 'bg-white/20 text-white';
+                let containerClass = 'w-full text-left p-4 border transition-all duration-200 disabled:cursor-default active:scale-[0.99] flex items-start gap-3 ';
+                let badgeClass = 'flex items-center justify-center w-8 h-8 text-sm font-bold shrink-0 ';
+                let textClass = 'pt-1.5 font-medium ';
 
                 if (!showResult) {
-                  bgClass = isSelected ? color.bg + ' brightness-75' : color.bg;
+                  if (isSelected) {
+                    containerClass += 'border-primary bg-primary/5 rounded-[0.5rem_1.5rem_0.5rem_1.5rem] shadow-studio';
+                    badgeClass += 'bg-primary text-white rounded-[0.25rem_0.75rem_0.25rem_0.75rem]';
+                    textClass += 'text-text-primary';
+                  } else {
+                    containerClass += 'border-border/60 bg-surface hover:border-primary/30 hover:bg-primary/[0.02] rounded-[0.5rem_1.25rem_0.5rem_1.25rem]';
+                    badgeClass += 'bg-border/40 text-text-secondary rounded-[0.25rem_0.5rem_0.25rem_0.5rem]';
+                    textClass += 'text-text-primary';
+                  }
                 } else if (isCorrect) {
-                  bgClass = CORRECT_COLOR;
+                  containerClass += 'border-success bg-success/5 rounded-[0.5rem_1.5rem_0.5rem_1.5rem]';
+                  badgeClass += 'bg-success text-white rounded-[0.25rem_0.75rem_0.25rem_0.75rem]';
+                  textClass += 'text-text-primary';
                 } else if (isSelected) {
-                  bgClass = WRONG_SELECTED_COLOR;
-                  badgeClass = 'bg-white/25 text-white';
+                  containerClass += 'border-error bg-error/5 rounded-[0.5rem_1.5rem_0.5rem_1.5rem]';
+                  badgeClass += 'bg-error text-white rounded-[0.25rem_0.75rem_0.25rem_0.75rem]';
+                  textClass += 'text-text-primary';
                 } else {
-                  bgClass = WRONG_OTHER_COLOR;
-                  badgeClass = 'bg-white/15 text-white/80';
+                  containerClass += 'border-border/40 bg-surface/50 rounded-[0.5rem_1.25rem_0.5rem_1.25rem] opacity-60';
+                  badgeClass += 'bg-border/30 text-text-secondary/60 rounded-[0.25rem_0.5rem_0.25rem_0.5rem]';
+                  textClass += 'text-text-secondary/60';
                 }
-
-                const borderClass = isSelected && !showResult ? color.border
-                  : showResult && isCorrect ? 'border-green-500'
-                  : showResult && isSelected && !isCorrect ? 'border-red-700'
-                  : showResult && !isSelected && !isCorrect ? 'border-red-400'
-                  : 'border-transparent';
-
-                const extraRing = isSelected && !showResult ? 'ring-2 ring-white/50'
-                  : showResult && isSelected && !isCorrect ? 'ring-2 ring-red-300'
-                  : '';
 
                 return (
                   <button
                     key={opt.originalKey}
                     onClick={() => handleAnswerSelect(opt.originalKey)}
                     disabled={isSubmitted || showExplanation}
-                    className={'w-full text-left p-4 rounded-xl border-2 transition-all duration-200 ' + bgClass + ' ' + borderClass + ' disabled:cursor-default active:scale-[0.99] text-white hover:brightness-110 ' + extraRing}
+                    className={containerClass}
                   >
-                    <div className="flex items-start gap-3">
-                      <span className={'flex items-center justify-center w-8 h-8 rounded-lg text-sm font-bold shrink-0 ' + badgeClass}>
-                        {color.label}
-                      </span>
-                      <span className="pt-1.5 font-medium">{opt.value}</span>
-                    </div>
+                    <span className={badgeClass}>
+                      {style.label}
+                    </span>
+                    <span className={textClass}>{opt.value}</span>
                   </button>
                 );
               })}
@@ -466,15 +466,15 @@ const StudentQuiz: React.FC = () => {
             {!showExplanation && !isSubmitted && selectedOption && (
               <div className="mt-6 animate-slideDown">
                 <button onClick={confirmAnswer} className="btn-primary w-full flex items-center justify-center gap-2">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                   Подтвердить ответ
                 </button>
-                <p className="mt-2 text-xs text-center text-text-secondary/50">Enter ↵ для подтверждения</p>
+                <p className="mt-2 text-xs text-center text-text-secondary/40">Enter &crarr; для подтверждения</p>
               </div>
             )}
 
             {showExplanation && currentQuestion.explanation && (
-              <div className="mt-6 p-4 rounded-xl bg-primary/10 text-text-primary border border-primary/20 animate-slideDown">
+              <div className="mt-6 p-4 rounded-[0.5rem_1.25rem_0.5rem_1.25rem] bg-primary/5 text-text-primary border border-primary/15 animate-slideDown">
                 <p className="text-sm font-medium mb-1">Объяснение:</p>
                 <p className="text-sm text-text-secondary">{currentQuestion.explanation}</p>
               </div>
@@ -483,7 +483,7 @@ const StudentQuiz: React.FC = () => {
             {showExplanation && !isSubmitted && currentQuestionIndex < quizData.questions.length - 1 && (
               <div className="mt-6 animate-slideDown">
                 <button onClick={() => { clearTimers(); moveToNext(); }} className="btn-primary w-full">
-                  → Далее
+                  &rarr; Далее
                 </button>
               </div>
             )}
@@ -506,11 +506,11 @@ const StudentQuiz: React.FC = () => {
               <div className="mt-6 flex justify-between">
                 {currentQuestionIndex > 0 && (
                   <button onClick={() => { setCurrentQuestionIndex(prev => prev - 1); setShowExplanation(false); setSelectedOption(null); if (!quizData?.time_limit_quiz) { clearTimers(); startQuestionTimer(); } sendProgress(); }} className="btn-outline btn-sm">
-                    ← Назад
+                    &larr; Назад
                   </button>
                 )}
                 <button onClick={() => { if (!quizData?.time_limit_quiz) clearTimers(); moveToNext(); sendProgress(); }} disabled={!answers[currentQuestion.id]} className="btn-primary btn-sm ml-auto">
-                  Следующий →
+                  Следующий &rarr;
                 </button>
               </div>
             )}
@@ -519,12 +519,12 @@ const StudentQuiz: React.FC = () => {
           {isSubmitted && (
             <div className="p-6 md:p-8 bg-success/5 border-t border-success/20 animate-fadeIn">
               <div className="text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-success/20 mb-4">
-                  <svg className="w-8 h-8 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-[0.5rem_1.5rem_0.5rem_1.5rem] bg-success/10 mb-4">
+                  <svg className="w-8 h-8 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <h3 className="text-2xl font-bold text-success mb-2 font-heading">Тест завершен!</h3>
+                <h3 className="text-2xl font-semibold text-success mb-2 font-heading">Тест завершен!</h3>
                 <p className="text-text-secondary mb-2">
                   Ваш результат: <span className="font-bold text-2xl text-text-primary">{correctCount}/{quizData.questions.length}</span>
                 </p>

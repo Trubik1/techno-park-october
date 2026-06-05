@@ -19,14 +19,14 @@ interface QuizEditForm {
 
 const DeleteConfirmModal: React.FC<{ quizTitle: string; onConfirm: () => void; onClose: () => void }> = ({ quizTitle, onConfirm, onClose }) => {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 animate-fadeIn" onClick={onClose}>
-      <div className="bg-surface rounded-2xl shadow-xl border border-error/30 p-6 max-w-sm w-full animate-scaleIn" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-fadeIn" onClick={onClose}>
+      <div className="bg-surface rounded-[0.75rem_2rem_0.75rem_2rem] shadow-studio-lg border border-error/30 p-6 max-w-sm w-full animate-scaleIn" onClick={e => e.stopPropagation()}>
         <div className="text-center mb-4">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-error/10 mb-4">
-            <svg className="w-7 h-7 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-[0.4rem_1.25rem_0.4rem_1.25rem] bg-error/10 mb-4">
+            <svg className="w-7 h-7 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
           </div>
           <h3 className="text-lg font-semibold text-text-primary font-heading">Удалить тест?</h3>
-          <p className="text-sm text-text-secondary mt-2">«{quizTitle.length > 50 ? quizTitle.slice(0, 50) + '…' : quizTitle}»</p>
+          <p className="text-sm text-text-secondary mt-2">&laquo;{quizTitle.length > 50 ? quizTitle.slice(0, 50) + '…' : quizTitle}&raquo;</p>
           <p className="text-xs text-text-secondary/60 mt-2">Это действие нельзя отменить. Все вопросы, сессии и результаты будут удалены.</p>
         </div>
         <div className="flex gap-3">
@@ -63,15 +63,15 @@ const QuizEditModal: React.FC<{ quiz: Quiz; onSave: () => void; onClose: () => v
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 animate-fadeIn" onClick={onClose}>
-      <div className="bg-surface rounded-2xl shadow-xl border border-border p-6 max-w-lg w-full animate-scaleIn" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-fadeIn" onClick={onClose}>
+      <div className="bg-surface rounded-[0.75rem_2rem_0.75rem_2rem] shadow-studio-lg border border-border p-6 max-w-lg w-full animate-scaleIn" onClick={e => e.stopPropagation()}>
         <h2 className="text-lg font-semibold text-text-primary mb-4 font-heading">Редактировать тест</h2>
         <div className="space-y-4">
           <input className="input" placeholder="Название" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
           <input className="input" placeholder="Предмет" value={form.subject} onChange={e => setForm(f => ({ ...f, subject: e.target.value }))} />
           <input className="input" placeholder="Класс" value={form.grade} onChange={e => setForm(f => ({ ...f, grade: e.target.value }))} />
           <label className="flex items-center gap-2 text-sm text-text-primary cursor-pointer">
-            <input type="checkbox" checked={form.is_public} onChange={e => setForm(f => ({ ...f, is_public: e.target.checked }))} className="rounded border-border text-primary focus:ring-primary/30" />
+            <input type="checkbox" checked={form.is_public} onChange={e => setForm(f => ({ ...f, is_public: e.target.checked }))} className="rounded border-border/80 text-primary focus:ring-primary/30" />
             Публичный тест
           </label>
         </div>
@@ -225,7 +225,7 @@ const TeacherDashboard: React.FC = () => {
   if (error) {
     return (
       <div className="page-container flex items-center justify-center">
-        <div className="card p-8 max-w-md mx-auto animate-scaleIn text-center">
+        <div className="card-sharp p-8 max-w-md mx-auto animate-scaleIn text-center">
           <div className="error-box mb-4">
             <p className="text-sm text-error">{error}</p>
           </div>
@@ -245,7 +245,7 @@ const TeacherDashboard: React.FC = () => {
           <ThemeToggleButton />
           <BackButton to="/teacher/login" />
           <div>
-            <h1 className="text-2xl font-bold text-text-primary font-heading">Панель управления</h1>
+            <h1 className="text-2xl font-semibold text-text-primary font-heading">Панель управления</h1>
             <Breadcrumbs items={[
               { label: 'Вход учителя', path: '/teacher/login' },
               { label: 'Панель управления' },
@@ -254,12 +254,12 @@ const TeacherDashboard: React.FC = () => {
         </div>
 
         <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-          <div className="flex gap-1 bg-surface border border-border rounded-xl p-1">
-            <button onClick={() => setTab('my')} className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${tab === 'my' ? 'bg-primary text-white shadow-sm' : 'text-text-secondary hover:text-text-primary'}`}>
+          <div className="flex gap-1 bg-surface border border-border/80 rounded-[0.5rem_1.25rem_0.5rem_1.25rem] p-1">
+            <button onClick={() => setTab('my')} className={`px-4 py-2 text-sm font-medium rounded-[0.3rem_0.9rem_0.3rem_0.9rem] transition-all ${tab === 'my' ? 'bg-primary text-white shadow-studio' : 'text-text-secondary hover:text-text-primary'}`}>
               Мои тесты
             </button>
-            <button onClick={() => setTab('public')} className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${tab === 'public' ? 'bg-primary text-white shadow-sm' : 'text-text-secondary hover:text-text-primary'}`}>
-              Общие тесты {publicQuizzes.length > 0 && <span className="ml-1.5 text-xs bg-primary/20 px-1.5 py-0.5 rounded-full">{publicQuizzes.length}</span>}
+            <button onClick={() => setTab('public')} className={`px-4 py-2 text-sm font-medium rounded-[0.3rem_0.9rem_0.3rem_0.9rem] transition-all ${tab === 'public' ? 'bg-primary text-white shadow-studio' : 'text-text-secondary hover:text-text-primary'}`}>
+              Общие тесты {publicQuizzes.length > 0 && <span className="ml-1.5 text-xs bg-white/20 px-1.5 py-0.5 rounded-[0.2rem_0.5rem_0.2rem_0.5rem]">{publicQuizzes.length}</span>}
             </button>
           </div>
           <div className="flex gap-2">
@@ -267,7 +267,7 @@ const TeacherDashboard: React.FC = () => {
               + Создать
             </button>
             <button onClick={() => navigate('/teacher/dashboard/import')} className="btn-outline btn-sm">
-              📥 Импорт
+              Импорт
             </button>
           </div>
         </div>
@@ -275,7 +275,7 @@ const TeacherDashboard: React.FC = () => {
         {activeSessions.length > 0 && (
           <div className="card p-4 mb-6">
             <div className="flex items-center gap-2 mb-3">
-              <span className="w-2 h-2 rounded-full bg-success"></span>
+              <span className="w-2 h-2 rounded-sm bg-success"></span>
               <h3 className="text-sm font-semibold text-text-primary font-heading">Активные сессии</h3>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -283,9 +283,9 @@ const TeacherDashboard: React.FC = () => {
                 <button
                   key={s.session_id}
                   onClick={() => navigate(`/teacher/dashboard/session/${s.code}`)}
-                  className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium bg-success/10 text-success rounded-lg hover:bg-success/20 transition-colors"
+                  className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium bg-success/10 text-success rounded-[0.3rem_0.75rem_0.3rem_0.75rem] border border-success/20 hover:bg-success/20 transition-colors"
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-success"></span>
+                  <span className="w-1.5 h-1.5 rounded-sm bg-success"></span>
                   {s.quiz_title.length > 30 ? s.quiz_title.slice(0, 30) + '…' : s.quiz_title}
                   <span className="opacity-60 font-mono">{s.code}</span>
                 </button>
@@ -299,40 +299,40 @@ const TeacherDashboard: React.FC = () => {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
               <div className="flex items-center gap-2">
                 <h2 className="text-lg font-bold text-text-primary font-heading">Мои тесты</h2>
-                <div className="flex gap-0.5 bg-surface border border-border rounded-lg p-0.5">
-                  {([['ticket', '№'], ['title', 'А-Я'], ['date', '📅']] as const).map(([key, label]) => (
-                    <button key={key} onClick={() => setSortBy(key)} className={`px-2 py-0.5 text-xs font-medium rounded-md transition-all ${sortBy === key ? 'bg-primary text-white shadow-sm' : 'text-text-secondary/60 hover:text-text-secondary'}`}>{label}</button>
+                <div className="flex gap-0.5 bg-surface border border-border/80 rounded-[0.4rem_0.9rem_0.4rem_0.9rem] p-0.5">
+                  {([['ticket', '№'], ['title', 'А-Я'], ['date', 'Дата']] as const).map(([key, label]) => (
+                    <button key={key} onClick={() => setSortBy(key)} className={`px-2 py-0.5 text-xs font-medium rounded-[0.2rem_0.6rem_0.2rem_0.6rem] transition-all ${sortBy === key ? 'bg-primary text-white shadow-sm' : 'text-text-secondary/60 hover:text-text-secondary'}`}>{label}</button>
                   ))}
                   <button onClick={() => setSortOrder(o => o === 'asc' ? 'desc' : 'asc')} className="px-1.5 py-0.5 text-xs text-text-secondary/60 hover:text-text-secondary" title={sortOrder === 'asc' ? 'По возрастанию' : 'По убыванию'}>
-                    {sortOrder === 'asc' ? '↑' : '↓'}
+                    {sortOrder === 'asc' ? '\u2191' : '\u2193'}
                   </button>
                 </div>
               </div>
               <div className="flex gap-1 flex-wrap">
-                <button onClick={() => setActiveSubject(null)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeSubject === null ? 'bg-primary/10 text-primary' : 'text-text-secondary hover:bg-surface border border-border'}`}>Все</button>
+                <button onClick={() => setActiveSubject(null)} className={`px-3 py-1.5 text-xs font-medium rounded-[0.3rem_0.75rem_0.3rem_0.75rem] transition-all ${activeSubject === null ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-secondary hover:bg-surface border border-border/80'}`}>Все</button>
                 {subjects.map(s => (
-                  <button key={s} onClick={() => setActiveSubject(s)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${activeSubject === s ? 'bg-primary/10 text-primary' : 'text-text-secondary hover:bg-surface border border-border'}`}>{s}</button>
+                  <button key={s} onClick={() => setActiveSubject(s)} className={`px-3 py-1.5 text-xs font-medium rounded-[0.3rem_0.75rem_0.3rem_0.75rem] transition-all ${activeSubject === s ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-secondary hover:bg-surface border border-border/80'}`}>{s}</button>
                 ))}
               </div>
             </div>
 
             <div className="relative mb-4">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary/40" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
               <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Поиск по названию..." className="input pl-9" />
             </div>
 
             {myQuizzes.length === 0 ? (
               <div className="card p-8 text-center animate-fadeIn">
-                <svg className="w-12 h-12 text-text-secondary/30 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <svg className="w-12 h-12 text-text-secondary/20 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 <p className="text-text-secondary">У вас пока нет созданных тестов.</p>
-                <p className="mt-2 text-sm text-text-secondary/60">Нажмите «Создать» или «Импорт», чтобы добавить первый тест.</p>
+                <p className="mt-2 text-sm text-text-secondary/60">Нажмите &laquo;Создать&raquo; или &laquo;Импорт&raquo;, чтобы добавить первый тест.</p>
               </div>
             ) : filteredMyQuizzes.length === 0 ? (
               <div className="card p-8 text-center animate-fadeIn">
-                <svg className="w-12 h-12 text-text-secondary/30 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <svg className="w-12 h-12 text-text-secondary/20 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 <p className="text-text-secondary">Тесты не найдены. Попробуйте изменить параметры поиска.</p>
               </div>
@@ -343,18 +343,22 @@ const TeacherDashboard: React.FC = () => {
                     <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-3">
                       <div className="flex-1 min-w-0">
                         <h3 className="text-base font-semibold text-text-primary truncate">{quiz.title}</h3>
-                        <p className="text-sm text-text-secondary mt-0.5">{quiz.subject} · {quiz.grade} класс</p>
+                        <p className="text-sm text-text-secondary mt-0.5">{quiz.subject} &middot; {quiz.grade} класс</p>
                       </div>
                       <span className="chip shrink-0">{quiz.question_count} вопросов</span>
                     </div>
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                       <div className="flex items-center gap-2 text-sm text-text-secondary/60">
                         <span>{new Date(quiz.created_at).toLocaleDateString('ru-RU', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
-                        {quiz.is_public && <span className="badge bg-success/10 text-success">Публичный</span>}
+                        {quiz.is_public && <span className="badge bg-success/10 text-success border border-success/20">Публичный</span>}
                       </div>
                       <div className="flex gap-2 w-full sm:w-auto">
-                        <button onClick={() => setEditingQuiz(quiz)} disabled={startingId !== null} className="btn-ghost btn-sm" title="Редактировать">✏️</button>
-                        <button onClick={() => setDeleteConfirm(quiz)} disabled={deletingId !== null || startingId !== null} className="btn-ghost btn-sm !text-error hover:!bg-error/5" title="Удалить">🗑️</button>
+                        <button onClick={() => setEditingQuiz(quiz)} disabled={startingId !== null} className="btn-ghost btn-sm" title="Редактировать">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
+                        </button>
+                        <button onClick={() => setDeleteConfirm(quiz)} disabled={deletingId !== null || startingId !== null} className="btn-ghost btn-sm !text-error hover:!bg-error/5" title="Удалить">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
+                        </button>
                         <button
                           onClick={async () => {
                             setStartingId(quiz.id);
@@ -373,7 +377,7 @@ const TeacherDashboard: React.FC = () => {
                           disabled={startingId !== null}
                           className="btn-success btn-sm"
                         >
-                          {startingId === quiz.id ? 'Запуск...' : '▶ Запустить'}
+                          {startingId === quiz.id ? 'Запуск...' : 'Запустить'}
                         </button>
                       </div>
                     </div>
@@ -396,42 +400,42 @@ const TeacherDashboard: React.FC = () => {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
               <div className="flex items-center gap-2">
                 <h2 className="text-lg font-bold text-text-primary font-heading">Общие тесты</h2>
-                <div className="flex gap-0.5 bg-surface border border-border rounded-lg p-0.5">
-                  {([['ticket', '№'], ['title', 'А-Я'], ['date', '📅']] as const).map(([key, label]) => (
-                    <button key={key} onClick={() => setSortBy(key)} className={`px-2 py-0.5 text-xs font-medium rounded-md transition-all ${sortBy === key ? 'bg-primary text-white shadow-sm' : 'text-text-secondary/60 hover:text-text-secondary'}`}>{label}</button>
+                <div className="flex gap-0.5 bg-surface border border-border/80 rounded-[0.4rem_0.9rem_0.4rem_0.9rem] p-0.5">
+                  {([['ticket', '№'], ['title', 'А-Я'], ['date', 'Дата']] as const).map(([key, label]) => (
+                    <button key={key} onClick={() => setSortBy(key)} className={`px-2 py-0.5 text-xs font-medium rounded-[0.2rem_0.6rem_0.2rem_0.6rem] transition-all ${sortBy === key ? 'bg-primary text-white shadow-sm' : 'text-text-secondary/60 hover:text-text-secondary'}`}>{label}</button>
                   ))}
                   <button onClick={() => setSortOrder(o => o === 'asc' ? 'desc' : 'asc')} className="px-1.5 py-0.5 text-xs text-text-secondary/60 hover:text-text-secondary" title={sortOrder === 'asc' ? 'По возрастанию' : 'По убыванию'}>
-                    {sortOrder === 'asc' ? '↑' : '↓'}
+                    {sortOrder === 'asc' ? '\u2191' : '\u2193'}
                   </button>
                 </div>
               </div>
               {publicSubjects.length > 0 && (
                 <div className="flex gap-1 flex-wrap">
-                  <button onClick={() => setPublicSubject(null)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${publicSubject === null ? 'bg-primary/10 text-primary' : 'text-text-secondary hover:bg-surface border border-border'}`}>Все</button>
+                  <button onClick={() => setPublicSubject(null)} className={`px-3 py-1.5 text-xs font-medium rounded-[0.3rem_0.75rem_0.3rem_0.75rem] transition-all ${publicSubject === null ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-secondary hover:bg-surface border border-border/80'}`}>Все</button>
                   {publicSubjects.map(s => (
-                    <button key={s} onClick={() => setPublicSubject(s)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${publicSubject === s ? 'bg-primary/10 text-primary' : 'text-text-secondary hover:bg-surface border border-border'}`}>{s}</button>
+                    <button key={s} onClick={() => setPublicSubject(s)} className={`px-3 py-1.5 text-xs font-medium rounded-[0.3rem_0.75rem_0.3rem_0.75rem] transition-all ${publicSubject === s ? 'bg-primary/10 text-primary border border-primary/20' : 'text-text-secondary hover:bg-surface border border-border/80'}`}>{s}</button>
                   ))}
                 </div>
               )}
             </div>
 
             <div className="relative mb-4">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary/40" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
               <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Поиск по названию..." className="input pl-9" />
             </div>
 
             {publicQuizzes.length === 0 ? (
               <div className="card p-8 text-center animate-fadeIn">
-                <svg className="w-12 h-12 text-text-secondary/30 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg className="w-12 h-12 text-text-secondary/20 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <p className="text-text-secondary">Публичных тестов от других учителей пока нет.</p>
                 <p className="mt-2 text-sm text-text-secondary/60">Создайте тест и сделайте его публичным.</p>
               </div>
             ) : filteredPublicQuizzes.length === 0 ? (
               <div className="card p-8 text-center animate-fadeIn">
-                <svg className="w-12 h-12 text-text-secondary/30 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <svg className="w-12 h-12 text-text-secondary/20 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 <p className="text-text-secondary">Тесты не найдены. Попробуйте изменить параметры поиска.</p>
               </div>
@@ -442,7 +446,7 @@ const TeacherDashboard: React.FC = () => {
                     <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-3">
                       <div className="flex-1 min-w-0">
                         <h3 className="text-base font-semibold text-text-primary truncate">{quiz.title}</h3>
-                        <p className="text-sm text-text-secondary mt-0.5">{quiz.subject} · {quiz.grade} класс · Автор: {quiz.teacher_name}</p>
+                        <p className="text-sm text-text-secondary mt-0.5">{quiz.subject} &middot; {quiz.grade} класс &middot; Автор: {quiz.teacher_name}</p>
                       </div>
                       <span className="chip shrink-0">{quiz.question_count} вопросов</span>
                     </div>
@@ -469,7 +473,7 @@ const TeacherDashboard: React.FC = () => {
                           disabled={startingId !== null}
                           className="btn-success btn-sm"
                         >
-                          {startingId === quiz.id ? 'Запуск...' : '▶ Запустить'}
+                          {startingId === quiz.id ? 'Запуск...' : 'Запустить'}
                         </button>
                       </div>
                     </div>

@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session, joinedload
-from typing import List
+from typing import List, Optional
 import uuid
 import json
 from app import schemas, crud, models
@@ -62,7 +62,7 @@ def get_session_results(session_id: uuid.UUID, skip: int = 0, limit: int = 100, 
 @router.get("/student/{student_id}", response_model=List[schemas.ResultResponse])
 def get_student_results(student_id: uuid.UUID, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """
-    Получить все результаты для конкретного ученика.
+    Получить все результаты для конкретного ученика (и сессии, и практика).
     Используется в личном кабинете ученика.
     """
     db_student = crud.get_student(db, student_id=student_id)
@@ -70,8 +70,16 @@ def get_student_results(student_id: uuid.UUID, skip: int = 0, limit: int = 100, 
         raise HTTPException(status_code=404, detail="Student not found")
     
     results = db.query(models.Result).options(
-        joinedload(models.Result.session).joinedload(models.Session.quiz)
-    ).filter(models.Result.student_id == student_id).offset(skip).limit(limit).all()
+        joinedload(models.Result.session).joinedload(models.Session.quiz),
+        joinedload(models.Result.quiz)
+    ).filter(models.Result.student_id == student_id).order_by(models.Result.completed_at.desc()).offset(skip).limit(limit).all()
+    
+    def get_quiz_title(r):
+        if r.quiz:
+            return r.quiz.title
+        if r.session and r.session.quiz:
+            return r.session.quiz.title
+        return ""
     
     return [
         schemas.ResultResponse(
@@ -80,10 +88,70 @@ def get_student_results(student_id: uuid.UUID, skip: int = 0, limit: int = 100, 
             total_questions=r.total_questions if r.total_questions is not None else 0,
             answers_json=r.answers_json,
             completed_at=r.completed_at,
-            quiz_title=r.session.quiz.title if r.session and r.session.quiz else "",
+            quiz_title=get_quiz_title(r),
+            mode=r.mode or "session",
         )
         for r in results
     ]
+
+# ── Practice (self-study) endpoints ──
+
+@router.post("/practice/", response_model=schemas.PracticeResultResponse)
+def submit_practice_result(
+    result: schemas.PracticeResultCreate,
+    student_id: uuid.UUID = Query(...),
+    db: Session = Depends(get_db)
+):
+    db_student = crud.get_student(db, student_id=student_id)
+    if not db_student:
+        raise HTTPException(status_code=404, detail="Student not found")
+    db_quiz = crud.get_quiz(db, quiz_id=result.quiz_id)
+    if not db_quiz:
+        raise HTTPException(status_code=404, detail="Quiz not found")
+    db_result = crud.create_practice_result(db=db, result=result, student_id=student_id)
+    return schemas.PracticeResultResponse(
+        id=db_result.id,
+        score=db_result.score,
+        total_questions=db_result.total_questions or 0,
+        answers_json=db_result.answers_json,
+        completed_at=db_result.completed_at,
+        quiz_title=db_quiz.title,
+        quiz_id=db_result.quiz_id,
+        mode=db_result.mode or "practice",
+    )
+
+
+@router.get("/practice/", response_model=List[schemas.PracticeResultResponse])
+def get_practice_results(
+    student_id: uuid.UUID = Query(...),
+    quiz_id: Optional[uuid.UUID] = None,
+    db: Session = Depends(get_db)
+):
+    results = crud.get_practice_results_by_student(db, student_id=student_id, quiz_id=quiz_id)
+    return [
+        schemas.PracticeResultResponse(
+            id=r.id,
+            score=r.score,
+            total_questions=r.total_questions or 0,
+            answers_json=r.answers_json,
+            completed_at=r.completed_at,
+            quiz_title=r.quiz.title if r.quiz else "",
+            quiz_id=r.quiz_id,
+            mode=r.mode or "practice",
+        )
+        for r in results
+    ]
+
+
+@router.get("/practice/summary/", response_model=List[schemas.PracticeSummaryItem])
+def get_practice_summary(
+    student_id: uuid.UUID = Query(...),
+    db: Session = Depends(get_db)
+):
+    return crud.get_practice_summary(db, student_id=student_id)
+
+
+# ── Review (works for both session and practice) ──
 
 @router.get("/{result_id}/review", response_model=schemas.AnswerReviewResponse)
 def get_result_review(result_id: uuid.UUID, db: Session = Depends(get_db)):
@@ -92,12 +160,15 @@ def get_result_review(result_id: uuid.UUID, db: Session = Depends(get_db)):
     Возвращает каждый вопрос, ответ ученика, правильный ответ и объяснение.
     """
     db_result = db.query(models.Result).options(
-        joinedload(models.Result.session).joinedload(models.Session.quiz)
+        joinedload(models.Result.session).joinedload(models.Session.quiz),
+        joinedload(models.Result.quiz)
     ).filter(models.Result.id == result_id).first()
     if not db_result:
         raise HTTPException(status_code=404, detail="Result not found")
 
-    quiz = db_result.session.quiz
+    quiz = db_result.quiz or (db_result.session.quiz if db_result.session else None)
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Quiz not found for this result")
     questions = crud.get_questions_by_quiz(db, quiz_id=quiz.id)
     questions_map = {str(q.id): q for q in questions}
 

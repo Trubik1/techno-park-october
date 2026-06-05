@@ -129,6 +129,7 @@ class ResultResponse(BaseModel):
     answers_json: str
     completed_at: datetime
     quiz_title: str = ""
+    mode: str = "session"
     
     class Config:
         from_attributes = True
@@ -164,6 +165,35 @@ class ParticipantResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+# Practice / Self-study schemas
+class PracticeResultCreate(BaseModel):
+    quiz_id: uuid.UUID
+    score: int
+    total_questions: int = 0
+    answers: List[AnswerItem]
+    mode: str = "practice"  # "practice" or "exam"
+
+class PracticeResultResponse(BaseModel):
+    id: uuid.UUID
+    score: int
+    total_questions: int
+    answers_json: str
+    completed_at: datetime
+    quiz_title: str = ""
+    quiz_id: uuid.UUID
+    mode: str = "practice"
+
+    class Config:
+        from_attributes = True
+
+class PracticeSummaryItem(BaseModel):
+    quiz_id: uuid.UUID
+    quiz_title: str
+    total_questions: int
+    last_score: Optional[int] = None
+    last_completed_at: Optional[datetime] = None
+    attempts: int = 0
 
 # Import schemas
 class QuestionOrderUpdate(BaseModel):

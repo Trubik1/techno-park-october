@@ -65,7 +65,7 @@ const StudentEntry: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background animate-fadeIn">
+    <div className="min-h-[100dvh] bg-background animate-fadeIn">
       <div className="fixed top-4 left-4 z-50">
         <ThemeToggleButton />
       </div>
@@ -75,19 +75,21 @@ const StudentEntry: React.FC = () => {
         </div>
       )}
 
-      <div className="bg-primary mesh-gradient relative px-6 pt-12 pb-8 md:pt-16 md:pb-10 text-center">
+      <div className="relative px-6 pt-12 pb-8 md:pt-20 md:pb-12 text-center overflow-hidden">
+        <div className="absolute inset-0 mesh-gradient" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background" />
         <div className="max-w-2xl mx-auto relative z-10">
-          <h1 className="text-white font-heading text-2xl md:text-3xl font-bold" style={{ letterSpacing: '-0.02em' }}>ClassQuiz</h1>
-          <p className="text-white/60 text-sm md:text-base leading-relaxed max-w-lg mx-auto mt-1">
+          <h1 className="text-text-primary font-heading text-3xl md:text-4xl font-semibold">ClassQuiz</h1>
+          <p className="text-text-secondary text-sm md:text-base leading-relaxed max-w-md mx-auto mt-2">
             Проходите тесты и отслеживайте результаты
           </p>
         </div>
       </div>
 
-      <div className="max-w-md mx-auto px-4 -mt-6 relative z-10 pb-8">
+      <div className="max-w-md mx-auto px-4 -mt-8 relative z-10 pb-8">
         <div className="card p-6 md:p-8">
           <div className="text-center mb-6">
-            <h2 className="text-xl font-bold text-text-primary font-heading">Добро пожаловать!</h2>
+            <h2 className="text-xl font-semibold text-text-primary font-heading">Добро пожаловать!</h2>
             <p className="text-text-secondary mt-1 text-sm">Введите данные для начала работы</p>
           </div>
 
@@ -111,12 +113,13 @@ const StudentEntry: React.FC = () => {
                     key={t}
                     type="button"
                     onClick={() => { setUserType(t); setClassName(''); }}
-                    className={`py-2.5 px-3 rounded-xl text-sm font-medium border transition-all duration-200
+                    className={`py-2.5 px-3 text-sm font-medium border transition-all duration-200
+                      rounded-[0.4rem_1rem_0.4rem_1rem]
                       ${userType === t
-                        ? 'border-primary bg-primary/5 text-primary'
-                        : 'border-border text-text-secondary hover:border-primary/30'}`}
+                        ? 'border-primary bg-primary/8 text-primary'
+                        : 'border-border/80 text-text-secondary hover:border-primary/30 hover:text-primary'}`}
                   >
-                    {t === 'school' ? '🏫 Школа' : t === 'club' ? '🧪 Кружок' : '🎯 Другое'}
+                    {t === 'school' ? 'Школа' : t === 'club' ? 'Кружок' : 'Другое'}
                   </button>
                 ))}
               </div>
@@ -147,15 +150,22 @@ const StudentEntry: React.FC = () => {
               ) : 'Начать работу'}
             </button>
 
-            <p className="text-xs text-text-secondary/60 text-center">
+            <p className="text-xs text-text-secondary/50 text-center">
               Ваши данные будут сохранены только в этом браузере.
             </p>
           </form>
 
-          <div className="mt-5 text-center">
-            <button onClick={() => navigate('/teacher/login')} className="text-sm text-primary hover:text-primary/80 transition-colors font-medium">
-              Войти как учитель →
-            </button>
+          <div className="mt-5 text-center space-y-2">
+            <div>
+              <button onClick={() => navigate('/student/practice')} className="text-sm text-primary hover:text-primary/80 transition-colors font-medium">
+                Подготовка к билетам &rarr;
+              </button>
+            </div>
+            <div>
+              <button onClick={() => navigate('/teacher/login')} className="text-sm text-primary hover:text-primary/80 transition-colors font-medium">
+                Войти как учитель &rarr;
+              </button>
+            </div>
           </div>
         </div>
       </div>

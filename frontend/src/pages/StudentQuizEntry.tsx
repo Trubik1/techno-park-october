@@ -14,7 +14,7 @@ const StudentQuizEntry: React.FC = () => {
   const navigate = useNavigate();
 
   if (isLoading) {
-    return <div className="min-h-screen bg-background flex items-center justify-center"><div className="spinner-dots"><span></span><span></span><span></span></div></div>;
+    return <div className="min-h-[100dvh] bg-background flex items-center justify-center"><div className="spinner-dots"><span></span><span></span><span></span></div></div>;
   }
   if (!isRegistered || !student) {
     return <Navigate to="/student/entry" replace />;
@@ -58,27 +58,33 @@ const StudentQuizEntry: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background animate-fadeIn">
+    <div className="min-h-[100dvh] bg-background animate-fadeIn">
       <div className="fixed top-4 right-4 z-50">
         <UserMenu role="student" />
       </div>
       <div className="max-w-lg mx-auto px-4 py-8">
-        <div className="flex items-center gap-2 mb-6">
-          <ThemeToggleButton />
-          <BackButton to="/student/entry" />
-        </div>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <ThemeToggleButton />
+              <BackButton to="/student/entry" />
+            </div>
+            <button onClick={() => navigate('/student/practice')}
+              className="text-sm text-primary hover:text-primary/80 transition-colors font-medium flex items-center gap-1">
+              Подготовка
+            </button>
+          </div>
         <div className="card p-8 md:p-10">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+            <div className="w-16 h-16 rounded-[0.5rem_1.5rem_0.5rem_1.5rem] bg-primary/8 border border-primary/15 flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-text-primary font-heading">Подключение к тесту</h2>
+            <h2 className="text-2xl font-semibold text-text-primary font-heading">Подключение к тесту</h2>
             <p className="text-text-secondary mt-2 text-sm">Введите 4-значный код сессии, предоставленный вашим учителем</p>
           </div>
 
-          <div className="bg-background rounded-xl p-4 mb-6 text-center">
+          <div className="bg-background rounded-[0.5rem_1.25rem_0.5rem_1.25rem] p-4 mb-6 text-center border border-border/60">
             <p className="text-sm text-text-secondary">
               Привет, <span className="font-semibold text-text-primary">{student.display_name}</span>!
               Вы в классе <span className="font-semibold text-text-primary">{student.class_name}</span>.
@@ -106,7 +112,7 @@ const StudentQuizEntry: React.FC = () => {
               ) : 'Подключиться к тесту'}
             </button>
 
-            <p className="text-xs text-text-secondary/60 text-center">
+            <p className="text-xs text-text-secondary/50 text-center">
               Код сессии предоставляется вашим учителем перед началом теста.
             </p>
           </form>

@@ -12,7 +12,10 @@ interface QuizHistoryItem {
   score: number;
   totalQuestions: number;
   completedAt: string;
+  mode: string;
 }
+
+type TabType = 'all' | 'session' | 'practice';
 
 const StudentHistory: React.FC = () => {
   const { student, isLoading: isStudentLoading } = useStudent();
@@ -20,6 +23,7 @@ const StudentHistory: React.FC = () => {
   const [history, setHistory] = useState<QuizHistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [tab, setTab] = useState<TabType>('all');
 
   useEffect(() => {
     if (isStudentLoading) return;
@@ -36,6 +40,7 @@ const StudentHistory: React.FC = () => {
           score: r.score,
           totalQuestions: r.total_questions,
           completedAt: r.completed_at,
+          mode: r.mode || 'session',
         }));
         setHistory(items);
       } catch {
@@ -44,6 +49,17 @@ const StudentHistory: React.FC = () => {
     };
     loadHistory();
   }, [student, navigate, isStudentLoading]);
+
+  const filtered = tab === 'all' ? history
+    : history.filter(h => h.mode === tab);
+
+  const totalQuestions = filtered.reduce((sum, item) => sum + item.totalQuestions, 0);
+  const correctAnswers = filtered.reduce((sum, item) => sum + item.score, 0);
+  const averageScore = filtered.length > 0 && totalQuestions > 0 ? ((correctAnswers / totalQuestions) * 10).toFixed(2) : '0.00';
+  const bestScore = filtered.length > 0 ? Math.round(Math.max(...filtered.map(item => item.totalQuestions > 0 ? (item.score / item.totalQuestions) * 100 : 0))) : 0;
+  const worstScore = filtered.length > 0 ? Math.round(Math.min(...filtered.map(item => item.totalQuestions > 0 ? (item.score / item.totalQuestions) * 100 : 0))) : 0;
+  const totalPercent = filtered.length > 0 && totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+  const initials = student?.display_name?.charAt(0)?.toUpperCase() || '?';
 
   if ((isLoading || isStudentLoading) && history.length === 0) {
     return (
@@ -69,14 +85,6 @@ const StudentHistory: React.FC = () => {
     );
   }
 
-  const totalQuestions = history.reduce((sum, item) => sum + item.totalQuestions, 0);
-  const correctAnswers = history.reduce((sum, item) => sum + item.score, 0);
-  const averageScore = history.length > 0 ? ((correctAnswers / totalQuestions) * 10).toFixed(2) : '0.00';
-  const bestScore = history.length > 0 ? Math.round(Math.max(...history.map(item => (item.score / item.totalQuestions) * 100))) : 0;
-  const worstScore = history.length > 0 ? Math.round(Math.min(...history.map(item => (item.score / item.totalQuestions) * 100))) : 0;
-  const totalPercent = history.length > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
-  const initials = student?.display_name?.charAt(0)?.toUpperCase() || '?';
-
   return (
     <div className="min-h-screen bg-background animate-fadeIn">
       <div className="fixed top-4 right-4 z-50">
@@ -90,7 +98,7 @@ const StudentHistory: React.FC = () => {
             <h1 className="text-2xl font-bold text-text-primary font-heading">Профиль</h1>
             <Breadcrumbs items={[
               { label: 'Вход ученика', path: '/student/entry' },
-              { label: 'История тестов' },
+              { label: 'История' },
             ]} />
           </div>
         </div>
@@ -109,7 +117,7 @@ const StudentHistory: React.FC = () => {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div className="stat-card">
               <p className="text-sm font-medium text-text-secondary">Всего тестов</p>
-              <p className="text-2xl font-bold text-text-primary font-heading">{history.length}</p>
+              <p className="text-2xl font-bold text-text-primary font-heading">{filtered.length}</p>
             </div>
             <div className="stat-card">
               <p className="text-sm font-medium text-text-secondary">Средний балл</p>
@@ -125,7 +133,7 @@ const StudentHistory: React.FC = () => {
             </div>
           </div>
 
-          {history.length > 0 && (
+          {filtered.length > 0 && (
             <div className="mt-6 p-4 rounded-xl bg-background">
               <p className="text-sm font-medium text-text-secondary mb-2">Общая статистика</p>
               <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm">
@@ -138,22 +146,41 @@ const StudentHistory: React.FC = () => {
           )}
         </div>
 
-        {history.length === 0 ? (
+        <div className="flex gap-1 mb-4 bg-background rounded-xl p-1 border border-border">
+          {(['all', 'session', 'practice'] as TabType[]).map(t => (
+            <button key={t} onClick={() => setTab(t)}
+              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all duration-200 ${
+                tab === t ? 'bg-primary text-white shadow-sm' : 'text-text-secondary hover:text-text-primary'
+              }`}>
+              {t === 'all' ? 'Всё' : t === 'session' ? 'Сессии' : 'Подготовка'}
+            </button>
+          ))}
+        </div>
+
+        {filtered.length === 0 ? (
           <div className="card p-8 text-center animate-fadeIn">
             <svg className="w-12 h-12 text-text-secondary/30 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
             </svg>
-            <p className="text-text-secondary">У вас пока нет пройденных тестов.</p>
-            <p className="mt-2 text-sm text-text-secondary/60">Пройдите тест, чтобы увидеть результаты здесь.</p>
-            <button onClick={() => navigate('/student/quiz-entry')} className="btn-primary mt-6">Подключиться к тесту</button>
+            <p className="text-text-secondary">
+              {tab === 'session' ? 'У вас пока нет пройденных сессий.' : tab === 'practice' ? 'Вы ещё не проходили подготовку.' : 'У вас пока нет результатов.'}
+            </p>
+            {tab === 'practice' && (
+              <button onClick={() => navigate('/student/practice')} className="btn-primary mt-6">Перейти к подготовке</button>
+            )}
+            {tab !== 'practice' && (
+              <button onClick={() => navigate('/student/quiz-entry')} className="btn-primary mt-6">Подключиться к тесту</button>
+            )}
           </div>
         ) : (
           <div className="card">
             <div className="p-6 border-b border-border">
-              <h2 className="text-lg font-bold text-text-primary font-heading">История тестов</h2>
+              <h2 className="text-lg font-bold text-text-primary font-heading">
+                {tab === 'session' ? 'История сессий' : tab === 'practice' ? 'История подготовки' : 'История тестов'}
+              </h2>
             </div>
             <div className="p-6 grid gap-3">
-              {history.map((item, index) => {
+              {filtered.map((item, index) => {
                 const percentage = Math.round((item.score / item.totalQuestions) * 100);
                 const badgeClasses = percentage >= 80
                   ? 'bg-success/10 text-success' : percentage >= 60
@@ -162,7 +189,12 @@ const StudentHistory: React.FC = () => {
                 return (
                   <div key={item.id} className="card-hover p-5" style={{ animationDelay: `${index * 0.08}s` }}>
                     <div className="flex flex-col sm:flex-row justify-between items-start gap-2 mb-3">
-                      <div>
+                      <div className="flex items-center gap-2">
+                        {item.mode === 'practice' && (
+                          <span className="px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                            Подготовка
+                          </span>
+                        )}
                         <h3 className="text-base font-semibold text-text-primary">{item.title}</h3>
                       </div>
                       <span className={'px-3 py-1 text-xs font-bold rounded-full shrink-0 ' + badgeClasses}>{percentage}%</span>
@@ -183,6 +215,7 @@ const StudentHistory: React.FC = () => {
 
         <div className="flex gap-3 mt-6">
           <button onClick={() => navigate('/student/quiz-entry')} className="btn-primary flex-1">Подключиться к тесту</button>
+          <button onClick={() => navigate('/student/practice')} className="btn-outline flex-1">Подготовка</button>
           <button onClick={() => navigate('/student/entry')} className="btn-outline flex-1">Сменить профиль</button>
         </div>
       </div>

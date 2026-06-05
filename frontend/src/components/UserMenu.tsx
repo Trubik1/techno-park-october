@@ -16,8 +16,14 @@ const PinInput: React.FC<{ value: string; onChange: (v: string) => void; placeho
   return (
     <div className="relative">
       <input type={show ? 'text' : 'password'} className="input pr-10" placeholder={placeholder} value={value} onChange={e => onChange(e.target.value)} maxLength={10} />
-      <button type="button" onClick={() => setShow(!show)} className="absolute right-2 top-1/2 -translate-y-1/2 text-text-secondary/50 hover:text-text-secondary transition-colors text-lg">
-        {show ? '🙈' : '👁️'}
+      <button type="button" onClick={() => setShow(!show)} className="absolute right-2 top-1/2 -translate-y-1/2 text-text-secondary/50 hover:text-text-secondary transition-colors">
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          {show ? (
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+          ) : (
+            <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+          )}
+        </svg>
       </button>
     </div>
   );
@@ -53,8 +59,8 @@ const PinResetModal: React.FC<{ teacherId: string; teacherName: string; onClose:
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 animate-fadeIn" onClick={onClose}>
-      <div className="bg-surface rounded-2xl shadow-xl border border-border p-6 max-w-sm w-full animate-scaleIn" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-fadeIn" onClick={onClose}>
+      <div className="bg-surface rounded-[0.75rem_2rem_0.75rem_2rem] shadow-studio-lg border border-border p-6 max-w-sm w-full animate-scaleIn" onClick={e => e.stopPropagation()}>
         <h3 className="text-lg font-semibold text-text-primary mb-4 font-heading">Настройки учителя</h3>
         <div className="space-y-3">
           <input className="input" placeholder="Ваше имя" value={name} onChange={e => setName(e.target.value)} maxLength={100} />
@@ -87,19 +93,19 @@ const TeacherMenu: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   };
 
   return (
-    <div className="absolute top-12 right-0 w-64 bg-surface rounded-xl shadow-lg border border-border overflow-hidden animate-scaleIn z-50">
-      <div className="p-4 border-b border-border">
+    <div className="absolute top-12 right-0 w-64 bg-surface rounded-[0.75rem_1.5rem_0.75rem_1.5rem] shadow-studio-lg border border-border/80 overflow-hidden animate-scaleIn z-50">
+      <div className="p-4 border-b border-border/60">
         <p className="font-semibold text-text-primary">{teacher?.name || 'Учитель'}</p>
         <p className="text-xs text-text-secondary mt-0.5">Учитель</p>
       </div>
       <div className="p-2">
-        <button onClick={() => { setShowPinReset(true); }} className="w-full text-left px-3 py-2 rounded-lg text-sm text-text-primary hover:bg-primary/5 transition-colors flex items-center gap-2">
-          <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+        <button onClick={() => { setShowPinReset(true); }} className="w-full text-left px-3 py-2 rounded-[0.3rem_0.75rem_0.3rem_0.75rem] text-sm text-text-primary hover:bg-primary/5 transition-colors flex items-center gap-2">
+          <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
           Сменить PIN
         </button>
       </div>
-      <div className="p-2 border-t border-border">
-        <button onClick={handleLogout} className="w-full text-left px-3 py-2 rounded-lg text-sm text-error hover:bg-error/5 transition-colors">
+      <div className="p-2 border-t border-border/60">
+        <button onClick={handleLogout} className="w-full text-left px-3 py-2 rounded-[0.3rem_0.75rem_0.3rem_0.75rem] text-sm text-error hover:bg-error/5 transition-colors">
           Выйти из аккаунта
         </button>
       </div>
@@ -135,8 +141,8 @@ const EditProfileModal: React.FC<{ student: { id: string; display_name: string; 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 animate-fadeIn" onClick={onClose}>
-      <div className="bg-surface rounded-2xl shadow-xl border border-border p-6 max-w-sm w-full animate-scaleIn" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-fadeIn" onClick={onClose}>
+      <div className="bg-surface rounded-[0.75rem_2rem_0.75rem_2rem] shadow-studio-lg border border-border p-6 max-w-sm w-full animate-scaleIn" onClick={e => e.stopPropagation()}>
         <h3 className="text-lg font-semibold text-text-primary mb-4 font-heading">Редактировать профиль</h3>
         <div className="space-y-3">
           <input className="input" placeholder="Ваше имя" value={name} onChange={e => setName(e.target.value)} maxLength={100} />
@@ -161,7 +167,7 @@ const StudentMenu: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   useEffect(() => {
     if (student) {
       const saved = localStorage.getItem(`classquiz_history_${student.id}`);
-      if (saved) try { setHistory(JSON.parse(saved)); } catch { /* corrupted data */ }
+      if (saved) try { setHistory(JSON.parse(saved)); } catch { }
     }
   }, [student]);
 
@@ -188,10 +194,10 @@ const StudentMenu: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const initials = student?.display_name?.charAt(0)?.toUpperCase() || '?';
 
   return (
-    <div className="absolute top-12 right-0 w-72 bg-surface rounded-xl shadow-lg border border-border overflow-hidden animate-scaleIn z-50">
-      <div className="p-4 border-b border-border">
+    <div className="absolute top-12 right-0 w-72 bg-surface rounded-[0.75rem_1.5rem_0.75rem_1.5rem] shadow-studio-lg border border-border/80 overflow-hidden animate-scaleIn z-50">
+      <div className="p-4 border-b border-border/60">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold text-sm shrink-0">
+          <div className="w-10 h-10 rounded-[0.3rem_1rem_0.3rem_1rem] bg-primary flex items-center justify-center text-white font-bold text-sm shrink-0">
             {initials}
           </div>
           <div className="min-w-0">
@@ -201,13 +207,13 @@ const StudentMenu: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </div>
       </div>
 
-      <div className="p-3 border-b border-border">
+      <div className="p-3 border-b border-border/60">
         <div className="grid grid-cols-2 gap-2">
-          <div className="text-center p-2 rounded-lg bg-background">
+          <div className="text-center p-2 rounded-[0.3rem_0.75rem_0.3rem_0.75rem] bg-background">
             <p className="text-lg font-bold text-text-primary">{totalTests}</p>
             <p className="text-xs text-text-secondary">Тестов</p>
           </div>
-          <div className="text-center p-2 rounded-lg bg-background">
+          <div className="text-center p-2 rounded-[0.3rem_0.75rem_0.3rem_0.75rem] bg-background">
             <p className={`text-lg font-bold ${avgPercent >= 80 ? 'text-success' : avgPercent >= 60 ? 'text-warning' : 'text-error'}`}>
               {avgPercent}%
             </p>
@@ -216,32 +222,32 @@ const StudentMenu: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </div>
       </div>
 
-      <div className="p-2 border-b border-border">
-        <button onClick={() => { onClose(); navigate('/student/history'); }} className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-text-primary hover:bg-primary/5 transition-colors flex items-center gap-2">
-          <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+      <div className="p-2 border-b border-border/60">
+        <button onClick={() => { onClose(); navigate('/student/history'); }} className="w-full text-left px-3 py-2 rounded-[0.3rem_0.75rem_0.3rem_0.75rem] text-sm font-medium text-text-primary hover:bg-primary/5 transition-colors flex items-center gap-2">
+          <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" />
           </svg>
           Профиль и статистика
         </button>
-        <button onClick={() => setShowEdit(true)} className="w-full text-left px-3 py-2 rounded-lg text-sm text-text-primary hover:bg-primary/5 transition-colors flex items-center gap-2">
-          <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        <button onClick={() => setShowEdit(true)} className="w-full text-left px-3 py-2 rounded-[0.3rem_0.75rem_0.3rem_0.75rem] text-sm text-text-primary hover:bg-primary/5 transition-colors flex items-center gap-2">
+          <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
           </svg>
           Сменить имя или класс
         </button>
-        <button onClick={() => { onClose(); navigate('/teacher/login'); }} className="w-full text-left px-3 py-2 rounded-lg text-sm text-text-secondary hover:bg-primary/5 transition-colors flex items-center gap-2">
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+        <button onClick={() => { onClose(); navigate('/teacher/login'); }} className="w-full text-left px-3 py-2 rounded-[0.3rem_0.75rem_0.3rem_0.75rem] text-sm text-text-secondary hover:bg-primary/5 transition-colors flex items-center gap-2">
+          <svg className="w-4 h-4 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
           </svg>
           Войти как учитель
         </button>
       </div>
 
       <div className="p-2">
-        <button onClick={handleClearData} className="w-full text-left px-3 py-2 rounded-lg text-sm text-warning hover:bg-warning/5 transition-colors">
+        <button onClick={handleClearData} className="w-full text-left px-3 py-2 rounded-[0.3rem_0.75rem_0.3rem_0.75rem] text-sm text-warning hover:bg-warning/5 transition-colors">
           Очистить данные
         </button>
-        <button onClick={handleLogout} className="w-full text-left px-3 py-2 rounded-lg text-sm text-error hover:bg-error/5 transition-colors">
+        <button onClick={handleLogout} className="w-full text-left px-3 py-2 rounded-[0.3rem_0.75rem_0.3rem_0.75rem] text-sm text-error hover:bg-error/5 transition-colors">
           Выйти
         </button>
       </div>
@@ -284,7 +290,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ role }) => {
     <div ref={menuRef} className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold shadow-sm hover:shadow-md hover:shadow-primary/20 transition-all active:scale-95"
+        className="w-9 h-9 rounded-[0.3rem_0.9rem_0.3rem_0.9rem] bg-primary flex items-center justify-center text-white text-sm font-bold shadow-studio hover:shadow-studio-hover transition-all active:scale-95"
       >
         {initials}
       </button>
