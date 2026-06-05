@@ -65,7 +65,7 @@ const StudentEntry: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-background animate-fadeIn">
+    <div className="h-[100dvh] bg-background animate-fadeIn overflow-hidden flex flex-col">
       <div className="fixed top-4 left-4 z-50">
         <ThemeToggleButton />
       </div>
@@ -75,7 +75,7 @@ const StudentEntry: React.FC = () => {
         </div>
       )}
 
-      <div className="relative px-6 pt-16 pb-12 md:pt-24 md:pb-16 text-center overflow-hidden">
+      <div className="relative px-6 pt-10 pb-6 md:pt-12 md:pb-8 text-center overflow-hidden shrink-0">
         <div className="absolute inset-0 mesh-gradient" />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent/40 to-background" />
         <div className="max-w-2xl mx-auto relative z-10">
@@ -84,14 +84,14 @@ const StudentEntry: React.FC = () => {
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h1 className="text-text-primary font-heading text-display">ClassQuiz</h1>
+          <h1 className="text-text-primary font-heading text-h1 md:text-display">ClassQuiz</h1>
           <p className="text-text-secondary text-body-lg max-w-md mx-auto mt-3">
             Проходите тесты и отслеживайте результаты
           </p>
         </div>
       </div>
 
-      <div className="max-w-md mx-auto px-4 -mt-10 relative z-10 pb-8">
+      <div className="max-w-md mx-auto px-4 -mt-6 relative z-10 pb-4 flex-1 overflow-y-auto">
         <div className="card p-6 md:p-8">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-semibold text-text-primary font-heading">Добро пожаловать!</h2>
