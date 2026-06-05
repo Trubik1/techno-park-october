@@ -352,18 +352,14 @@
     position: absolute;
     inset: 0;
     background:
-      radial-gradient(ellipse 80% 60% at 15% 20%, rgba(122,158,109,0.3) 0%, transparent 70%),
-      radial-gradient(ellipse 60% 80% at 80% 25%, rgba(138,158,122,0.2) 0%, transparent 70%),
-      radial-gradient(ellipse 70% 50% at 40% 75%, rgba(122,158,109,0.15) 0%, transparent 70%),
-      radial-gradient(ellipse 50% 60% at 85% 80%, rgba(100,165,145,0.15) 0%, transparent 70%);
+      radial-gradient(ellipse 90% 60% at 10% 30%, rgba(var(--color-primary-rgb), 0.2) 0%, transparent 60%),
+      radial-gradient(ellipse 70% 50% at 90% 70%, rgba(var(--color-accent-rgb), 0.13) 0%, transparent 55%);
     pointer-events: none;
   }
   .dark .mesh-gradient::before {
     background:
-      radial-gradient(ellipse 80% 60% at 15% 20%, rgba(150,190,140,0.25) 0%, transparent 70%),
-      radial-gradient(ellipse 60% 80% at 80% 25%, rgba(175,195,160,0.15) 0%, transparent 70%),
-      radial-gradient(ellipse 70% 50% at 40% 75%, rgba(150,190,140,0.12) 0%, transparent 70%),
-      radial-gradient(ellipse 50% 60% at 85% 80%, rgba(125,190,170,0.1) 0%, transparent 70%);
+      radial-gradient(ellipse 90% 60% at 10% 30%, rgba(var(--color-primary-rgb), 0.15) 0%, transparent 60%),
+      radial-gradient(ellipse 70% 50% at 90% 70%, rgba(var(--color-accent-rgb), 0.1) 0%, transparent 55%);
   }
 
   .stat-card {
