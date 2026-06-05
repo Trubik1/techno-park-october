@@ -37,8 +37,8 @@ module.exports = {
         'studio': '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.6)',
         'studio-lg': '0 4px 16px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.6)',
         'studio-hover': '0 8px 30px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.6)',
-        'studio-glow': '0 0 0 1px rgba(196,101,74,0.1), 0 0 20px rgba(196,101,74,0.06), 0 1px 3px rgba(0,0,0,0.04)',
-        'studio-colored': '0 4px 12px rgba(196,101,74,0.12), 0 1px 3px rgba(0,0,0,0.04)',
+        'studio-glow': '0 0 0 1px rgba(122,158,109,0.1), 0 0 20px rgba(122,158,109,0.06), 0 1px 3px rgba(0,0,0,0.04)',
+        'studio-colored': '0 4px 12px rgba(122,158,109,0.12), 0 1px 3px rgba(0,0,0,0.04)',
         'studio-inner': 'inset 0 1px 2px rgba(0,0,0,0.04), inset 0 0 0 1px rgba(0,0,0,0.02)',
       },
       colors: {

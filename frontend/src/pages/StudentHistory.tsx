@@ -191,7 +191,7 @@ const StudentHistory: React.FC = () => {
                     <div className="flex flex-col sm:flex-row justify-between items-start gap-2 mb-3">
                       <div className="flex items-center gap-2">
                         {item.mode === 'practice' && (
-                          <span className="px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                          <span className="px-2 py-0.5 rounded text-xs font-medium bg-accent/10 text-accent">
                             Подготовка
                           </span>
                         )}

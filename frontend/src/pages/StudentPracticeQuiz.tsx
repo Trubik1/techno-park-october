@@ -302,7 +302,7 @@ const StudentPracticeQuiz: React.FC = () => {
           <BackButton to="/student/practice" />
         </div>
         <div className="card">
-          <div className={`p-6 rounded-t-2xl ${mode === 'exam' ? 'bg-primary' : 'bg-emerald-600'} text-white`}>
+          <div className={`p-6 rounded-t-2xl ${mode === 'exam' ? 'bg-primary' : 'bg-accent'} text-white`}>
             <div className="flex justify-between items-start">
               <div>
                 <div className="flex items-center gap-2 mb-1">
@@ -339,7 +339,7 @@ const StudentPracticeQuiz: React.FC = () => {
           </div>
 
           <div className="h-2 bg-background">
-            <div className={`h-full transition-all duration-500 ease-out rounded-r-full ${mode === 'exam' ? 'bg-primary' : 'bg-emerald-500'}`}
+            <div className={`h-full transition-all duration-500 ease-out rounded-r-full ${mode === 'exam' ? 'bg-primary' : 'bg-accent'}`}
               style={{ width: progress + '%' }}></div>
           </div>
 
