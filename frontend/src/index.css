@@ -209,7 +209,7 @@
     background: rgba(var(--color-surface-rgb), 0.72);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(var(--color-border-rgb), 0.3);
+    border: 1px solid rgba(var(--color-border-strong-rgb), 0.7);
     isolation: isolate;
   }
 
@@ -220,18 +220,18 @@
   .card-hover:hover {
     background: rgba(var(--color-surface-rgb), 0.88);
     box-shadow: 0 12px 40px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03), inset 0 1px 0 var(--shadow-inset-highlight);
-    border-color: rgba(var(--color-primary-rgb), 0.15);
+    border-color: rgba(var(--color-primary-rgb), 0.35);
     transform: translateY(-0.1875rem);
   }
 
   .card-solid {
     background: rgb(var(--color-surface-rgb));
-    border: 1px solid rgba(var(--color-border-rgb), 0.6);
+    border: 1px solid rgba(var(--color-border-strong-rgb), 0.7);
   }
 
   .card-glass {
     @apply rounded-[0.75rem_2rem_0.75rem_2rem] shadow-studio-lg;
-    border: 1px solid rgba(var(--color-border-rgb), 0.25);
+    border: 1px solid rgba(var(--color-border-strong-rgb), 0.5);
     background: rgba(var(--color-surface-rgb), 0.6);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -242,7 +242,7 @@
     background: rgba(var(--color-surface-rgb), 0.72);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(var(--color-border-rgb), 0.3);
+    border: 1px solid rgba(var(--color-border-strong-rgb), 0.7);
     isolation: isolate;
   }
 
