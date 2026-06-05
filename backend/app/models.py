@@ -98,6 +98,8 @@ class SessionParticipant(Base):
     session_id = Column(Uuid(as_uuid=True), ForeignKey("sessions.id"), nullable=False)
     student_id = Column(Uuid(as_uuid=True), ForeignKey("students.id"), nullable=False)
     joined_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    current_question = Column(Integer, nullable=True)
+    answers_json = Column(Text, nullable=True)
 
     __table_args__ = (
         UniqueConstraint("session_id", "student_id", name="uq_session_student"),

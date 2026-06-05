@@ -305,6 +305,19 @@ def join_session(db: Session, session_id: uuid.UUID, student_id: uuid.UUID):
     db.refresh(participant)
     return participant
 
+def update_progress(db: Session, session_id: uuid.UUID, student_id: uuid.UUID, current_question: int, answers: list):
+    participant = db.query(models.SessionParticipant).filter(
+        models.SessionParticipant.session_id == session_id,
+        models.SessionParticipant.student_id == student_id
+    ).first()
+    if not participant:
+        return None
+    participant.current_question = current_question
+    participant.answers_json = json.dumps([a.model_dump() for a in answers])
+    db.commit()
+    db.refresh(participant)
+    return participant
+
 def get_participants_by_session(db: Session, session_id: uuid.UUID):
     return db.query(
         models.SessionParticipant,
@@ -312,13 +325,19 @@ def get_participants_by_session(db: Session, session_id: uuid.UUID):
         models.Student.class_name,
         models.Result.completed_at,
         models.Result.score,
-        models.Result.total_questions
+        models.Result.total_questions,
+        models.Result.answers_json,
+        models.Quiz
     ).join(
         models.Student, models.SessionParticipant.student_id == models.Student.id
     ).outerjoin(
         models.Result,
         (models.Result.session_id == models.SessionParticipant.session_id) &
         (models.Result.student_id == models.SessionParticipant.student_id)
+    ).join(
+        models.Session, models.SessionParticipant.session_id == models.Session.id
+    ).join(
+        models.Quiz, models.Session.quiz_id == models.Quiz.id
     ).filter(
         models.SessionParticipant.session_id == session_id
     ).all()

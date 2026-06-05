@@ -141,6 +141,16 @@ class ResultWithStudentResponse(ResultResponse):
 class SessionJoinRequest(BaseModel):
     student_id: uuid.UUID
 
+class AnswerProgress(BaseModel):
+    question_index: int
+    answer: Optional[str] = None
+    is_correct: Optional[bool] = None
+
+class ProgressUpdate(BaseModel):
+    student_id: uuid.UUID
+    current_question: int
+    answers: List[AnswerProgress]
+
 class ParticipantResponse(BaseModel):
     student_id: uuid.UUID
     display_name: str
@@ -149,6 +159,8 @@ class ParticipantResponse(BaseModel):
     completed_at: Optional[datetime] = None
     score: Optional[int] = None
     total_questions: int = 0
+    current_question: Optional[int] = None
+    answers: Optional[List[AnswerProgress]] = None
 
     class Config:
         from_attributes = True

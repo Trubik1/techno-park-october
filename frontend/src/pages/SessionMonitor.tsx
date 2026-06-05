@@ -17,10 +17,18 @@ interface SessionData {
   title?: string; subject?: string; grade?: string;
 }
 
+interface AnswerProgress {
+  question_index: number;
+  answer: string | null;
+  is_correct: boolean | null;
+}
+
 interface Participant {
   student_id: string; display_name: string; class_name: string;
   joined_at: string; completed_at: string | null;
   score: number | null; total_questions: number;
+  current_question: number | null;
+  answers: AnswerProgress[] | null;
 }
 
 function playBeep() {
@@ -77,7 +85,9 @@ const SessionMonitor: React.FC = () => {
       const mapped = participantsData.map((p: any) => ({
         student_id: p.student_id, display_name: p.display_name, class_name: p.class_name,
         joined_at: p.joined_at, completed_at: p.completed_at,
-        score: p.score, total_questions: p.total_questions || 0
+        score: p.score, total_questions: p.total_questions || 0,
+        current_question: p.current_question ?? null,
+        answers: p.answers || null
       }));
       if (mapped.length > prevCountRef.current && prevCountRef.current > 0) {
         playBeep();
@@ -269,33 +279,74 @@ const SessionMonitor: React.FC = () => {
                     <table className="min-w-full divide-y divide-border">
                       <thead className="bg-background">
                         <tr>
-                          {['Ученик', 'Класс', 'Балл', 'Статус', 'Время'].map(h => (
+                          {['Ученик', 'Класс', 'Прогресс', 'Балл', 'Статус', 'Время'].map(h => (
                             <th key={h} className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">{h}</th>
                           ))}
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border">
-                        {participants.map((p, i) => (
-                          <tr key={p.student_id} className="bg-surface hover:bg-background transition-colors animate-fadeIn" style={{ animationDelay: `${i * 0.05}s` }}>
-                            <td className="px-4 py-3 text-sm font-medium text-text-primary">{p.display_name}</td>
-                            <td className="px-4 py-3 text-sm text-text-secondary">{p.class_name}</td>
-                            <td className="px-4 py-3 text-sm font-bold">
-                              {p.completed_at ? (
-                                <span className={`${p.score === 0 ? 'text-error' : p.score! >= p.total_questions * 0.8 ? 'text-success' : p.score! >= p.total_questions * 0.6 ? 'text-warning' : 'text-text-primary'}`}>
-                                  {p.score}/{p.total_questions}
+                          {participants.map((p, i) => {
+                            const progressGrid = () => {
+                              const cells: React.ReactNode[] = [];
+                              for (let qi = 0; qi < p.total_questions; qi++) {
+                                let color = 'bg-gray-400';
+                                let title = `Вопрос ${qi + 1}: не начат`;
+                                if (p.completed_at && p.answers) {
+                                  const answered = p.answers.find(a => a.question_index === qi);
+                                  if (answered) {
+                                    color = answered.is_correct ? 'bg-green-500' : 'bg-red-500';
+                                    title = `Вопрос ${qi + 1}: ${answered.is_correct ? '✓ верно' : '✗ неверно'}`;
+                                  }
+                                } else if (p.current_question !== null && p.current_question !== undefined) {
+                                  if (qi < p.current_question) {
+                                    const answered = p.answers?.find(a => a.question_index === qi);
+                                    if (answered) {
+                                      color = answered.is_correct ? 'bg-green-500' : 'bg-red-500';
+                                      title = `Вопрос ${qi + 1}: ${answered.is_correct ? '✓ верно' : '✗ неверно'}`;
+                                    }
+                                  } else if (qi === p.current_question) {
+                                    color = 'bg-yellow-400';
+                                    title = `Вопрос ${qi + 1}: текущий`;
+                                  }
+                                }
+                                cells.push(
+                                  <div key={qi} className={`w-4 h-4 rounded-sm ${color} flex-shrink-0`} title={title} />
+                                );
+                              }
+                              return cells;
+                            };
+
+                            return (
+                            <tr key={p.student_id} className="bg-surface hover:bg-background transition-colors animate-fadeIn" style={{ animationDelay: `${i * 0.05}s` }}>
+                              <td className="px-4 py-3 text-sm font-medium text-text-primary">{p.display_name}</td>
+                              <td className="px-4 py-3 text-sm text-text-secondary">{p.class_name}</td>
+                              <td className="px-4 py-3">
+                                {p.total_questions > 0 ? (
+                                  <div className="flex gap-0.5 flex-wrap max-w-[160px]">
+                                    {progressGrid()}
+                                  </div>
+                                ) : (
+                                  <span className="text-text-secondary/50">—</span>
+                                )}
+                              </td>
+                              <td className="px-4 py-3 text-sm font-bold">
+                                {p.completed_at ? (
+                                  <span className={`${p.score === 0 ? 'text-error' : p.score! >= p.total_questions * 0.8 ? 'text-success' : p.score! >= p.total_questions * 0.6 ? 'text-warning' : 'text-text-primary'}`}>
+                                    {p.score}/{p.total_questions}
+                                  </span>
+                                ) : (
+                                  <span className="text-text-secondary/50">—</span>
+                                )}
+                              </td>
+                              <td className="px-4 py-3 text-sm">
+                                <span className={`badge ${p.completed_at ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'}`}>
+                                  {p.completed_at ? 'Завершил' : 'В процессе'}
                                 </span>
-                              ) : (
-                                <span className="text-text-secondary/50">—</span>
-                              )}
-                            </td>
-                            <td className="px-4 py-3 text-sm">
-                              <span className={`badge ${p.completed_at ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'}`}>
-                                {p.completed_at ? 'Завершил' : 'В процессе'}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3 text-sm text-text-secondary">{p.completed_at ? parseBackendDate(p.completed_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) : parseBackendDate(p.joined_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</td>
-                          </tr>
-                        ))}
+                              </td>
+                              <td className="px-4 py-3 text-sm text-text-secondary">{p.completed_at ? parseBackendDate(p.completed_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) : parseBackendDate(p.joined_at).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</td>
+                            </tr>
+                            );
+                          })}
                       </tbody>
                     </table>
                   </div>

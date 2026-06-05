@@ -45,6 +45,13 @@ with engine.connect() as conn:
     if row4 and 'sort_order' not in row4[0]:
         conn.execute(text("ALTER TABLE questions ADD COLUMN sort_order INTEGER DEFAULT 0"))
         conn.commit()
+    # Добавляем current_question и answers_json в session_participants, если нет
+    cursor5 = conn.execute(text("SELECT sql FROM sqlite_master WHERE type='table' AND name='session_participants'"))
+    row5 = cursor5.fetchone()
+    if row5 and 'current_question' not in row5[0]:
+        conn.execute(text("ALTER TABLE session_participants ADD COLUMN current_question INTEGER DEFAULT NULL"))
+        conn.execute(text("ALTER TABLE session_participants ADD COLUMN answers_json TEXT DEFAULT NULL"))
+        conn.commit()
 
 # Авто-сидирование общих тестов по истории (is_public=True)
 from app.db.database import SessionLocal

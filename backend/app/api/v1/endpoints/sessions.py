@@ -1,3 +1,4 @@
+import json
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
@@ -103,7 +104,38 @@ def get_participants(session_id: uuid.UUID, db: Session = Depends(get_db)):
     """
     rows = crud.get_participants_by_session(db, session_id=session_id)
     result = []
-    for p, display_name, class_name, completed_at, score, total_questions in rows:
+    for p, display_name, class_name, completed_at, score, total_questions, result_answers_json, quiz in rows:
+        total = total_questions or 0
+        answers = None
+        current_q = None
+
+        if completed_at and result_answers_json:
+            current_q = total
+            try:
+                result_answers = json.loads(result_answers_json)
+                answers = []
+                for i, ra in enumerate(result_answers):
+                    answers.append(schemas.AnswerProgress(
+                        question_index=i,
+                        answer=ra.get("answer"),
+                        is_correct=ra.get("answer") == _get_correct_for_question(quiz, ra.get("question_id"))
+                    ))
+            except (json.JSONDecodeError, KeyError):
+                answers = None
+        elif p.answers_json:
+            current_q = p.current_question or 0
+            try:
+                prog_answers = json.loads(p.answers_json)
+                answers = []
+                for pa in prog_answers:
+                    answers.append(schemas.AnswerProgress(
+                        question_index=pa.get("question_index", 0),
+                        answer=pa.get("answer"),
+                        is_correct=pa.get("is_correct")
+                    ))
+            except (json.JSONDecodeError, KeyError):
+                answers = None
+
         result.append(schemas.ParticipantResponse(
             student_id=p.student_id,
             display_name=display_name,
@@ -111,9 +143,44 @@ def get_participants(session_id: uuid.UUID, db: Session = Depends(get_db)):
             joined_at=p.joined_at,
             completed_at=completed_at,
             score=score,
-            total_questions=total_questions or 0
+            total_questions=total,
+            current_question=current_q,
+            answers=answers
         ))
     return result
+
+
+def _get_correct_for_question(quiz, question_id: str) -> str:
+    for q in quiz.questions:
+        if str(q.id) == str(question_id):
+            return q.correct
+    return ""
+
+
+@router.put("/{session_id}/progress", response_model=schemas.ParticipantResponse)
+def update_student_progress(session_id: uuid.UUID, body: schemas.ProgressUpdate, db: Session = Depends(get_db)):
+    """
+    Обновить прогресс ученика (текущий вопрос + ответы).
+    """
+    db_session = crud.get_session(db, session_id=session_id)
+    if not db_session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    participant = crud.update_progress(db, session_id=session_id, student_id=body.student_id,
+                                        current_question=body.current_question, answers=body.answers)
+    if not participant:
+        raise HTTPException(status_code=404, detail="Participant not found")
+    student = crud.get_student(db, student_id=body.student_id)
+    return schemas.ParticipantResponse(
+        student_id=student.id,
+        display_name=student.display_name,
+        class_name=student.class_name,
+        joined_at=participant.joined_at,
+        completed_at=None,
+        score=None,
+        total_questions=0,
+        current_question=participant.current_question,
+        answers=body.answers
+    )
 
 @router.get("/{session_id}/leaderboard", response_model=List[schemas.LeaderboardEntry])
 def get_leaderboard(session_id: uuid.UUID, db: Session = Depends(get_db)):

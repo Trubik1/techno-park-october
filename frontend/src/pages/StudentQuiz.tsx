@@ -74,6 +74,7 @@ const StudentQuiz: React.FC = () => {
   const [shuffleOrder, setShuffleOrder] = useState<string[]>([]);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [resultId, setResultId] = useState<string | null>(null);
+  const progressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const clearTimers = () => {
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
@@ -83,6 +84,7 @@ const StudentQuiz: React.FC = () => {
   useEffect(() => {
     if (!code) { navigate('/student/entry'); return; }
     if (!student) { setIsLoading(false); return; }
+    studentIdRef.current = student.id;
     let cancelled = false;
 
     (async () => {
@@ -187,6 +189,37 @@ const StudentQuiz: React.FC = () => {
 
   submitQuizRef.current = submitQuiz;
 
+  const sendProgress = useCallback(() => {
+    if (!sessionData || !student || !quizData) return;
+    if (progressTimerRef.current) clearTimeout(progressTimerRef.current);
+    progressTimerRef.current = setTimeout(async () => {
+      try {
+        const answerList = quizData.questions
+          .map((q, idx) => {
+            const studentAnswer = answers[q.id] || '';
+            if (!studentAnswer) return null;
+            return {
+              question_index: idx,
+              answer: studentAnswer,
+              is_correct: studentAnswer === q.correct,
+            };
+          })
+          .filter((a): a is { question_index: number; answer: string; is_correct: boolean } => a !== null);
+        await fetch(`/api/sessions/${sessionData.id}/progress`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            student_id: student.id,
+            current_question: currentQuestionIndex,
+            answers: answerList,
+          }),
+        });
+      } catch {
+        /* progress tracking is not critical */
+      }
+    }, 500);
+  }, [sessionData, student, quizData, answers, currentQuestionIndex]);
+
   const moveToNext = () => {
     if (!quizData) return;
     if (currentQuestionIndex < quizData.questions.length - 1) {
@@ -194,6 +227,7 @@ const StudentQuiz: React.FC = () => {
       setSelectedOption(null);
       setCurrentQuestionIndex(prev => prev + 1);
       if (!quizData.time_limit_quiz) startQuestionTimer();
+      sendProgress();
     } else {
       submitQuizRef.current();
     }
@@ -235,6 +269,7 @@ const StudentQuiz: React.FC = () => {
     setAnswers(prev => ({ ...prev, [qId]: selectedOption }));
     setShowExplanation(true);
     setSelectedOption(null);
+    sendProgress();
     if (quizData?.time_limit_quiz) {
       return;
     }
@@ -439,9 +474,9 @@ const StudentQuiz: React.FC = () => {
             )}
 
             {showExplanation && currentQuestion.explanation && (
-              <div className="mt-6 p-4 rounded-xl bg-white/10 text-white animate-slideDown">
+              <div className="mt-6 p-4 rounded-xl bg-primary/10 text-text-primary border border-primary/20 animate-slideDown">
                 <p className="text-sm font-medium mb-1">Объяснение:</p>
-                <p className="text-sm text-white/80">{currentQuestion.explanation}</p>
+                <p className="text-sm text-text-secondary">{currentQuestion.explanation}</p>
               </div>
             )}
 
@@ -470,11 +505,11 @@ const StudentQuiz: React.FC = () => {
             {!showExplanation && !isSubmitted && currentQuestionIndex < quizData.questions.length - 1 && (
               <div className="mt-6 flex justify-between">
                 {currentQuestionIndex > 0 && (
-                  <button onClick={() => { setCurrentQuestionIndex(prev => prev - 1); setShowExplanation(false); setSelectedOption(null); if (!quizData?.time_limit_quiz) { clearTimers(); startQuestionTimer(); } }} className="btn-outline btn-sm">
+                  <button onClick={() => { setCurrentQuestionIndex(prev => prev - 1); setShowExplanation(false); setSelectedOption(null); if (!quizData?.time_limit_quiz) { clearTimers(); startQuestionTimer(); } sendProgress(); }} className="btn-outline btn-sm">
                     ← Назад
                   </button>
                 )}
-                <button onClick={() => { if (!quizData?.time_limit_quiz) clearTimers(); moveToNext(); }} disabled={!answers[currentQuestion.id]} className="btn-primary btn-sm ml-auto">
+                <button onClick={() => { if (!quizData?.time_limit_quiz) clearTimers(); moveToNext(); sendProgress(); }} disabled={!answers[currentQuestion.id]} className="btn-primary btn-sm ml-auto">
                   Следующий →
                 </button>
               </div>

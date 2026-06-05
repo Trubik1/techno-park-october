@@ -75,33 +75,12 @@ const StudentEntry: React.FC = () => {
         </div>
       )}
 
-      <div className="bg-primary mesh-gradient relative px-6 pt-16 pb-10 md:pt-20 md:pb-14 text-center">
-        <div className="absolute top-6 right-8 w-20 h-20 border border-white/10 rounded-full"></div>
-        <div className="absolute bottom-6 left-8 w-12 h-12 border border-white/10 rounded-full"></div>
+      <div className="bg-primary mesh-gradient relative px-6 pt-12 pb-8 md:pt-16 md:pb-10 text-center">
         <div className="max-w-2xl mx-auto relative z-10">
-          <div className="w-16 h-16 rounded-2xl bg-white/15 flex items-center justify-center mx-auto mb-6" style={{ animation: 'float 6s ease-in-out infinite' }}>
-            <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-            </svg>
-          </div>
-          <h1 className="text-white font-heading text-3xl md:text-4xl font-bold mb-3" style={{ letterSpacing: '-0.02em' }}>ClassQuiz</h1>
-          <p className="text-white/70 text-base md:text-lg leading-relaxed max-w-lg mx-auto">
-            Проходите тесты, отслеживайте свои результаты и улучшайте знания в удобном формате.
+          <h1 className="text-white font-heading text-2xl md:text-3xl font-bold" style={{ letterSpacing: '-0.02em' }}>ClassQuiz</h1>
+          <p className="text-white/60 text-sm md:text-base leading-relaxed max-w-lg mx-auto mt-1">
+            Проходите тесты и отслеживайте результаты
           </p>
-          <div className="mt-8 flex justify-center gap-3 md:gap-4">
-            <div className="bg-white/10 rounded-xl px-5 py-3 md:px-6 md:py-4">
-              <p className="text-white text-xl md:text-2xl font-bold font-heading">50+</p>
-              <p className="text-white/60 text-xs md:text-sm mt-0.5">Вопросов</p>
-            </div>
-            <div className="bg-white/10 rounded-xl px-5 py-3 md:px-6 md:py-4">
-              <p className="text-white text-xl md:text-2xl font-bold font-heading">Мом.</p>
-              <p className="text-white/60 text-xs md:text-sm mt-0.5">Результат</p>
-            </div>
-            <div className="bg-white/10 rounded-xl px-5 py-3 md:px-6 md:py-4">
-              <p className="text-white text-xl md:text-2xl font-bold font-heading">Все</p>
-              <p className="text-white/60 text-xs md:text-sm mt-0.5">Предметы</p>
-            </div>
-          </div>
         </div>
       </div>
 
