@@ -379,8 +379,8 @@ const StudentPracticeQuiz: React.FC = () => {
                   : showResult && !isSelected && !isCorrect ? 'border-red-400'
                   : 'border-transparent';
 
-                const extraRing = isSelected && !showResult ? 'ring-2 ring-white/50'
-                  : showResult && isSelected && !isCorrect ? 'ring-2 ring-red-300'
+                const extraRing = isSelected && !showResult ? 'ring-2 ring-primary/40'
+                  : showResult && isSelected && !isCorrect ? 'ring-2 ring-error/40'
                   : '';
 
                 return (

@@ -240,7 +240,7 @@ const SessionMonitor: React.FC = () => {
             </div>
           </div>
 
-          <div className="p-6 border-b border-border bg-background/50">
+          <div className="p-6 border-b border-border/80 bg-background/50">
             <div className="grid grid-cols-3 gap-4">
               <div className="stat-card"><p className="text-sm font-medium text-text-secondary">Участников</p><p className="text-2xl font-bold text-text-primary font-heading">{totalStudents}</p></div>
               <div className="stat-card"><p className="text-sm font-medium text-text-secondary">Средний балл</p><p className="text-2xl font-bold text-text-primary font-heading">{averageScore}</p></div>
@@ -249,10 +249,10 @@ const SessionMonitor: React.FC = () => {
           </div>
 
           <div className="flex gap-1 px-6 pt-4">
-            <button onClick={() => setMonitorTab('participants')} className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${monitorTab === 'participants' ? 'bg-primary text-white shadow-sm' : 'text-text-secondary hover:bg-surface border border-border'}`}>
+            <button onClick={() => setMonitorTab('participants')} className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${monitorTab === 'participants' ? 'bg-primary text-white shadow-sm' : 'text-text-secondary hover:bg-surface border border-border/80'}`}>
               Участники {participants.length > 0 && <span className="ml-1 opacity-70">({participants.length})</span>}
             </button>
-            <button onClick={() => setMonitorTab('leaderboard')} className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${monitorTab === 'leaderboard' ? 'bg-primary text-white shadow-sm' : 'text-text-secondary hover:bg-surface border border-border'}`}>
+            <button onClick={() => setMonitorTab('leaderboard')} className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${monitorTab === 'leaderboard' ? 'bg-primary text-white shadow-sm' : 'text-text-secondary hover:bg-surface border border-border/80'}`}>
               Рейтинг {leaderboard.length > 0 && <span className="ml-1 opacity-70">({leaderboard.length})</span>}
             </button>
           </div>
@@ -396,7 +396,7 @@ const SessionMonitor: React.FC = () => {
             )}
           </div>
 
-          <div className="p-6 border-t border-border">
+          <div className="p-6 border-t border-border/80">
             <button
               onClick={() => {
                 if (!sessionData || participants.length === 0) { showToast('Нет данных для экспорта', 'error'); return; }
@@ -420,7 +420,7 @@ const SessionMonitor: React.FC = () => {
 
         {qrModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 animate-fadeIn" onClick={() => { setQrModal(false); setQrDataUrl(''); }}>
-            <div className="bg-surface rounded-2xl shadow-xl border border-border p-8 max-w-sm w-full text-center animate-scaleIn" onClick={e => e.stopPropagation()}>
+            <div className="bg-surface rounded-2xl shadow-studio-lg border border-border/80 p-8 max-w-sm w-full text-center animate-scaleIn" onClick={e => e.stopPropagation()}>
               <p className="text-lg font-bold text-text-primary font-heading mb-1">Подключиться к тесту</p>
               <p className="text-sm text-text-secondary mb-4">Отсканируйте код или введите код вручную</p>
               {qrDataUrl ? (
