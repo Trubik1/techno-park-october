@@ -92,7 +92,7 @@ const StudentEntry: React.FC = () => {
       </div>
 
       <div className="max-w-md mx-auto px-4 -mt-6 relative z-10 pb-4 flex-1 overflow-y-auto">
-        <div className="card p-6 md:p-8">
+        <div className="card p-6 md:p-8 border border-border-strong">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-semibold text-text-primary font-heading">Добро пожаловать!</h2>
             <p className="text-text-secondary mt-1.5 text-caption">Введите данные для начала работы</p>
