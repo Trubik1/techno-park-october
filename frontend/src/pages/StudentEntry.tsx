@@ -98,66 +98,68 @@ const StudentEntry: React.FC = () => {
             <p className="text-text-secondary mt-1.5 text-caption">Введите данные для начала работы</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="label">Ваше имя</label>
-              <input
-                type="text"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value.replace(/[^a-zA-Zа-яА-ЯёЁ0-9\s\-]/g, ''))}
-                placeholder="Анна Петрова"
-                className="input"
-                autoFocus
-              />
-            </div>
-            <div>
-              <label className="label">Тип</label>
-              <div className="grid grid-cols-3 gap-2">
-                {(['school', 'club', 'other'] as UserType[]).map(t => (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() => { setUserType(t); setClassName(''); }}
-                    className={`py-2.5 px-3 text-sm font-medium border transition-all duration-200 ease-out
-                      rounded-studio-xs active:scale-[0.97]
-                      ${userType === t
-                        ? 'border-primary bg-primary/8 text-primary shadow-studio-glow'
-                        : 'border-border/80 text-text-secondary hover:border-primary/30 hover:text-primary'}`}
-                  >
-                    {t === 'school' ? 'Школа' : t === 'club' ? 'Кружок' : 'Другое'}
-                  </button>
-                ))}
+          <form onSubmit={handleSubmit}>
+            <div className="border border-border-strong/60 rounded-studio p-5 space-y-4">
+              <div>
+                <label className="label">Ваше имя</label>
+                <input
+                  type="text"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value.replace(/[^a-zA-Zа-яА-ЯёЁ0-9\s\-]/g, ''))}
+                  placeholder="Анна Петрова"
+                  className="input"
+                  autoFocus
+                />
               </div>
-            </div>
-            <div>
-              <label className="label">{typeLabels[userType].label}</label>
-              <input
-                type="text"
-                value={className}
-                onChange={(e) => setClassName(e.target.value.replace(/[^a-zA-Zа-яА-ЯёЁ0-9\s\-]/g, ''))}
-                placeholder={typeLabels[userType].placeholder}
-                className="input"
-              />
-            </div>
-
-            {error && (
-              <div className="error-box animate-shake">
-                <p className="error-text">{error}</p>
+              <div>
+                <label className="label">Тип</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {(['school', 'club', 'other'] as UserType[]).map(t => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => { setUserType(t); setClassName(''); }}
+                      className={`py-2.5 px-3 text-sm font-medium border transition-all duration-200 ease-out
+                        rounded-studio-xs active:scale-[0.97]
+                        ${userType === t
+                          ? 'border-primary bg-primary/8 text-primary shadow-studio-glow'
+                          : 'border-border/80 text-text-secondary hover:border-primary/30 hover:text-primary'}`}
+                    >
+                      {t === 'school' ? 'Школа' : t === 'club' ? 'Кружок' : 'Другое'}
+                    </button>
+                  ))}
+                </div>
               </div>
-            )}
+              <div>
+                <label className="label">{typeLabels[userType].label}</label>
+                <input
+                  type="text"
+                  value={className}
+                  onChange={(e) => setClassName(e.target.value.replace(/[^a-zA-Zа-яА-ЯёЁ0-9\s\-]/g, ''))}
+                  placeholder={typeLabels[userType].placeholder}
+                  className="input"
+                />
+              </div>
 
-            <button type="submit" disabled={isLoading} className="btn-primary w-full">
-              {isLoading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <div className="spinner !w-4 !h-4 !border-white/30 !border-t-white"></div>
-                  Регистрация...
-                </span>
-              ) : 'Начать работу'}
-            </button>
+              {error && (
+                <div className="error-box animate-shake">
+                  <p className="error-text">{error}</p>
+                </div>
+              )}
 
-            <p className="text-xs text-text-tertiary text-center">
-              Ваши данные будут сохранены только в этом браузере.
-            </p>
+              <button type="submit" disabled={isLoading} className="btn-primary w-full">
+                {isLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <div className="spinner !w-4 !h-4 !border-white/30 !border-t-white"></div>
+                    Регистрация...
+                  </span>
+                ) : 'Начать работу'}
+              </button>
+
+              <p className="text-xs text-text-tertiary text-center">
+                Ваши данные будут сохранены только в этом браузере.
+              </p>
+            </div>
           </form>
 
           <div className="mt-6 pt-5 border-t border-border/60 text-center space-y-2.5">
