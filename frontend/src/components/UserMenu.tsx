@@ -59,9 +59,8 @@ const PinResetModal: React.FC<{ teacherId: string; teacherName: string; onClose:
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-fadeIn" onClick={onClose}>
-      <div className="bg-surface rounded-[0.75rem_2rem_0.75rem_2rem] shadow-studio-lg border border-border p-6 max-w-sm w-full animate-scaleIn" onClick={e => e.stopPropagation()}>
-        <h3 className="text-lg font-semibold text-text-primary mb-4 font-heading">Настройки учителя</h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn" onClick={onClose}>
+      <div className="card-glass p-6 max-w-sm w-full" onClick={e => e.stopPropagation()}>
         <div className="space-y-3">
           <input className="input" placeholder="Ваше имя" value={name} onChange={e => setName(e.target.value)} maxLength={100} />
           <PinInput value={oldPin} onChange={setOldPin} placeholder="Старый PIN" />
@@ -93,7 +92,7 @@ const TeacherMenu: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   };
 
   return (
-    <div className="absolute top-12 right-0 w-64 bg-surface rounded-[0.75rem_1.5rem_0.75rem_1.5rem] shadow-studio-lg border border-border/80 overflow-hidden animate-scaleIn z-50">
+    <div className="absolute top-12 right-0 w-64 rounded-[0.75rem_1.5rem_0.75rem_1.5rem] shadow-studio-lg border border-border/40 overflow-hidden animate-scaleIn z-50 card-glass">
       <div className="p-4 border-b border-border/60">
         <p className="font-semibold text-text-primary">{teacher?.name || 'Учитель'}</p>
         <p className="text-xs text-text-secondary mt-0.5">Учитель</p>
@@ -141,8 +140,8 @@ const EditProfileModal: React.FC<{ student: { id: string; display_name: string; 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-fadeIn" onClick={onClose}>
-      <div className="bg-surface rounded-[0.75rem_2rem_0.75rem_2rem] shadow-studio-lg border border-border p-6 max-w-sm w-full animate-scaleIn" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn" onClick={onClose}>
+      <div className="card-glass p-6 max-w-sm w-full" onClick={e => e.stopPropagation()}>
         <h3 className="text-lg font-semibold text-text-primary mb-4 font-heading">Редактировать профиль</h3>
         <div className="space-y-3">
           <input className="input" placeholder="Ваше имя" value={name} onChange={e => setName(e.target.value)} maxLength={100} />
@@ -194,7 +193,7 @@ const StudentMenu: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const initials = student?.display_name?.charAt(0)?.toUpperCase() || '?';
 
   return (
-    <div className="absolute top-12 right-0 w-72 bg-surface rounded-[0.75rem_1.5rem_0.75rem_1.5rem] shadow-studio-lg border border-border/80 overflow-hidden animate-scaleIn z-50">
+    <div className="absolute top-12 right-0 w-72 rounded-[0.75rem_1.5rem_0.75rem_1.5rem] shadow-studio-lg border border-border/40 overflow-hidden animate-scaleIn z-50 card-glass">
       <div className="p-4 border-b border-border/60">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-[0.3rem_1rem_0.3rem_1rem] bg-primary flex items-center justify-center text-white font-bold text-sm shrink-0">

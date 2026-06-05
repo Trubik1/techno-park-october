@@ -19,8 +19,8 @@ interface QuizEditForm {
 
 const DeleteConfirmModal: React.FC<{ quizTitle: string; onConfirm: () => void; onClose: () => void }> = ({ quizTitle, onConfirm, onClose }) => {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-fadeIn" onClick={onClose}>
-      <div className="bg-surface rounded-[0.75rem_2rem_0.75rem_2rem] shadow-studio-lg border border-error/30 p-6 max-w-sm w-full animate-scaleIn" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn" onClick={onClose}>
+      <div className="card-solid shadow-studio-lg border border-error/30 p-6 max-w-sm w-full animate-scaleIn rounded-[0.75rem_2rem_0.75rem_2rem]" onClick={e => e.stopPropagation()}>
         <div className="text-center mb-4">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-[0.4rem_1.25rem_0.4rem_1.25rem] bg-error/10 mb-4">
             <svg className="w-7 h-7 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
@@ -63,8 +63,8 @@ const QuizEditModal: React.FC<{ quiz: Quiz; onSave: () => void; onClose: () => v
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-fadeIn" onClick={onClose}>
-      <div className="bg-surface rounded-[0.75rem_2rem_0.75rem_2rem] shadow-studio-lg border border-border p-6 max-w-lg w-full animate-scaleIn" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn" onClick={onClose}>
+      <div className="card-solid shadow-studio-lg border border-border p-6 max-w-lg w-full animate-scaleIn rounded-[0.75rem_2rem_0.75rem_2rem]" onClick={e => e.stopPropagation()}>
         <h2 className="text-lg font-semibold text-text-primary mb-4 font-heading">Редактировать тест</h2>
         <div className="space-y-4">
           <input className="input" placeholder="Название" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
@@ -339,7 +339,7 @@ const TeacherDashboard: React.FC = () => {
             ) : (
               <div ref={myGridRef} className="grid gap-3">
                 {filteredMyQuizzes.map((quiz, index) => (
-                  <div key={quiz.id} className={`card-hover p-5 ${deletingId === quiz.id ? 'opacity-20 scale-95 pointer-events-none' : ''} ${myRevealed ? 'animate-rise' : 'opacity-0 translate-y-6'}`} style={{ animationDelay: `${index * 0.06}s` }}>
+                  <div key={quiz.id} className={`card-hover bg-surface p-5 ${deletingId === quiz.id ? 'opacity-20 scale-95 pointer-events-none' : ''} ${myRevealed ? 'animate-rise' : 'opacity-0 translate-y-6'}`} style={{ animationDelay: `${index * 0.06}s` }}>
                     <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-3">
                       <div className="flex-1 min-w-0">
                         <h3 className="text-base font-semibold text-text-primary truncate">{quiz.title}</h3>
@@ -442,7 +442,7 @@ const TeacherDashboard: React.FC = () => {
             ) : (
               <div ref={pubGridRef} className="grid gap-3">
                 {filteredPublicQuizzes.map((quiz, index) => (
-                  <div key={quiz.id} className={`card-hover p-5 ${pubRevealed ? 'animate-rise' : 'opacity-0 translate-y-6'}`} style={{ animationDelay: `${index * 0.06}s` }}>
+                  <div key={quiz.id} className={`card-hover bg-surface p-5 ${pubRevealed ? 'animate-rise' : 'opacity-0 translate-y-6'}`} style={{ animationDelay: `${index * 0.06}s` }}>
                     <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-3">
                       <div className="flex-1 min-w-0">
                         <h3 className="text-base font-semibold text-text-primary truncate">{quiz.title}</h3>

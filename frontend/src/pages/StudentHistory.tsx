@@ -187,7 +187,7 @@ const StudentHistory: React.FC = () => {
                   ? 'bg-warning/10 text-warning' : 'bg-error/10 text-error';
                 const barClasses = percentage >= 80 ? 'bg-success' : percentage >= 60 ? 'bg-warning' : 'bg-error';
                 return (
-                  <div key={item.id} className="card-hover p-5" style={{ animationDelay: `${index * 0.08}s` }}>
+                  <div key={item.id} className="card-hover bg-surface p-5" style={{ animationDelay: `${index * 0.08}s` }}>
                     <div className="flex flex-col sm:flex-row justify-between items-start gap-2 mb-3">
                       <div className="flex items-center gap-2">
                         {item.mode === 'practice' && (
