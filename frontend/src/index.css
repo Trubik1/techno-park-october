@@ -352,14 +352,14 @@
     position: absolute;
     inset: 0;
     background:
-      radial-gradient(ellipse 90% 60% at 10% 30%, rgba(var(--color-primary-rgb), 0.2) 0%, transparent 60%),
-      radial-gradient(ellipse 70% 50% at 90% 70%, rgba(var(--color-accent-rgb), 0.13) 0%, transparent 55%);
+      radial-gradient(ellipse 90% 60% at 10% 30%, rgba(var(--color-primary-rgb), 0.35) 0%, transparent 60%),
+      radial-gradient(ellipse 70% 50% at 90% 70%, rgba(var(--color-accent-rgb), 0.25) 0%, transparent 55%);
     pointer-events: none;
   }
   .dark .mesh-gradient::before {
     background:
-      radial-gradient(ellipse 90% 60% at 10% 30%, rgba(var(--color-primary-rgb), 0.15) 0%, transparent 60%),
-      radial-gradient(ellipse 70% 50% at 90% 70%, rgba(var(--color-accent-rgb), 0.1) 0%, transparent 55%);
+      radial-gradient(ellipse 90% 60% at 10% 30%, rgba(var(--color-primary-rgb), 0.25) 0%, transparent 60%),
+      radial-gradient(ellipse 70% 50% at 90% 70%, rgba(var(--color-accent-rgb), 0.18) 0%, transparent 55%);
   }
 
   .stat-card {
