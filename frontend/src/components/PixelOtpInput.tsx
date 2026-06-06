@@ -79,10 +79,6 @@ const PixelOtpInput: React.FC<PixelOtpInputProps> = ({ value, onChange, length =
               }
               dark:shadow-[3px_3px_0px_0px_rgba(0,0,0,0.3)]
             `}
-            style={{
-              imageRendering: 'pixelated',
-              clipPath: 'polygon(0 4px, 4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px))',
-            }}
           >
             {char}
           </div>

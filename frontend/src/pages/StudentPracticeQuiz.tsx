@@ -301,8 +301,8 @@ const StudentPracticeQuiz: React.FC = () => {
           <ThemeToggleButton />
           <BackButton to="/student/practice" />
         </div>
-        <div className="card">
-          <div className={`p-6 rounded-t-2xl ${mode === 'exam' ? 'bg-primary' : 'bg-accent'} text-white`}>
+        <div className="card overflow-hidden" style={{ borderRadius: '16px' }}>
+          <div className={`p-6 ${mode === 'exam' ? 'bg-primary' : 'bg-accent'} text-white`} style={{ borderTopLeftRadius: '16px', borderTopRightRadius: '16px' }}>
             <div className="flex justify-between items-start">
               <div>
                 <div className="flex items-center gap-2 mb-1">
@@ -338,12 +338,12 @@ const StudentPracticeQuiz: React.FC = () => {
             </div>
           </div>
 
-          <div className="h-2 bg-background">
-            <div className={`h-full transition-all duration-500 ease-out rounded-r-full ${mode === 'exam' ? 'bg-primary' : 'bg-accent'}`}
-              style={{ width: progress + '%' }}></div>
+          <div className="h-2 bg-white/10 overflow-hidden">
+            <div className={`h-full transition-all duration-500 ease-out rounded-r-full`}
+              style={{ width: progress + '%', backgroundColor: '#4CAF50' }}></div>
           </div>
 
-          <div className="p-6 md:p-8 animate-fadeIn" key={currentQuestionIndex}>
+          <div className="p-6 md:p-8 animate-fadeIn" key={currentQuestionIndex} style={{ borderBottomLeftRadius: '16px', borderBottomRightRadius: '16px' }}>
             <div className="mb-6">
               <h3 className="text-xl font-semibold text-text-primary">{currentQuestion.text}</h3>
               {!showExplanation && !isSubmitted && (
@@ -476,7 +476,7 @@ const StudentPracticeQuiz: React.FC = () => {
                 )}
                 <div className="flex flex-col sm:flex-row justify-center gap-3 mt-6">
                   {resultId && <button onClick={() => navigate(`/student/review/${resultId}`)} className="btn-primary">Посмотреть ответы</button>}
-                  <button onClick={() => { window.location.href = `/student/practice/quiz/${quizId}?mode=${mode}`; }}
+                  <button onClick={() => { navigate(`/student/practice/quiz/${quizId}?mode=${mode}`); }}
                     className="btn-outline">
                     Пройти ещё раз
                   </button>

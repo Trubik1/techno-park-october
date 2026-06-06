@@ -202,8 +202,8 @@ const SessionMonitor: React.FC = () => {
           { label: 'Панель управления', path: '/teacher/dashboard' },
           { label: 'Монитор сессии' },
         ]} />
-        <div className="card">
-          <div className="p-6 bg-primary text-white rounded-t-2xl">
+        <div className="card overflow-hidden" style={{ borderRadius: '16px' }}>
+          <div className="p-6 bg-primary text-white" style={{ borderTopLeftRadius: '16px', borderTopRightRadius: '16px' }}>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                 <h1 className="text-2xl font-bold font-heading">{sessionData.title || 'Мониторинг сессии'}</h1>

@@ -47,13 +47,13 @@
   --color-primary-muted-rgb: 212 229 205;
   --color-accent-rgb: 138 158 122;
   --color-accent-hover-rgb: 122 142 106;
-  --color-background-rgb: 233 242 228;
-  --color-surface-rgb: 248 252 245;
-  --color-surface-elevated-rgb: 252 255 250;
-  --color-surface-subtle-rgb: 240 248 234;
+  --color-background-rgb: 238 228 205;
+  --color-surface-rgb: 250 246 236;
+  --color-surface-elevated-rgb: 254 250 242;
+  --color-surface-subtle-rgb: 244 236 220;
   --color-text-primary-rgb: 30 28 26;
   --color-text-secondary-rgb: 138 133 128;
-  --color-text-tertiary-rgb: 184 178 170;
+  --color-text-tertiary-rgb: 90 85 80;
   --color-success-rgb: 100 165 145;
   --color-success-hover-rgb: 85 150 130;
   --color-success-muted-rgb: 210 235 225;
@@ -64,7 +64,9 @@
   --color-info-rgb: 106 124 155;
   --color-border-rgb: 210 220 205;
   --color-border-strong-rgb: 120 145 108;
-  --color-card-border-rgb: 95 125 85;
+  --color-warm-rgb: 170 135 95;
+  --color-card-border-rgb: 180 50 50;
+  --color-card-border: #1b5e20;
   --color-overlay-rgb: 0 0 0;
   --shadow-inset-highlight: rgba(255, 255, 255, 0.6);
   --shadow-inset-highlight-subtle: rgba(255, 255, 255, 0.15);
@@ -94,7 +96,9 @@
   --color-info-rgb: 130 148 179;
   --color-border-rgb: 75 88 68;
   --color-border-strong-rgb: 130 152 118;
-  --color-card-border-rgb: 150 190 140;
+  --color-warm-rgb: 190 165 130;
+  --color-card-border-rgb: 220 70 70;
+  --color-card-border: #1b5e20;
   --color-overlay-rgb: 0 0 0;
   --shadow-inset-highlight: rgba(0, 0, 0, 0.2);
   --shadow-inset-highlight-subtle: rgba(0, 0, 0, 0.1);
@@ -213,8 +217,10 @@
     background: rgba(var(--color-surface-rgb), 0.55);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 2px solid rgba(var(--color-card-border-rgb), 1) !important;
+    border: 3px solid var(--color-card-border) !important;
     isolation: isolate;
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
+    mask-image: radial-gradient(white, black);
   }
 
   .card-hover {
@@ -252,12 +258,12 @@
 
   .input {
     @apply w-full px-4 py-3 text-sm
-           bg-surface text-text-primary
-            placeholder:text-text-tertiary/50
+           bg-background text-black dark:text-white
+            placeholder:text-black/60 dark:placeholder:text-white/60
            rounded-[0.4rem_1.25rem_0.4rem_1.25rem]
            outline-none
            transition-all duration-200 ease-out;
-    border: 1px solid rgba(var(--color-border-rgb), 0.8);
+    border: 1.5px solid #2d7a2e !important;
   }
   .input:hover:not(:focus):not(:disabled):not([readonly]) {
     border-color: rgba(var(--color-border-strong-rgb), 0.8);

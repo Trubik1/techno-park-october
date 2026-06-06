@@ -369,8 +369,8 @@ const StudentQuiz: React.FC = () => {
           { label: 'Выбор теста', path: '/student/quiz-entry' },
           { label: quizData?.title || 'Тест' },
         ]} />
-        <div className="card overflow-hidden">
-          <div className="p-6 bg-primary text-white relative overflow-hidden">
+        <div className="card overflow-hidden" style={{ borderRadius: '16px' }}>
+          <div className="p-6 bg-primary text-white relative overflow-hidden" style={{ borderTopLeftRadius: '16px', borderTopRightRadius: '16px' }}>
             <div className="absolute inset-0 opacity-10">
               <div className="absolute -top-20 -right-20 w-60 h-60 rounded-full bg-white blur-3xl" />
               <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-white/60 blur-2xl" />
@@ -400,11 +400,11 @@ const StudentQuiz: React.FC = () => {
             </div>
           </div>
 
-          <div className="h-1.5 bg-background">
-            <div className="h-full bg-primary/60 transition-all duration-500 ease-out" style={{ width: progress + '%' }}></div>
+          <div className="h-1.5 bg-white/15">
+            <div className="h-full transition-all duration-500 ease-out rounded-r-full" style={{ width: progress + '%', backgroundColor: '#4CAF50' }}></div>
           </div>
 
-          <div className="p-6 md:p-8 animate-fadeIn" key={currentQuestionIndex}>
+          <div className="p-6 md:p-8 animate-fadeIn" key={currentQuestionIndex} style={{ borderBottomLeftRadius: '16px', borderBottomRightRadius: '16px' }}>
             <div className="mb-6">
               <h3 className="text-xl font-medium text-text-primary font-heading leading-snug">{currentQuestion.text}</h3>
               {!showExplanation && !isSubmitted && (

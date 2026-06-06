@@ -87,17 +87,17 @@ const StudentQuizReview: React.FC = () => {
           ]} />
         </div>
 
-        <div className="card">
-          <div className="p-6 bg-primary text-white rounded-t-2xl">
+        <div className="card overflow-hidden" style={{ borderRadius: '16px' }}>
+          <div className="p-6 bg-primary text-white" style={{ borderTopLeftRadius: '16px', borderTopRightRadius: '16px' }}>
             <h1 className="text-xl font-bold font-heading">{review.quiz_title}</h1>
             <p className="text-white/80 mt-1">Просмотр ответов — {review.score}/{review.total}</p>
           </div>
 
-          <div className="h-2 bg-background">
-            <div className="h-full bg-primary transition-all duration-500" style={{ width: `${((currentQ + 1) / review.answers.length) * 100}%` }}></div>
+          <div className="h-2 bg-white/10">
+            <div className="h-full transition-all duration-500 rounded-r-full" style={{ width: `${((currentQ + 1) / review.answers.length) * 100}%`, backgroundColor: '#4CAF50' }}></div>
           </div>
 
-          <div className="p-6 animate-fadeIn" key={currentQ}>
+          <div className="p-6 animate-fadeIn" key={currentQ} style={{ borderBottomLeftRadius: '16px', borderBottomRightRadius: '16px' }}>
             <p className="text-xs text-text-secondary mb-1">Вопрос {currentQ + 1} из {review.answers.length}</p>
             <h3 className="text-lg font-semibold text-text-primary mb-4">{q.question_text}</h3>
 

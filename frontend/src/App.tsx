@@ -52,7 +52,7 @@ const NotFoundPage: React.FC = () => {
 };
 
 const Blob = ({ className, ...props }: { className: string; style?: React.CSSProperties }) => (
-  <div className={`absolute rounded-full blur-[120px] will-change-transform animate-float pointer-events-none ${className}`} {...props} />
+  <div className={`absolute rounded-full blur-[40px] will-change-transform animate-float pointer-events-none ${className}`} {...props} />
 );
 
 const Ring = ({ className, ...props }: { className: string; style?: React.CSSProperties }) => (
@@ -63,14 +63,15 @@ const BgDecoration: React.FC = () => (
   <>
     <div className="noise-overlay" />
     <div className="fixed inset-0 pointer-events-none overflow-hidden -z-0" aria-hidden="true">
-      <Blob className="w-[600px] h-[600px] bg-primary/12 -top-48 -left-48" />
-      <Blob className="w-[450px] h-[450px] bg-accent/8 top-1/4 -right-32" style={{ animationDelay: '-3s', animationDuration: '11s' }} />
-      <Blob className="w-[380px] h-[380px] bg-success/9 bottom-0 left-1/4" style={{ animationDelay: '-5s', animationDuration: '13s' }} />
-      <Blob className="w-[280px] h-[280px] bg-primary/6 bottom-1/4 right-1/5" style={{ animationDelay: '-2s', animationDuration: '9s' }} />
-      <Blob className="w-[200px] h-[200px] bg-accent/5 top-3/4 left-1/6" style={{ animationDelay: '-7s', animationDuration: '15s' }} />
-      <Ring className="w-[900px] h-[900px] border-primary/8 -top-64 -right-64" style={{ animation: 'none' }} />
-      <Ring className="w-[700px] h-[700px] border-accent/6 bottom-1/3 -left-40" style={{ animation: 'none' }} />
-      <Ring className="w-[500px] h-[500px] border-success/6 top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2" style={{ animation: 'none' }} />
+      <Blob className="w-[600px] h-[600px] bg-primary/45 -top-48 -left-48" />
+      <Blob className="w-[450px] h-[450px] bg-accent/40 top-1/4 -right-32" style={{ animationDelay: '-3s', animationDuration: '11s' }} />
+      <Blob className="w-[380px] h-[380px] bg-success/40 bottom-0 left-1/4" style={{ animationDelay: '-5s', animationDuration: '13s' }} />
+      <Blob className="w-[280px] h-[280px] bg-primary/35 bottom-1/4 right-1/5" style={{ animationDelay: '-2s', animationDuration: '9s' }} />
+      <Blob className="w-[200px] h-[200px] bg-accent/30 top-3/4 left-1/6" style={{ animationDelay: '-7s', animationDuration: '15s' }} />
+      <Blob className="w-[320px] h-[320px] bottom-0 left-1/4" style={{ background: 'rgba(var(--color-warm-rgb), 0.45)', animationDelay: '-4s', animationDuration: '13s' }} />
+      <Ring className="w-[900px] h-[900px] border-primary/35 -top-64 -right-64" style={{ animation: 'none' }} />
+      <Ring className="w-[700px] h-[700px] border-accent/30 bottom-1/3 -left-40" style={{ animation: 'none' }} />
+      <Ring className="w-[500px] h-[500px] border-success/30 top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2" style={{ animation: 'none' }} />
     </div>
   </>
 );
