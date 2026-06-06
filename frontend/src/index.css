@@ -64,7 +64,7 @@
   --color-info-rgb: 106 124 155;
   --color-border-rgb: 210 220 205;
   --color-border-strong-rgb: 120 145 108;
-  --color-card-border-rgb: 120 145 108;
+  --color-card-border-rgb: 95 125 85;
   --color-overlay-rgb: 0 0 0;
   --shadow-inset-highlight: rgba(255, 255, 255, 0.6);
   --shadow-inset-highlight-subtle: rgba(255, 255, 255, 0.15);
@@ -213,7 +213,8 @@
     background: rgba(var(--color-surface-rgb), 0.55);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(var(--color-card-border-rgb), 1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03), inset 0 0 0 1px rgba(var(--color-card-border-rgb), 1);
+    border: none;
     isolation: isolate;
   }
 
@@ -223,19 +224,19 @@
   }
   .card-hover:hover {
     background: rgba(var(--color-surface-rgb), 0.78);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03), inset 0 1px 0 var(--shadow-inset-highlight);
-    border-color: rgba(var(--color-card-border-rgb), 0.9);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03), inset 0 0 0 1px rgba(var(--color-card-border-rgb), 0.9);
     transform: translateY(-0.1875rem);
   }
 
   .card-solid {
     background: rgb(var(--color-surface-rgb));
-    border: 1px solid rgba(var(--color-card-border-rgb), 0.85);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03), inset 0 0 0 1px rgba(var(--color-card-border-rgb), 0.85);
+    border: none;
   }
 
   .card-glass {
     @apply rounded-[0.75rem_2rem_0.75rem_2rem] shadow-studio-lg;
-    border: 1px solid rgba(var(--color-card-border-rgb), 0.6);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.03), inset 0 0 0 1px rgba(var(--color-card-border-rgb), 0.7);
     background: rgba(var(--color-surface-rgb), 0.45);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -246,7 +247,8 @@
     background: rgba(var(--color-surface-rgb), 0.55);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(var(--color-card-border-rgb), 1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03), inset 0 0 0 1px rgba(var(--color-card-border-rgb), 1);
+    border: none;
     isolation: isolate;
   }
 

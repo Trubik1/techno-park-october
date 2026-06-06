@@ -92,7 +92,7 @@ const TeacherMenu: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   };
 
   return (
-    <div className="absolute top-12 right-0 w-64 rounded-[0.75rem_1.5rem_0.75rem_1.5rem] shadow-studio-lg border border-border/40 overflow-hidden animate-scaleIn z-50 card-glass">
+    <div className="absolute top-12 right-0 w-64 rounded-[0.75rem_1.5rem_0.75rem_1.5rem] shadow-studio-lg overflow-hidden animate-scaleIn z-50 card-glass">
       <div className="p-4 border-b border-border/60">
         <p className="font-semibold text-text-primary">{teacher?.name || 'Учитель'}</p>
         <p className="text-xs text-text-secondary mt-0.5">Учитель</p>
@@ -193,7 +193,7 @@ const StudentMenu: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const initials = student?.display_name?.charAt(0)?.toUpperCase() || '?';
 
   return (
-    <div className="absolute top-12 right-0 w-72 rounded-[0.75rem_1.5rem_0.75rem_1.5rem] shadow-studio-lg border border-border/40 overflow-hidden animate-scaleIn z-50 card-glass">
+    <div className="absolute top-12 right-0 w-72 rounded-[0.75rem_1.5rem_0.75rem_1.5rem] shadow-studio-lg overflow-hidden animate-scaleIn z-50 card-glass">
       <div className="p-4 border-b border-border/60">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-[0.3rem_1rem_0.3rem_1rem] bg-primary flex items-center justify-center text-white font-bold text-sm shrink-0">

@@ -420,7 +420,7 @@ const SessionMonitor: React.FC = () => {
 
         {qrModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn" onClick={() => { setQrModal(false); setQrDataUrl(''); }}>
-            <div className="rounded-2xl shadow-studio-lg border border-border/40 p-8 max-w-sm w-full text-center animate-scaleIn card-glass" onClick={e => e.stopPropagation()}>
+            <div className="rounded-2xl shadow-studio-lg p-8 max-w-sm w-full text-center animate-scaleIn card-glass" onClick={e => e.stopPropagation()}>
               <p className="text-lg font-bold text-text-primary font-heading mb-1">Подключиться к тесту</p>
               <p className="text-sm text-text-secondary mb-4">Отсканируйте код или введите код вручную</p>
               {qrDataUrl ? (

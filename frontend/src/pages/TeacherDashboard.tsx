@@ -64,7 +64,7 @@ const QuizEditModal: React.FC<{ quiz: Quiz; onSave: () => void; onClose: () => v
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn" onClick={onClose}>
-      <div className="card-solid shadow-studio-lg border border-border p-6 max-w-lg w-full animate-scaleIn rounded-[0.75rem_2rem_0.75rem_2rem]" onClick={e => e.stopPropagation()}>
+      <div className="card-solid shadow-studio-lg p-6 max-w-lg w-full animate-scaleIn rounded-[0.75rem_2rem_0.75rem_2rem]" onClick={e => e.stopPropagation()}>
         <h2 className="text-lg font-semibold text-text-primary mb-4 font-heading">Редактировать тест</h2>
         <div className="space-y-4">
           <input className="input" placeholder="Название" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
