@@ -63,7 +63,7 @@
   --color-warning-rgb: 196 154 74;
   --color-info-rgb: 106 124 155;
   --color-border-rgb: 210 220 205;
-  --color-border-strong-rgb: 155 175 145;
+  --color-border-strong-rgb: 120 145 108;
   --color-overlay-rgb: 0 0 0;
   --shadow-inset-highlight: rgba(255, 255, 255, 0.6);
   --shadow-inset-highlight-subtle: rgba(255, 255, 255, 0.15);
@@ -92,7 +92,7 @@
   --color-warning-rgb: 211 180 105;
   --color-info-rgb: 130 148 179;
   --color-border-rgb: 75 88 68;
-  --color-border-strong-rgb: 100 118 90;
+  --color-border-strong-rgb: 130 152 118;
   --color-overlay-rgb: 0 0 0;
   --shadow-inset-highlight: rgba(0, 0, 0, 0.2);
   --shadow-inset-highlight-subtle: rgba(0, 0, 0, 0.1);
