@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ThemeToggleButton from '../components/ThemeToggleButton';
 import BackButton from '../components/BackButton';
@@ -48,6 +48,30 @@ const StudentQuizReview: React.FC = () => {
       } finally { setIsLoading(false); }
     })();
   }, [resultId, navigate]);
+
+  const goNext = useCallback(() => {
+    if (!review) return;
+    if (currentQ < review.answers.length - 1) {
+      setCurrentQ(p => p + 1);
+    } else {
+      navigate('/student/entry');
+    }
+  }, [review, currentQ, navigate]);
+
+  const goPrev = useCallback(() => {
+    setCurrentQ(p => Math.max(0, p - 1));
+  }, []);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        goNext();
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [goNext]);
 
   if (isLoading) {
     return (
@@ -128,20 +152,20 @@ const StudentQuizReview: React.FC = () => {
             </div>
 
             {q.explanation && (
-              <div className="mt-4 p-4 rounded-xl bg-primary/5 text-text-secondary text-sm">
-                <p className="font-medium text-text-primary mb-1">Объяснение:</p>
+              <div className="mt-4 p-4 rounded-xl bg-primary/5 text-text-primary text-sm">
+                <p className="font-medium mb-1">Объяснение:</p>
                 {q.explanation}
               </div>
             )}
           </div>
 
           <div className="p-6 border-t border-border flex justify-between gap-3">
-            <button onClick={() => setCurrentQ(p => Math.max(0, p - 1))} disabled={currentQ === 0} className="btn-outline btn-sm disabled:opacity-30">
+            <button onClick={goPrev} disabled={currentQ === 0} className="btn-outline btn-sm disabled:opacity-30">
               ← Назад
             </button>
             <span className="text-sm text-text-secondary self-center">{currentQ + 1}/{review.answers.length}</span>
-            <button onClick={() => setCurrentQ(p => Math.min(review.answers.length - 1, p + 1))} disabled={currentQ === review.answers.length - 1} className="btn-primary btn-sm disabled:opacity-30">
-              Далее →
+            <button onClick={goNext} className="btn-primary btn-sm">
+              {currentQ === review.answers.length - 1 ? 'Завершить →' : 'Далее →'}
             </button>
           </div>
         </div>
