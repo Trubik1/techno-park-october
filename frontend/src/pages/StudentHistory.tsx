@@ -5,6 +5,7 @@ import UserMenu from '../components/UserMenu';
 import ThemeToggleButton from '../components/ThemeToggleButton';
 import BackButton from '../components/BackButton';
 import Breadcrumbs from '../components/Breadcrumbs';
+import { percentageToGrade } from '../utils/grade';
 
 interface QuizHistoryItem {
   id: string;
@@ -126,10 +127,12 @@ const StudentHistory: React.FC = () => {
             <div className="stat-card">
               <p className="text-sm font-medium text-text-secondary">Лучший</p>
               <p className="text-2xl font-bold text-success font-heading">{bestScore}%</p>
+              <p className="text-xs text-success">Оценка: {percentageToGrade(bestScore)}/10</p>
             </div>
             <div className="stat-card">
               <p className="text-sm font-medium text-text-secondary">Худший</p>
               <p className="text-2xl font-bold text-error font-heading">{worstScore}%</p>
+              <p className="text-xs text-error">Оценка: {percentageToGrade(worstScore)}/10</p>
             </div>
           </div>
 
@@ -197,7 +200,10 @@ const StudentHistory: React.FC = () => {
                         )}
                         <h3 className="text-base font-semibold text-text-primary">{item.title}</h3>
                       </div>
-                      <span className={'px-3 py-1 text-xs font-bold rounded-full shrink-0 ' + badgeClasses}>{percentage}%</span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className={'px-3 py-1 text-xs font-bold rounded-full shrink-0 ' + badgeClasses}>{percentage}%</span>
+                        <span className={'px-3 py-1 text-xs font-bold rounded-full shrink-0 ' + badgeClasses}>{percentageToGrade(percentage)}/10</span>
+                      </div>
                     </div>
                     <div className="h-2 bg-background rounded-full mb-3">
                       <div className={'h-full rounded-full transition-all duration-500 ' + barClasses} style={{ width: percentage + '%' }}></div>

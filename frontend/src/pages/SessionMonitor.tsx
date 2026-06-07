@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { exportSessionResultsToCsv, downloadCsv } from '../utils/csvExport';
+import { percentageToGrade } from '../utils/grade';
 import QRCode from 'qrcode';
 import { useToast } from '../components/Toast';
 import ThemeToggleButton from '../components/ThemeToggleButton';
@@ -366,7 +367,7 @@ const SessionMonitor: React.FC = () => {
                     <table className="min-w-full divide-y divide-border">
                       <thead className="bg-background">
                         <tr>
-                          {['Место', 'Ученик', 'Баллы', '%'].map(h => (
+                          {['Место', 'Ученик', 'Баллы', '%', 'Оценка'].map(h => (
                             <th key={h} className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">{h}</th>
                           ))}
                         </tr>
@@ -385,6 +386,9 @@ const SessionMonitor: React.FC = () => {
                               <span className={`font-semibold ${entry.percentage >= 80 ? 'text-success' : entry.percentage >= 60 ? 'text-warning' : 'text-error'}`}>
                                 {entry.percentage}%
                               </span>
+                            </td>
+                            <td className="px-4 py-3 text-sm font-bold text-text-primary">
+                              {percentageToGrade(entry.percentage)}/10
                             </td>
                           </tr>
                         ))}

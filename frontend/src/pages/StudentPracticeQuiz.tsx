@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useStudent } from '../hooks/useStudent';
+import { percentageToGrade } from '../utils/grade';
 import UserMenu from '../components/UserMenu';
 import ThemeToggleButton from '../components/ThemeToggleButton';
 import BackButton from '../components/BackButton';
@@ -466,13 +467,18 @@ const StudentPracticeQuiz: React.FC = () => {
                 <h3 className="text-2xl font-bold text-success mb-2 font-heading">
                   {mode === 'practice' ? 'Подготовка завершена!' : 'Экзамен завершен!'}
                 </h3>
-                <p className="text-text-secondary mb-2">
+                <p className="text-text-secondary mb-1">
                   Результат: <span className="font-bold text-2xl text-text-primary">{correctCount}/{questions.length}</span>
                 </p>
                 {questions.length > 0 && (
-                  <p className="text-xs text-text-secondary/60 mb-2">
-                    Точность: {Math.round((correctCount / questions.length) * 100)}%
-                  </p>
+                  <>
+                    <p className="text-lg font-bold text-primary">
+                      Оценка: {percentageToGrade(Math.round((correctCount / questions.length) * 100))}/10
+                    </p>
+                    <p className="text-xs text-text-secondary/60 mt-1">
+                      Точность: {Math.round((correctCount / questions.length) * 100)}%
+                    </p>
+                  </>
                 )}
                 <div className="flex flex-col sm:flex-row justify-center gap-3 mt-6">
                   {resultId && <button onClick={() => navigate(`/student/review/${resultId}`)} className="btn-primary">Посмотреть ответы</button>}

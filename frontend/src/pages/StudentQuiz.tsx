@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useStudent } from '../hooks/useStudent';
+import { percentageToGrade } from '../utils/grade';
 import UserMenu from '../components/UserMenu';
 import ThemeToggleButton from '../components/ThemeToggleButton';
 import BackButton from '../components/BackButton';
@@ -525,9 +526,14 @@ const StudentQuiz: React.FC = () => {
                   </svg>
                 </div>
                 <h3 className="text-2xl font-semibold text-success mb-2 font-heading">Тест завершен!</h3>
-                <p className="text-text-secondary mb-2">
+                <p className="text-text-secondary mb-1">
                   Ваш результат: <span className="font-bold text-2xl text-text-primary">{correctCount}/{quizData.questions.length}</span>
                 </p>
+                {quizData.questions.length > 0 && (
+                  <p className="text-lg font-bold text-primary">
+                    Оценка: {percentageToGrade(Math.round((correctCount / quizData.questions.length) * 100))}/10
+                  </p>
+                )}
                 <div className="flex flex-col sm:flex-row justify-center gap-3 mt-6">
                   {resultId && <button onClick={() => navigate(`/student/review/${resultId}`)} className="btn-primary">Посмотреть ответы</button>}
                   <button onClick={() => navigate('/student/history')} className="btn-outline">История</button>

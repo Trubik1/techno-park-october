@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStudent } from '../hooks/useStudent';
+import { percentageToGrade } from '../utils/grade';
 import UserMenu from '../components/UserMenu';
 import ThemeToggleButton from '../components/ThemeToggleButton';
 import BackButton from '../components/BackButton';
@@ -156,6 +157,11 @@ const StudentPractice: React.FC = () => {
                             <>
                               <span className="text-text-secondary">Попыток: {sum.attempts} · </span>
                               <span className="text-success font-medium">Лучший: {sum.last_score}/{sum.total_questions}</span>
+                              {sum.last_score !== null && (
+                                <span className="text-success/70 ml-1">
+                                  ({percentageToGrade(Math.round((sum.last_score / sum.total_questions) * 100))}/10)
+                                </span>
+                              )}
                             </>
                           ) : (
                             <span className="text-text-secondary/40">Не пройден</span>

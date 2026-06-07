@@ -56,11 +56,14 @@ export const exportSessionResultsToCsv = (
   }
 ): string => {
   // Prepare data for export
+  const percentageToGrade = (pct: number): number => Math.max(1, Math.min(10, Math.round(pct / 10)));
+
   const csvData = results.map(result => ({
     'Ученик': result.student_name,
     'Класс': result.class_name,
     'Балл': `${result.score}/${result.total_questions}`,
     'Процент': `${result.percentage}%`,
+    'Оценка': `${percentageToGrade(result.percentage)}/10`,
     'Дата завершения': result.completed_at ? new Date(result.completed_at).toLocaleString('ru-RU') : 'Не завершил',
     'Статус': result.completed_at ? 'Завершил' : 'В процессе'
   }));

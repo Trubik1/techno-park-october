@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import ThemeToggleButton from '../components/ThemeToggleButton';
 import BackButton from '../components/BackButton';
 import Breadcrumbs from '../components/Breadcrumbs';
+import { percentageToGrade } from '../utils/grade';
 
 interface ReviewItem {
   question_text: string;
@@ -91,6 +92,9 @@ const StudentQuizReview: React.FC = () => {
           <div className="p-6 bg-primary text-white" style={{ borderTopLeftRadius: '16px', borderTopRightRadius: '16px' }}>
             <h1 className="text-xl font-bold font-heading">{review.quiz_title}</h1>
             <p className="text-white/80 mt-1">Просмотр ответов — {review.score}/{review.total}</p>
+            {review.total > 0 && (
+              <p className="text-white/90 mt-1 font-bold">Оценка: {percentageToGrade(Math.round((review.score / review.total) * 100))}/10</p>
+            )}
           </div>
 
           <div className="h-2 bg-white/10">

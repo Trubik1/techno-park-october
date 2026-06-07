@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStudent } from '../hooks/useStudent';
 import { useToast } from '../components/Toast';
+import { percentageToGrade } from '../utils/grade';
 
 interface QuizHistoryItem {
   id: string;
@@ -217,6 +218,9 @@ const StudentMenu: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               {avgPercent}%
             </p>
             <p className="text-xs text-text-secondary">Верных</p>
+            <p className={`text-xs font-semibold mt-0.5 ${avgPercent >= 80 ? 'text-success' : avgPercent >= 60 ? 'text-warning' : 'text-error'}`}>
+              Оценка: {percentageToGrade(avgPercent)}/10
+            </p>
           </div>
         </div>
       </div>
