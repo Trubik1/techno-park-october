@@ -6,12 +6,16 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# SQLite база данных
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./classquiz.db")
 
 connect_args = {}
 if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
     connect_args["check_same_thread"] = False
+elif SQLALCHEMY_DATABASE_URL.startswith("postgresql"):
+    connect_args["pool_pre_ping"] = True
+    connect_args["pool_size"] = 5
+    connect_args["max_overflow"] = 10
+
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, connect_args=connect_args
 )
