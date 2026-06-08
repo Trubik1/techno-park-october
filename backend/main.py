@@ -74,6 +74,13 @@ app.include_router(api_router, prefix="/api")
 async def root():
     return {"message": "ClassQuiz API is running"}
 
+@app.get("/api/debug")
+async def debug():
+    import os
+    url = os.getenv("DATABASE_URL", "NOT SET")
+    masked = url.replace(url.split("@")[0].split(":")[-1], "***") if "@" in url else url
+    return {"database_url_preview": masked, "vercel": os.getenv("VERCEL", "not set")}
+
 # Для Vercel serverless
 handler = None
 if os.getenv("VERCEL"):
