@@ -8,17 +8,22 @@ load_dotenv()
 
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./classquiz.db")
 
-connect_args = {}
-if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
-    connect_args["check_same_thread"] = False
-elif SQLALCHEMY_DATABASE_URL.startswith("postgresql"):
-    connect_args["pool_pre_ping"] = True
-    connect_args["pool_size"] = 5
-    connect_args["max_overflow"] = 10
+if SQLALCHEMY_DATABASE_URL.startswith("postgresql"):
+    if "?" not in SQLALCHEMY_DATABASE_URL:
+        SQLALCHEMY_DATABASE_URL += "?sslmode=require"
+    engine = create_engine(
+        SQLALCHEMY_DATABASE_URL,
+        pool_pre_ping=True,
+        pool_size=5,
+        max_overflow=10,
+    )
+elif SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
+    engine = create_engine(
+        SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+    )
+else:
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args=connect_args
-)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
